@@ -78,21 +78,53 @@ while ($row = $result->fetch_assoc()) {
 }
 $stmt->close();
 
-$q_check = $conn->prepare("SELECT COUNT(*) as total FROM daily_quest WHERE user_id=? AND DATE(created_at)=?");
-$q_check->bind_param("is", $user_id, $today);
-$q_check->execute();
-$total_today = $q_check->get_result()->fetch_assoc()['total'];
-$q_check->close();
+// ===============================
+// SYSTEM RESET QUEST HARIAN
+// ===============================
+
+// Cek apakah sudah ada quest hari ini
+$stmt = $conn->prepare("SELECT COUNT(*) as total FROM daily_quest WHERE user_id=? AND DATE(created_at)=?");
+$stmt->bind_param("is", $user_id, $today);
+$stmt->execute();
+$total_today = $stmt->get_result()->fetch_assoc()['total'];
+$stmt->close();
 
 if($total_today == 0){
+
+    // Cek jumlah quest selesai kemarin
+    $stmt = $conn->prepare("
+        SELECT COUNT(*) as done_count 
+        FROM daily_quest 
+        WHERE user_id=? 
+        AND DATE(created_at) < ? 
+        AND is_done=1
+    ");
+    $stmt->bind_param("is", $user_id, $today);
+    $stmt->execute();
+    $done_count = $stmt->get_result()->fetch_assoc()['done_count'];
+    $stmt->close();
+
+    // Jika minimal 5 quest selesai
+    if($done_count >= 5){
+
+        // Hapus quest lama
+        $stmt = $conn->prepare("DELETE FROM daily_quest WHERE user_id=? AND DATE(created_at) < ?");
+        $stmt->bind_param("is", $user_id, $today);
+        $stmt->execute();
+        $stmt->close();
+    }
+
+    // Generate quest baru untuk hari ini
     $q_master = mysqli_query($conn, "SELECT * FROM daily_quest_master ORDER BY RAND() LIMIT 5");
+
     while($row = mysqli_fetch_assoc($q_master)){
-        $stmt = $conn->prepare("INSERT INTO daily_quest (user_id, quest_title) VALUES (?,?)");
+        $stmt = $conn->prepare("INSERT INTO daily_quest (user_id, quest_title, created_at) VALUES (?,?,NOW())");
         $stmt->bind_param("is", $user_id, $row['quest_title']);
         $stmt->execute();
         $stmt->close();
     }
 }
+
 ?>
 
 <!DOCTYPE html>
