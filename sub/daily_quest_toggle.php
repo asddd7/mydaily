@@ -19,7 +19,7 @@ if($stmt->execute()){
     $done_count = $stmt2->get_result()->fetch_assoc()['done_count'];
     $stmt2->close();
 
-    // Misal unlock achievement tiap 50 poin (5 quest x 10 poin)
+    // Setting Achievement
     if($done_count > 0 && $done_count % 5 == 0){
         $title = "Quest Master: $done_count";
         $desc = "Menyelesaikan $done_count quest harian!";

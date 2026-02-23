@@ -9,7 +9,6 @@ if (!isset($_SESSION['login'])) {
 $user_id  = $_SESSION['id'];
 $username = $_SESSION['username'] ?? 'Guest';
 
-// Ambil file_id dari URL
 $file_id = intval($_GET['id']);
 
 $stmt = $conn->prepare("SELECT * FROM backup_files WHERE id=? AND user_id=?");
@@ -22,11 +21,9 @@ if ($result && $result->num_rows > 0) {
     $file_path = "uploads/" . $file['file_name'];
 
     if (file_exists($file_path)) {
-        // Nama file yang akan diunduh
         $download_name = $file['custom_name'] ? $file['custom_name'] . "." . pathinfo($file['file_name'], PATHINFO_EXTENSION) 
                                               : $file['file_name'];
 
-        // Header untuk download
         header('Content-Description: File Transfer');
         header('Content-Type: application/octet-stream');
         header('Content-Disposition: attachment; filename="' . basename($download_name) . '"');

@@ -17,7 +17,7 @@ while($row = $result->fetch_assoc()){
         'id' => $row['id'],
         'title' => $row['title'],
         'tanggal' => $row['tanggal'],
-        'url' => '../task.php?date=' . $row['tanggal'] // nantinya link ke task.php
+        'url' => '../task.php?date=' . $row['tanggal']
     ];
 }
 $stmt->close();

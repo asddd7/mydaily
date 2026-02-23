@@ -120,7 +120,7 @@ function goBack(){
     if(document.referrer !== ""){
         window.history.back();
     } else {
-        window.location.href = "../index.php"; // fallback kalau tidak ada history
+        window.location.href = "../index.php";
     }
 }
 </script>

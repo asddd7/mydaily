@@ -95,7 +95,6 @@ $stmt->close();
 <?php include 'sidebar.php'; ?>
 <main class="content">
 
-<!-- Absen -->
 <div class="card checkin-card">
     <h3>Absen Hari Ini</h3>
     <?php if(!empty($success)) echo "<p class='success'>$success</p>"; ?>
@@ -106,7 +105,6 @@ $stmt->close();
         <button type="submit" name="absen_pulang" class="btn-checkout" <?= (!$check_in_today || $check_out_today) ? 'disabled style="opacity:0.6; cursor:not-allowed;"' : '' ?>>Selesai</button>
     </form>
 
-    <!-- Kalender -->
     <div class="calendar-header">
         <button onclick="changeMonth(-1)">❮</button>
         <h4 id="monthYear"></h4>
@@ -121,14 +119,12 @@ $stmt->close();
         <tbody id="calendarBody"></tbody>
     </table>
 
-    <!-- Marks / Penanda -->
     <div class="calendar-marks">
         <h4>📌 Penanda Bulan Ini</h4>
         <ul id="marksList"></ul>
     </div>
 </div>
 
-<!-- Riwayat Absen -->
 <div class="card">
     <h3>📜 Riwayat Absen</h3>
     <?php if (!empty($riwayat)): ?>
@@ -147,7 +143,6 @@ $stmt->close();
     <?php endif; ?>
 </div>
 
-<!-- Modal Tambah Penanda -->
 <div id="markerModal" class="modal">
   <div class="modal-content">
 

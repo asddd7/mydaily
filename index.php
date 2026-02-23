@@ -13,9 +13,6 @@ $username = $_SESSION['username'];
 date_default_timezone_set("Asia/Jakarta");
 $today = date("Y-m-d");
 
-/* =========================
-   TASK HARI INI
-========================= */
 $q_total = mysqli_query($conn, "
     SELECT COUNT(*) as total 
     FROM tugas 
@@ -35,9 +32,6 @@ $total_done = mysqli_fetch_assoc($q_done)['done'];
 
 $total_pending = $total_task - $total_done;
 
-/* =========================
-   PENGELUARAN HARI INI
-========================= */
 $q_money = mysqli_query($conn, "
     SELECT SUM(amount) as total_money 
     FROM money_plan 
@@ -49,9 +43,6 @@ $q_money = mysqli_query($conn, "
 $money = mysqli_fetch_assoc($q_money)['total_money'];
 $total_money = $money ? $money : 0;
 
-/* =========================
-   CATATAN TERBARU
-========================= */
 $q_note = mysqli_query($conn, "
     SELECT title, created_at 
     FROM notes 
@@ -72,13 +63,11 @@ while ($row = $result->fetch_assoc()) {
 }
 $stmt->close();
 
-// Hitung poin user
 $points = 0;
 foreach ($quests as $q) {
-    if ($q['is_done']) $points += 10; // misal 10 poin per quest
+    if ($q['is_done']) $points += 10;
 }
 
-// Cek achievement
 $achievements = [];
 $stmt = $conn->prepare("SELECT * FROM achievements WHERE user_id=? ORDER BY unlocked_at DESC");
 $stmt->bind_param("i", $user_id);
@@ -89,7 +78,6 @@ while ($row = $result->fetch_assoc()) {
 }
 $stmt->close();
 
-// === Generate 5 quest random hari ini jika belum ada ===
 $q_check = $conn->prepare("SELECT COUNT(*) as total FROM daily_quest WHERE user_id=? AND DATE(created_at)=?");
 $q_check->bind_param("is", $user_id, $today);
 $q_check->execute();
@@ -97,7 +85,6 @@ $total_today = $q_check->get_result()->fetch_assoc()['total'];
 $q_check->close();
 
 if($total_today == 0){
-    // Ambil 5 quest random dari master
     $q_master = mysqli_query($conn, "SELECT * FROM daily_quest_master ORDER BY RAND() LIMIT 5");
     while($row = mysqli_fetch_assoc($q_master)){
         $stmt = $conn->prepare("INSERT INTO daily_quest (user_id, quest_title) VALUES (?,?)");
@@ -203,7 +190,7 @@ if($total_today == 0){
         })
         .then(res => res.text())
         .then(res => {
-            if(res === 'ok') location.reload(); // reload untuk update poin & achievement
+            if(res === 'ok') location.reload();
             else alert(res);
         });
     });

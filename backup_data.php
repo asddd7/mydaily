@@ -15,7 +15,7 @@ $error = "";
 // Folder upload
 $upload_dir = "uploads/";
 
-// Buat folder jika belum ada
+// Buat folder kalau belum ada
 if (!is_dir($upload_dir)) {
     mkdir($upload_dir, 0777, true);
 }
@@ -67,12 +67,10 @@ if (isset($_GET['delete'])) {
         $file = $result->fetch_assoc();
         $file_path = $upload_dir . $file['file_name'];
 
-        // Hapus file dari server
         if (file_exists($file_path)) {
             unlink($file_path);
         }
 
-        // Hapus dari database
         $stmt_del = $conn->prepare("DELETE FROM backup_files WHERE id=? AND user_id=?");
         $stmt_del->bind_param("ii", $file_id, $user_id);
         $stmt_del->execute();

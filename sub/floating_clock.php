@@ -100,7 +100,6 @@ if(mode === "clock"){
 
 if(mode === "stopwatch"){
     
-    // Ambil waktu mulai dari localStorage
     let startTime = localStorage.getItem("stopwatchStart");
 
     if(!startTime){

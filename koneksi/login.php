@@ -26,7 +26,7 @@ if (isset($_POST['login'])) {
 
         if (password_verify($password, $user['password'])) {
 
-            session_regenerate_id(true); // penting!
+            session_regenerate_id(true);
 
             $_SESSION['login']    = true;
             $_SESSION['id']       = $user['id'];

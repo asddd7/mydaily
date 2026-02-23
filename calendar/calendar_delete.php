@@ -14,7 +14,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if (!empty($id)) {
 
-        // Tambahkan user_id biar aman
         $stmt = $conn->prepare("DELETE FROM calendar_marks WHERE id=? AND user_id=?");
         $stmt->bind_param("ii", $id, $user_id);
 
