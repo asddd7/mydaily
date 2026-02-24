@@ -74,6 +74,10 @@ button:disabled{background:#93c5fd;cursor:not-allowed;opacity:.6;}
                         cursor:pointer;font-size:13px;transition:all.3s;}
 .btn-delete:hover{transform:translateY(-1px);box-shadow:0 6px 15px rgba(246,59,59,0.4);opacity:0.95;}
 .btn-back{background:linear-gradient(135deg,#22c55e,#16a34a);color:var(--white);padding:10px 20px;border-radius:10px;}
+.btn-copy{background:#3b82f6;color:white;border:none;padding:6px 10px;cursor:pointer;border-radius:6px;}
+.btn-copy:hover{background:#2563eb;}
+.btn-edit{background:#f59e0b;color:white;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;margin-left:5px;}
+.btn-edit:hover{background:#d97706;}
 
 /* MODAL */
 .modal{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;justify-content:center;align-items:center;z-index:999;}

@@ -10,12 +10,8 @@ if (!isset($_SESSION['login'])) {
 $username = $_SESSION['username'] ?? 'Guest';
 $user_id  = $_SESSION['id'];
 
-/* ======================
-   PROSES FORM
-====================== */
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
-    // Tambah tugas utama
     if (isset($_POST['nama_tugas'], $_POST['deadline'])) {
         $nama_tugas = trim($_POST['nama_tugas']);
         $deadline   = $_POST['deadline'];
@@ -28,7 +24,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
-    // Tambah subtask
     if (isset($_POST['parent_id'], $_POST['nama_subtask'])) {
         $parent_id    = intval($_POST['parent_id']);
         $nama_subtask = trim($_POST['nama_subtask']);
@@ -42,7 +37,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
-    // Update selesai
     if (isset($_POST['task_id'])) {
         $task_id = intval($_POST['task_id']);
         $selesai = isset($_POST['selesai']) ? 1 : 0;
@@ -52,11 +46,72 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->execute();
         $stmt->close();
     }
+
+    if (isset($_POST['delete_task'])) {
+        $task_id = intval($_POST['delete_task']);
+
+        $stmt = $conn->prepare("DELETE FROM tugas WHERE parent_id=? AND user_id=?");
+        $stmt->bind_param("ii", $task_id, $user_id);
+        $stmt->execute();
+        $stmt->close();
+
+        $stmt = $conn->prepare("DELETE FROM tugas WHERE id=? AND user_id=?");
+        $stmt->bind_param("ii", $task_id, $user_id);
+        $stmt->execute();
+        $stmt->close();
+    }
+
+    if (isset($_POST['copy_task'])) {
+        $task_id = intval($_POST['copy_task']);
+
+        $stmt = $conn->prepare("SELECT nama_tugas FROM tugas WHERE id=? AND user_id=?");
+        $stmt->bind_param("ii", $task_id, $user_id);
+        $stmt->execute();
+        $resultCopy = $stmt->get_result();
+        $taskData = $resultCopy->fetch_assoc();
+        $stmt->close();
+
+        if ($taskData) {
+
+            $stmt = $conn->prepare("INSERT INTO tugas (nama_tugas, deadline, user_id) VALUES (?, CURDATE(), ?)");
+            $stmt->bind_param("si", $taskData['nama_tugas'], $user_id);
+            $stmt->execute();
+            $new_parent_id = $stmt->insert_id;
+            $stmt->close();
+
+            $stmt = $conn->prepare("SELECT nama_tugas FROM tugas WHERE parent_id=? AND user_id=?");
+            $stmt->bind_param("ii", $task_id, $user_id);
+            $stmt->execute();
+            $subtasks = $stmt->get_result();
+
+            while ($sub = $subtasks->fetch_assoc()) {
+                $stmtInsert = $conn->prepare("INSERT INTO tugas (nama_tugas, deadline, user_id, parent_id) 
+                                            VALUES (?, CURDATE(), ?, ?)");
+                $stmtInsert->bind_param("sii", $sub['nama_tugas'], $user_id, $new_parent_id);
+                $stmtInsert->execute();
+                $stmtInsert->close();
+            }
+
+            $stmt->close();
+        }
+    }
+
+    if (isset($_POST['edit_task_id'], $_POST['edit_nama_tugas'], $_POST['edit_deadline'])) {
+
+        $task_id  = intval($_POST['edit_task_id']);
+        $nama     = trim($_POST['edit_nama_tugas']);
+        $deadline = $_POST['edit_deadline'];
+
+        if ($nama && $deadline) {
+            $stmt = $conn->prepare("UPDATE tugas SET nama_tugas=?, deadline=? WHERE id=? AND user_id=?");
+            $stmt->bind_param("ssii", $nama, $deadline, $task_id, $user_id);
+            $stmt->execute();
+            $stmt->close();
+        }
+    }
+
 }
 
-/* ======================
-   AMBIL TUGAS UTAMA
-====================== */
 $stmt = $conn->prepare("SELECT * FROM tugas 
                         WHERE user_id=? AND parent_id IS NULL
                         ORDER BY deadline ASC");
@@ -70,9 +125,6 @@ while ($row = $result->fetch_assoc()) {
 }
 $stmt->close();
 
-/* ======================
-   KELOMPOK PER TANGGAL
-====================== */
 $tugas_per_tanggal = [];
 foreach ($tugas_list as $tugas) {
     $tgl = $tugas['deadline'];
@@ -119,7 +171,25 @@ foreach ($tugas_list as $tugas) {
                     <input type="checkbox" onchange="toggleTask(<?= $tugas['id'] ?>, this)" <?= $checked ?>>
                 </td>
                 <td>
-                    <button class="btn-add-task" onclick="openModal('tugas', <?= $tugas['id']; ?>, 'Tambah Subtask untuk <?= addslashes($tugas['nama_tugas']); ?>')">Tambah Subtask</button>
+                    <button class="btn-add-task"
+                        onclick="openModal('tugas', <?= $tugas['id']; ?>, 'Tambah Subtask')">+</button>
+
+                    <button class="btn-edit"
+                        onclick="openEditTask(
+                            <?= $tugas['id']; ?>,
+                            '<?= addslashes($tugas['nama_tugas']); ?>',
+                            '<?= $tugas['deadline']; ?>'
+                        )">
+                        <i class="fa-solid fa-pen"></i>
+                    </button>
+
+                    <button class="btn-copy" onclick="copyTask(<?= $tugas['id']; ?>)">
+                        <i class="fa-solid fa-copy"></i>
+                    </button>
+
+                    <button class="btn-delete" onclick="deleteTask(<?= $tugas['id']; ?>)">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
                 </td>
             </tr>
             <?php endforeach; ?>
@@ -154,7 +224,6 @@ foreach ($tugas_list as $tugas) {
 </div>
 
 <script>
-// Modal
 function openModal(type, id = null, title = 'Tambah Tugas') {
     const modal = document.getElementById("taskModal");
     const modalTitle = document.getElementById("modalTitle");
@@ -182,8 +251,7 @@ function openModal(type, id = null, title = 'Tambah Tugas') {
         `;
         modalSubmit.innerText = 'Simpan Subtask';
     
-        // Load subtask
-        fetch("load_subtask.php?parent_id=" + id)
+        fetch("sub/load_subtask.php?parent_id=" + id)
             .then(res => res.text())
             .then(data => subtaskList.innerHTML = data);
     }
@@ -198,7 +266,6 @@ window.onclick = function(event) {
     if (event.target === modal) closeModal();
 }
 
-// Toggle task utama status
 function toggleTask(taskId, checkbox) {
     const formData = new FormData();
     formData.append('task_id', taskId);
@@ -216,16 +283,83 @@ function toggleTask(taskId, checkbox) {
         });
 }
 
-// Subtask update
 function updateSubtask(e, parentId){
     e.preventDefault();
     const form = e.target;
     const formData = new FormData(form);
 
-    fetch("load_subtask.php?parent_id=" + parentId, {method:"POST", body:formData})
-    .then(()=> fetch("load_subtask.php?parent_id=" + parentId))
+    fetch("sub/load_subtask.php?parent_id=" + parentId, {method:"POST", body:formData})
+    .then(()=> fetch("sub/load_subtask.php?parent_id=" + parentId))
     .then(res => res.text())
     .then(data => document.getElementById("subtaskList").innerHTML = data);
+}
+
+function deleteTask(id){
+    if(confirm("Yakin ingin menghapus tugas ini?")){
+        const formData = new FormData();
+        formData.append("delete_task", id);
+
+        fetch("", {method:"POST", body:formData})
+        .then(()=> location.reload());
+    }
+}
+
+function copyTask(id){
+    const formData = new FormData();
+    formData.append("copy_task", id);
+
+    fetch("", {method:"POST", body:formData})
+    .then(()=> location.reload());
+}
+
+function openEditTask(id, nama, deadline){
+    const modal = document.getElementById("taskModal");
+    const modalTitle = document.getElementById("modalTitle");
+    const modalInputs = document.getElementById("modalInputs");
+    const modalParentId = document.getElementById("modalParentId");
+
+    modal.classList.add("show");
+    modalTitle.innerText = "Edit Tugas";
+
+    modalParentId.value = '';
+
+    modalInputs.innerHTML = `
+        <input type="hidden" name="edit_task_id" value="${id}">
+        <input type="text" name="edit_nama_tugas" value="${nama}" required>
+        <input type="date" name="edit_deadline" value="${deadline}" required>
+    `;
+}
+function deleteSubtask(id, parentId){
+    if(confirm("Hapus subtask ini?")){
+        const formData = new FormData();
+        formData.append("delete_subtask", id);
+
+        fetch("load_subtask.php?parent_id="+parentId, {
+            method:"POST",
+            body:formData
+        })
+        .then(()=> fetch("load_subtask.php?parent_id="+parentId))
+        .then(res=>res.text())
+        .then(data=> document.getElementById("subtaskList").innerHTML=data);
+    }
+}
+
+function editSubtask(id, nama, parentId){
+    const newName = prompt("Edit subtask:", nama);
+    if(newName && newName.trim() !== ""){
+
+        const formData = new FormData();
+        formData.append("edit_subtask_id", id);
+        formData.append("edit_subtask_nama", newName);
+
+        fetch("load_subtask.php?parent_id="+parentId,{
+            method:"POST",
+            body:formData
+        })
+        .then(()=> fetch("load_subtask.php?parent_id="+parentId))
+        .then(res=>res.text())
+        .then(data=> document.getElementById("subtaskList").innerHTML=data);
+    }
 }
 </script>
 

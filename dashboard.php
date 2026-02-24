@@ -82,9 +82,9 @@ $stmt->close();
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-.calendar-marks ul { list-style:none; padding-left:0; margin-top:10px; }
-.calendar-marks li { margin-bottom:5px; }
-.today { background:#00f;color:#fff;border-radius:50%;text-align:center; }
+.calendar-marks ul{list-style:none;padding-left:0;margin-top:10px;}
+.calendar-marks li{margin-bottom:5px;}
+.today{background:#00f;color:#fff;border-radius:50%;text-align:center;}
 .btn-done{background:#22c55e;color:#fff;border:none;padding:5px 8px;border-radius:6px;cursor:pointer;transition:0.2s;}
 .btn-done:hover:not(:disabled){background:#16a34a;}
 .btn-done:disabled{opacity:0.6;cursor:not-allowed;}

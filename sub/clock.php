@@ -87,13 +87,13 @@ if(isset($_POST['mode'])){
             <input type="radio" name="mode" value="stopwatch" <?= $current=='stopwatch'?'checked':''; ?>>
             <span class="radio-custom"></span>
             Stopwatch
-        </label><br><br>
+        </label>
 
         <label class="radio-container">
             <input type="radio" name="mode" value="countdown" <?= $current=='countdown'?'checked':''; ?>>
             <span class="radio-custom"></span>
             Countdown
-        </label><br><br>
+        </label>
 
         <label class="radio-container">
             <input type="radio" name="mode" value="pomodoro" <?= $current=='pomodoro'?'checked':''; ?>>
