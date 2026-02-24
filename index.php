@@ -146,16 +146,6 @@ if($total_today == 0){
 
         <div style="margin-top:20px;line-height:1.8;font-size:16px;">
 
-            <p><strong>📝 Total Task Hari Ini:</strong> <?= $total_task; ?></p>
-
-            <p style="color:green;">
-                <strong>✔ Selesai:</strong> <?= $total_done; ?>
-            </p>
-
-            <p style="color:#dc2626;">
-                <strong>⏳ Belum Selesai:</strong> <?= $total_pending; ?>
-            </p>
-
             <hr style="margin:15px 0;">
 
             <p>
@@ -179,54 +169,6 @@ if($total_today == 0){
         </div>
     </div>
 
-        <div class="card">
-        <h3>🎯 Daily Quest</h3>
-        <p>Total Poin: <strong><?= $points; ?></strong></p>
-
-        <?php if($quests): ?>
-            <ul class="quest-list">
-                <?php foreach($quests as $q): ?>
-                <li>
-                    <input type="checkbox" class="quest-checkbox" data-id="<?= $q['id']; ?>" <?= $q['is_done'] ? 'checked' : ''; ?>>
-                    <span class="<?= $q['is_done'] ? 'done' : ''; ?>"><?= htmlspecialchars($q['quest_title']); ?></span>
-                </li>
-                <?php endforeach; ?>
-            </ul>
-        <?php else: ?>
-            <p>Tidak ada quest hari ini.</p>
-        <?php endif; ?>
-
-        <h4>🏆 Achievements</h4>
-        <?php if($achievements): ?>
-            <ul class="achievement-list">
-                <?php foreach($achievements as $a): ?>
-                <li><strong><?= htmlspecialchars($a['title']); ?></strong> - <?= htmlspecialchars($a['description']); ?> <small>(<?= date('d M Y', strtotime($a['unlocked_at'])); ?>)</small></li>
-                <?php endforeach; ?>
-            </ul>
-        <?php else: ?>
-            <p>Belum ada achievement.</p>
-        <?php endif; ?>
-    </div>
-
 </div>
-<script>
-    document.querySelectorAll('.quest-checkbox').forEach(cb => {
-    cb.addEventListener('change', function() {
-        const questId = this.dataset.id;
-        const isDone = this.checked ? 1 : 0;
-
-        fetch('sub/daily_quest_toggle.php', {
-            method: 'POST',
-            headers: {'Content-Type':'application/x-www-form-urlencoded'},
-            body: `id=${questId}&is_done=${isDone}`
-        })
-        .then(res => res.text())
-        .then(res => {
-            if(res === 'ok') location.reload();
-            else alert(res);
-        });
-    });
-});
-</script>
 </body>
 </html>

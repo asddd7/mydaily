@@ -32,6 +32,8 @@ if (isset($_POST['login'])) {
             $_SESSION['id']       = $user['id'];
             $_SESSION['email']    = $user['email'];
             $_SESSION['username'] = $user['username'];
+            $_SESSION['LAST_ACTIVITY'] = time();
+            $_SESSION['EXPIRE_TIME']   = 1800;
 
             $_SESSION['token'] = bin2hex(random_bytes(32));
 
@@ -60,6 +62,11 @@ if (isset($_POST['login'])) {
 
 <div class="login-container">
     <h2>Login</h2>
+<?php if(isset($_GET['timeout'])): ?>
+    <div style="color:red;margin-bottom:10px;">
+        Sesi anda telah berakhir karena tidak aktif.
+    </div>
+<?php endif; ?>
 
 <form method="POST">
     <input type="hidden" name="token" value="<?= $_SESSION['token']; ?>">

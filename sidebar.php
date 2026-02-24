@@ -3,6 +3,20 @@ $base_url = (strpos($_SERVER['PHP_SELF'], '/sub/') !== false) ? '../' : '';
 $current_page = basename($_SERVER['PHP_SELF']);
 header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
 header("Pragma: no-cache");
+if (isset($_SESSION['LAST_ACTIVITY'])) {
+
+    if (time() - $_SESSION['LAST_ACTIVITY'] > $_SESSION['EXPIRE_TIME']) {
+
+        session_unset();
+        session_destroy();
+
+        header("Location: koneksi/login.php?timeout=1");
+        exit;
+    }
+}
+
+$_SESSION['LAST_ACTIVITY'] = time();
+
 ?>
 <!-- Header -->
 <header>
@@ -27,32 +41,32 @@ header("Pragma: no-cache");
         <span class="menu-text">Dashboard</span>
     </a>
 
-    <a href="<?= $base_url ?>task.php" class="<?= $current_page == 'task.php.php' ? 'active' : '' ?>">
+    <a href="<?= $base_url ?>task.php" class="<?= $current_page == 'task.php' ? 'active' : '' ?>">
         <i class="menu-icon fa-solid fa-list-check"></i>
         <span class="menu-text">Tugas</span>
     </a>
 
-    <a href="<?= $base_url ?>task_repeat.php" class="<?= $current_page == 'task_repeat.php.php' ? 'active' : '' ?>">
+    <a href="<?= $base_url ?>task_repeat.php" class="<?= $current_page == 'task_repeat.php' ? 'active' : '' ?>">
         <i class="menu-icon fa-solid fa-repeat"></i>
         <span class="menu-text">Tugas (Berulang)</span>
     </a>
 
-    <a href="<?= $base_url ?>backup_data.php" class="<?= $current_page == 'backup_data.php.php' ? 'active' : '' ?>">
+    <a href="<?= $base_url ?>backup_data.php" class="<?= $current_page == 'backup_data.php' ? 'active' : '' ?>">
         <i class="menu-icon fa-solid fa-database"></i>
         <span class="menu-text">BackUp Data</span>
     </a>
 
-    <a href="<?= $base_url ?>money_plan.php" class="<?= $current_page == 'money_plan.php.php' ? 'active' : '' ?>">
+    <a href="<?= $base_url ?>money_plan.php" class="<?= $current_page == 'money_plan.php' ? 'active' : '' ?>">
         <i class="menu-icon fa-solid fa-wallet"></i>
         <span class="menu-text">Pengatur Keuangan</span>
     </a>
 
-    <a href="<?= $base_url ?>notes.php" class="<?= $current_page == 'notes.php.php' ? 'active' : '' ?>">
+    <a href="<?= $base_url ?>notes.php" class="<?= $current_page == 'notes.php' ? 'active' : '' ?>">
         <i class="menu-icon fa-solid fa-note-sticky"></i>
         <span class="menu-text">Catatan</span>
     </a>
 
-    <a href="<?= $base_url ?>profile.php" class="<?= $current_page == 'profile.php.php' ? 'active' : '' ?>">
+    <a href="<?= $base_url ?>profile.php" class="<?= $current_page == 'profile.php' ? 'active' : '' ?>">
         <i class="menu-icon fa-solid fa-user"></i>
         <span class="menu-text">Profil</span>
     </a>

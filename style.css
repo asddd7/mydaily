@@ -78,8 +78,8 @@ button:disabled{background:#93c5fd;cursor:not-allowed;opacity:.6;}
 .btn-copy:hover{background:#2563eb;}
 .btn-edit{background:#f59e0b;color:white;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;margin-left:5px;}
 .btn-edit:hover{background:#d97706;}
-.btn-action{background:#6366f1;color:white;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;margin-left:5px;transition:0.2s;}
-.btn-action:hover{background:#4f46e5;transform:scale(1.05);}
+.btn-action{background:#3b82f6;color:white;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;margin-left:5px;transition:0.2s;}
+.btn-action:hover{background:#2563eb;transform:scale(1.05);}
 tr[draggable="true"]{cursor:grab;}
 
 /* MODAL */

@@ -126,7 +126,7 @@ $stmt->close();
 </div>
 
 <div class="card">
-    <h3>📜 Riwayat Absen</h3>
+    <h3>Riwayat Absen</h3>
     <?php if (!empty($riwayat)): ?>
     <table class="checkin-history">
         <tr><th>Tanggal</th><th>Mulai</th><th>Selesai</th></tr>
@@ -147,7 +147,7 @@ $stmt->close();
   <div class="modal-content">
 
     <div class="modal-header">
-      <h3>📌 Tambah Penanda</h3>
+      <h3>Tambah Penanda</h3>
     </div>
 
     <form id="markerForm">
@@ -196,7 +196,7 @@ function renderCalendar(date) {
         const today = new Date();
 
         const fullDate = `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
-        cell.setAttribute("data-date", fullDate); // 🔥 penting
+        cell.setAttribute("data-date", fullDate);
 
         if(day===today.getDate() && month===today.getMonth() && year===today.getFullYear()){
             cell.classList.add("today");
