@@ -110,11 +110,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
+    /* ======================
+   UPDATE URUTAN (DRAG DROP)
+====================== */
+if (isset($_POST['update_order'])) {
+
+    foreach ($_POST['update_order'] as $index => $task_id) {
+
+        $stmt = $conn->prepare("UPDATE tugas SET urutan=? WHERE id=? AND user_id=?");
+        $stmt->bind_param("iii", $index, $task_id, $user_id);
+        $stmt->execute();
+        $stmt->close();
+    }
+
+    exit;
+}
+
 }
 
 $stmt = $conn->prepare("SELECT * FROM tugas 
                         WHERE user_id=? AND parent_id IS NULL
-                        ORDER BY deadline ASC");
+                        ORDER BY deadline ASC, urutan ASC");
 $stmt->bind_param("i", $user_id);
 $stmt->execute();
 $result = $stmt->get_result();
@@ -149,7 +165,7 @@ foreach ($tugas_list as $tugas) {
 
 <div class="card">
 <h3>📌 Daftar Tugas</h3>
-<button class="btn-add-task" onclick="openModal('utama')">Tambah Tugas</button>
+<button class="btn-action" onclick="openModal('utama')">Tambah Tugas</button>
 
 <?php if (!empty($tugas_per_tanggal)): ?>
     <?php foreach ($tugas_per_tanggal as $tanggal => $tugas_tgl): ?>
@@ -165,16 +181,16 @@ foreach ($tugas_list as $tugas) {
                 $checked = $tugas['selesai'] ? "checked" : "";
                 $style   = $tugas['selesai'] ? "text-decoration:line-through;color:gray;" : "";
             ?>
-            <tr>
+            <tr draggable="true" data-id="<?= $tugas['id']; ?>">
                 <td style="<?= $style ?>"><?= htmlspecialchars($tugas['nama_tugas']); ?></td>
                 <td>
                     <input type="checkbox" onchange="toggleTask(<?= $tugas['id'] ?>, this)" <?= $checked ?>>
                 </td>
                 <td>
-                    <button class="btn-add-task"
+                    <button class="btn-action"
                         onclick="openModal('tugas', <?= $tugas['id']; ?>, 'Tambah Subtask')">+</button>
 
-                    <button class="btn-edit"
+                    <button class="btn-action"
                         onclick="openEditTask(
                             <?= $tugas['id']; ?>,
                             '<?= addslashes($tugas['nama_tugas']); ?>',
@@ -183,11 +199,11 @@ foreach ($tugas_list as $tugas) {
                         <i class="fa-solid fa-pen"></i>
                     </button>
 
-                    <button class="btn-copy" onclick="copyTask(<?= $tugas['id']; ?>)">
+                    <button class="btn-action" onclick="copyTask(<?= $tugas['id']; ?>)">
                         <i class="fa-solid fa-copy"></i>
                     </button>
 
-                    <button class="btn-delete" onclick="deleteTask(<?= $tugas['id']; ?>)">
+                    <button class="btn-action" onclick="deleteTask(<?= $tugas['id']; ?>)">
                         <i class="fa-solid fa-trash"></i>
                     </button>
                 </td>
@@ -360,6 +376,69 @@ function editSubtask(id, nama, parentId){
         .then(res=>res.text())
         .then(data=> document.getElementById("subtaskList").innerHTML=data);
     }
+}
+
+// =============================
+// DRAG & DROP TASK
+// =============================
+
+let dragItem = null;
+
+document.querySelectorAll("table").forEach(table => {
+
+    table.addEventListener("dragstart", function(e){
+        dragItem = e.target;
+        e.target.style.opacity = "0.5";
+    });
+
+    table.addEventListener("dragend", function(e){
+        e.target.style.opacity = "1";
+    });
+
+    table.addEventListener("dragover", function(e){
+        e.preventDefault();
+        const afterElement = getDragAfterElement(table, e.clientY);
+        if(afterElement == null){
+            table.appendChild(dragItem);
+        } else {
+            table.insertBefore(dragItem, afterElement);
+        }
+    });
+
+    table.addEventListener("drop", function(){
+        saveOrder(table);
+    });
+
+});
+
+function getDragAfterElement(container, y) {
+    const draggableElements = [...container.querySelectorAll("tr[draggable='true']:not(.dragging)")];
+
+    return draggableElements.reduce((closest, child) => {
+        const box = child.getBoundingClientRect();
+        const offset = y - box.top - box.height / 2;
+
+        if(offset < 0 && offset > closest.offset){
+            return { offset: offset, element: child }
+        } else {
+            return closest
+        }
+    }, { offset: Number.NEGATIVE_INFINITY }).element;
+}
+
+function saveOrder(table){
+    const ids = [];
+    table.querySelectorAll("tr[draggable='true']").forEach(row=>{
+        ids.push(row.getAttribute("data-id"));
+    });
+
+    const formData = new FormData();
+    ids.forEach(id => formData.append("update_order[]", id));
+
+    fetch("", {
+        method:"POST",
+        body:formData
+    });
 }
 </script>
 
