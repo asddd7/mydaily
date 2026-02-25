@@ -350,11 +350,11 @@ function deleteSubtask(id, parentId){
         const formData = new FormData();
         formData.append("delete_subtask", id);
 
-        fetch("load_subtask.php?parent_id="+parentId, {
+        fetch("sub/load_subtask.php?parent_id="+parentId, {
             method:"POST",
             body:formData
         })
-        .then(()=> fetch("load_subtask.php?parent_id="+parentId))
+        .then(()=> fetch("sub/load_subtask.php?parent_id="+parentId))
         .then(res=>res.text())
         .then(data=> document.getElementById("subtaskList").innerHTML=data);
     }
@@ -368,11 +368,11 @@ function editSubtask(id, nama, parentId){
         formData.append("edit_subtask_id", id);
         formData.append("edit_subtask_nama", newName);
 
-        fetch("load_subtask.php?parent_id="+parentId,{
+        fetch("sub/load_subtask.php?parent_id="+parentId,{
             method:"POST",
             body:formData
         })
-        .then(()=> fetch("load_subtask.php?parent_id="+parentId))
+        .then(()=> fetch("sub/load_subtask.php?parent_id="+parentId))
         .then(res=>res.text())
         .then(data=> document.getElementById("subtaskList").innerHTML=data);
     }
