@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Waktu pembuatan: 21 Feb 2026 pada 10.36
+-- Waktu pembuatan: 26 Feb 2026 pada 08.18
 -- Versi server: 10.4.32-MariaDB
 -- Versi PHP: 8.0.30
 
@@ -47,7 +47,11 @@ INSERT INTO `absen` (`id`, `user_id`, `tanggal`, `jam_masuk`, `jam_pulang`, `cre
 (4, 1, '2026-02-14', '08:01:56', '19:33:59', '2026-02-14 01:01:56'),
 (5, 1, '2026-02-18', '07:58:06', NULL, '2026-02-18 00:58:06'),
 (6, 1, '2026-02-20', '07:38:25', '17:27:59', '2026-02-20 00:38:25'),
-(7, 1, '2026-02-21', '07:09:53', NULL, '2026-02-21 00:09:53');
+(7, 1, '2026-02-21', '07:09:53', '17:06:48', '2026-02-21 00:09:53'),
+(8, 1, '2026-02-23', '07:21:16', '17:17:37', '2026-02-23 00:21:16'),
+(9, 1, '2026-02-24', '07:16:28', NULL, '2026-02-24 00:16:28'),
+(10, 1, '2026-02-25', '12:59:50', '17:27:57', '2026-02-25 05:59:50'),
+(11, 1, '2026-02-26', '07:17:51', NULL, '2026-02-26 00:17:51');
 
 -- --------------------------------------------------------
 
@@ -68,7 +72,8 @@ CREATE TABLE `achievements` (
 --
 
 INSERT INTO `achievements` (`id`, `user_id`, `title`, `description`, `unlocked_at`) VALUES
-(1, 1, 'Quest Master: 5', 'Menyelesaikan 5 quest harian!', '2026-02-21 16:23:13');
+(1, 1, 'Quest Master: 5', 'Menyelesaikan 5 quest harian!', '2026-02-21 16:23:13'),
+(2, 1, 'Quest Master: 5', 'Menyelesaikan 5 quest harian!', '2026-02-24 09:50:35');
 
 -- --------------------------------------------------------
 
@@ -116,8 +121,10 @@ CREATE TABLE `calendar_marks` (
 
 INSERT INTO `calendar_marks` (`id`, `user_id`, `tanggal`, `title`, `description`, `created_at`, `selesai`) VALUES
 (3, 1, '2026-03-07', 'gajian', '', '2026-02-20 04:27:04', 0),
-(18, 1, '2026-02-25', 'PIKET', '', '2026-02-21 07:49:27', 0),
-(20, 1, '2026-02-23', 'UPDATE: CLOCK.PHP', '', '2026-02-21 08:08:26', 0);
+(18, 1, '2026-02-25', 'PIKET', '', '2026-02-21 07:49:27', 1),
+(20, 1, '2026-02-23', 'UPDATE: CLOCK.PHP', '', '2026-02-21 08:08:26', 1),
+(21, 1, '2026-02-24', 'UPDATE TASK.PHP', '', '2026-02-24 01:03:37', 1),
+(22, 1, '2026-02-25', 'BERESIN TASK.PHP', 'ERROR SAAT MENHAPUS SUBTASK', '2026-02-25 00:15:38', 1);
 
 -- --------------------------------------------------------
 
@@ -138,11 +145,26 @@ CREATE TABLE `daily_quest` (
 --
 
 INSERT INTO `daily_quest` (`id`, `user_id`, `quest_title`, `is_done`, `created_at`) VALUES
-(1, 1, 'Belajar coding 30 menit', 1, '2026-02-21 16:21:57'),
-(2, 1, 'Selesaikan 1 task kerjaan', 1, '2026-02-21 16:21:57'),
-(3, 1, 'Olahraga 30 menit', 1, '2026-02-21 16:21:57'),
-(4, 1, 'Bersihkan inbox', 1, '2026-02-21 16:21:57'),
-(5, 1, 'Cek keuangan aplikasi', 1, '2026-02-21 16:21:57');
+(6, 2, 'Rencanakan menu makan', 0, '2026-02-21 16:41:55'),
+(7, 2, 'Dengarkan podcast edukatif', 0, '2026-02-21 16:41:55'),
+(8, 2, 'Tulis ide kreatif', 0, '2026-02-21 16:41:55'),
+(9, 2, 'Refleksi hari ini', 0, '2026-02-21 16:41:55'),
+(10, 2, 'Bersihkan inbox', 0, '2026-02-21 16:41:55'),
+(16, 2, 'Tidur tepat waktu', 0, '2026-02-23 15:30:05'),
+(17, 2, 'Tulis jurnal harian', 0, '2026-02-23 15:30:05'),
+(18, 2, 'Evaluasi pengeluaran', 0, '2026-02-23 15:30:05'),
+(19, 2, 'Bayar tagihan tepat waktu', 0, '2026-02-23 15:30:05'),
+(20, 2, 'Selesaikan 1 task kerjaan', 0, '2026-02-23 15:30:05'),
+(26, 1, 'Dengarkan podcast edukatif', 0, '2026-02-25 06:54:54'),
+(27, 1, 'Tulis jurnal harian', 0, '2026-02-25 06:54:54'),
+(28, 1, 'Update to-do list', 0, '2026-02-25 06:54:54'),
+(29, 1, 'Cek social media max 30 menit', 0, '2026-02-25 06:54:54'),
+(30, 1, 'Refleksi hari ini', 0, '2026-02-25 06:54:54'),
+(31, 1, 'Bersihkan rumah 15 menit', 0, '2026-02-26 07:17:48'),
+(32, 1, 'Berjalan kaki 5000 langkah', 0, '2026-02-26 07:17:48'),
+(33, 1, 'Update to-do list', 0, '2026-02-26 07:17:48'),
+(34, 1, 'Refleksi hari ini', 0, '2026-02-26 07:17:48'),
+(35, 1, 'Selesaikan 1 task kerjaan', 0, '2026-02-26 07:17:48');
 
 -- --------------------------------------------------------
 
@@ -207,6 +229,15 @@ CREATE TABLE `money_plan` (
   `tanggal` date DEFAULT curdate()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Dumping data untuk tabel `money_plan`
+--
+
+INSERT INTO `money_plan` (`id`, `username`, `type`, `category`, `amount`, `description`, `tanggal`) VALUES
+(8, 'Dim', 'income', 'Sisa Gaji', 120000.00, '', '2026-02-23'),
+(9, 'Dim', 'expense', 'Ojek', 10000.00, '', '2026-02-23'),
+(10, 'Dim', 'expense', 'Ojek', 10000.00, '', '2026-02-24');
+
 -- --------------------------------------------------------
 
 --
@@ -258,29 +289,51 @@ CREATE TABLE `tugas` (
   `parent_id` int(11) DEFAULT NULL,
   `nama_tugas` varchar(100) NOT NULL,
   `deadline` date NOT NULL,
-  `selesai` tinyint(1) NOT NULL DEFAULT 0
+  `selesai` tinyint(1) NOT NULL DEFAULT 0,
+  `urutan` int(11) DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data untuk tabel `tugas`
 --
 
-INSERT INTO `tugas` (`id`, `user_id`, `parent_id`, `nama_tugas`, `deadline`, `selesai`) VALUES
-(10, 1, NULL, 'Masukin idos: saleh', '2026-02-12', 1),
-(11, 1, NULL, 'idos: bagas', '2026-02-12', 1),
-(12, 1, NULL, 'IDOS: MISKANA', '2026-02-12', 1),
-(20, 1, NULL, 'Routing Pengiriman', '2026-02-12', 1),
-(21, 1, NULL, 'tes', '2026-02-12', 1),
-(22, 1, 21, '1', '2026-02-12', 1),
-(23, 1, NULL, 'Pulang', '2026-02-20', 1),
-(24, 1, NULL, 'coba', '2026-02-21', 1),
-(25, 1, NULL, 'qq', '2026-02-20', 1),
-(26, 1, 10, 'aa', '2026-02-20', 0),
-(27, 1, 10, 'aa', '2026-02-20', 0),
-(28, 1, 10, 'a', '2026-02-20', 0),
-(29, 1, 10, 'aaaaa', '2026-02-20', 1),
-(30, 1, 10, 'aaaaa', '2026-02-20', 0),
-(31, 1, NULL, 'BACKUP', '2026-02-21', 1);
+INSERT INTO `tugas` (`id`, `user_id`, `parent_id`, `nama_tugas`, `deadline`, `selesai`, `urutan`) VALUES
+(10, 1, NULL, 'Masukin idos: saleh', '2026-02-12', 1, 10),
+(11, 1, NULL, 'idos: bagas', '2026-02-12', 1, 11),
+(12, 1, NULL, 'IDOS: MISKANA', '2026-02-12', 1, 12),
+(20, 1, NULL, 'Routing Pengiriman', '2026-02-12', 1, 20),
+(26, 1, 10, 'aa', '2026-02-20', 0, 26),
+(27, 1, 10, 'aa', '2026-02-20', 0, 27),
+(28, 1, 10, 'a', '2026-02-20', 0, 28),
+(29, 1, 10, 'aaaaa', '2026-02-20', 1, 29),
+(30, 1, 10, 'aaaaa', '2026-02-20', 0, 30),
+(32, 1, NULL, 'OTSUKA', '2026-02-23', 1, 0),
+(33, 1, 32, 'BERESIN IDOS PUNYA FIRMAN', '2026-02-23', 0, 33),
+(34, 1, NULL, 'SOSRO CIREBON', '2026-02-23', 1, 1),
+(35, 1, 34, 'BERESIN DISKON', '2026-02-23', 1, 35),
+(36, 1, NULL, 'SOSRO AWN', '2026-02-23', 1, 2),
+(37, 1, NULL, 'KINO', '2026-02-23', 1, 3),
+(38, 1, NULL, 'DATABASE', '2026-02-23', 1, 4),
+(39, 1, 38, 'GANTI NAMA SALES FURATUN > ARIS MAULANA, WAHYU > FURATUN (PINDAH KE MIX 1)', '2026-02-23', 1, 39),
+(40, 1, 32, 'CEK OUTLET IDOS DARI PAK WENDI', '2026-02-23', 1, 40),
+(41, 1, NULL, 'TAMBAH NOPOL', '2026-02-23', 1, 5),
+(42, 1, 41, '58 FB  MBM.09263 - TOKO TOPIK PUTRA  45 DB MBM.03411 - WARUNG IBU IDA', '2026-02-23', 1, 42),
+(43, 1, NULL, 'ACC RNO', '2026-02-24', 1, 1),
+(44, 1, NULL, 'BENERIN LIST_PELANGGAN MBM (ASC BY ID)', '2026-02-24', 1, 0),
+(45, 1, NULL, 'TAMBAH NOPOL', '2026-02-24', 1, 6),
+(46, 1, 45, '58 FB  MBM.09263 - TOKO TOPIK PUTRA  45 DB MBM.03411 - WARUNG IBU IDA', '2026-02-24', 0, 46),
+(47, 1, NULL, 'SOSRO CIREBON', '2026-02-24', 1, 5),
+(48, 1, 47, 'BERESIN DISKON', '2026-02-24', 0, 48),
+(49, 1, NULL, 'SOSRO AWN', '2026-02-24', 1, 3),
+(50, 1, NULL, 'KINO', '2026-02-24', 1, 2),
+(51, 1, NULL, 'DATABASE', '2026-02-24', 1, 4),
+(52, 1, 51, 'GANTI NAMA SALES FURATUN > ARIS MAULANA, WAHYU > FURATUN (PINDAH KE MIX 1)', '2026-02-24', 0, 52),
+(53, 1, NULL, 'ACC RNO', '2026-02-25', 0, 4),
+(54, 1, NULL, 'KINO', '2026-02-25', 1, 0),
+(55, 1, NULL, 'SOSRO AWN', '2026-02-25', 1, 1),
+(56, 1, NULL, 'SOSRO CIREBON', '2026-02-25', 1, 2),
+(61, 1, NULL, 'OTSUKA', '2026-02-25', 1, 3),
+(63, 1, 53, 'aaaaa', '2026-02-25', 0, 0);
 
 -- --------------------------------------------------------
 
@@ -299,16 +352,20 @@ CREATE TABLE `users` (
   `tiktok` varchar(255) DEFAULT NULL,
   `linkedin` varchar(255) DEFAULT NULL,
   `sosmed_public` tinyint(1) DEFAULT 1,
-  `points` int(11) DEFAULT 0
+  `points` int(11) DEFAULT 0,
+  `clock_mode` varchar(20) DEFAULT 'clock',
+  `countdown_seconds` int(11) DEFAULT 0,
+  `pomodoro_work` int(11) DEFAULT 25,
+  `pomodoro_break` int(11) DEFAULT 5
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data untuk tabel `users`
 --
 
-INSERT INTO `users` (`id`, `username`, `email`, `password`, `instagram`, `facebook`, `twitter`, `tiktok`, `linkedin`, `sosmed_public`, `points`) VALUES
-(1, 'Dim', 'dimas@gmail.com', '$2y$10$Nka6226wwMVL/alYeXQsceNl9meo4k6076wbDt2XvR0oDBFE3apOG', 'www.instagram.com', '', '', '', '', 1, -3),
-(2, 'budi', 'budi123@gmail.com', '$2y$10$ZJw8kaqQHmKCmjKu9NIKO.l5/WmdO.Ik8duSVrtLZSwgJvEvoITUy', NULL, NULL, NULL, NULL, NULL, 1, 0);
+INSERT INTO `users` (`id`, `username`, `email`, `password`, `instagram`, `facebook`, `twitter`, `tiktok`, `linkedin`, `sosmed_public`, `points`, `clock_mode`, `countdown_seconds`, `pomodoro_work`, `pomodoro_break`) VALUES
+(1, 'Dim', 'dimas@gmail.com', '$2y$10$Nka6226wwMVL/alYeXQsceNl9meo4k6076wbDt2XvR0oDBFE3apOG', 'www.instagram.com', '', '', '', '', 1, -3, 'clock', 0, 25, 5),
+(2, 'budi', 'budi123@gmail.com', '$2y$10$ZJw8kaqQHmKCmjKu9NIKO.l5/WmdO.Ik8duSVrtLZSwgJvEvoITUy', NULL, NULL, NULL, NULL, NULL, 1, 0, 'clock', 0, 25, 5);
 
 --
 -- Indexes for dumped tables
@@ -390,13 +447,13 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT untuk tabel `absen`
 --
 ALTER TABLE `absen`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- AUTO_INCREMENT untuk tabel `achievements`
 --
 ALTER TABLE `achievements`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT untuk tabel `backup_files`
@@ -408,13 +465,13 @@ ALTER TABLE `backup_files`
 -- AUTO_INCREMENT untuk tabel `calendar_marks`
 --
 ALTER TABLE `calendar_marks`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
 
 --
 -- AUTO_INCREMENT untuk tabel `daily_quest`
 --
 ALTER TABLE `daily_quest`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=36;
 
 --
 -- AUTO_INCREMENT untuk tabel `daily_quest_master`
@@ -426,7 +483,7 @@ ALTER TABLE `daily_quest_master`
 -- AUTO_INCREMENT untuk tabel `money_plan`
 --
 ALTER TABLE `money_plan`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT untuk tabel `notes`
@@ -444,7 +501,7 @@ ALTER TABLE `task_repeat`
 -- AUTO_INCREMENT untuk tabel `tugas`
 --
 ALTER TABLE `tugas`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=32;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=66;
 
 --
 -- AUTO_INCREMENT untuk tabel `users`
