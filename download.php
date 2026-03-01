@@ -1,13 +1,13 @@
 <?php
-include 'koneksi/koneksi.php';
+include 'koneksi.php';
 session_start();
 
 if (!isset($_SESSION['login'])) {
     die("Akses ditolak!");
 }
 
-$user_id  = $_SESSION['id'];
-$username = $_SESSION['username'] ?? 'Guest';
+$user_id = $_SESSION['id'] ?? 0;
+
 
 $file_id = intval($_GET['id']);
 
@@ -18,12 +18,12 @@ $result = $stmt->get_result();
 
 if ($result && $result->num_rows > 0) {
     $file = $result->fetch_assoc();
-    $file_path = "uploads/" . $file['file_name'];
+    $file_path = "../uploads/" . $file['file_name'];
 
     if (file_exists($file_path)) {
+        // Buat Nama File
         $download_name = $file['custom_name'] ? $file['custom_name'] . "." . pathinfo($file['file_name'], PATHINFO_EXTENSION) 
                                               : $file['file_name'];
-
         header('Content-Description: File Transfer');
         header('Content-Type: application/octet-stream');
         header('Content-Disposition: attachment; filename="' . basename($download_name) . '"');
