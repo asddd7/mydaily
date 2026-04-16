@@ -18,7 +18,6 @@ if (isset($_SESSION['LAST_ACTIVITY'])) {
 $_SESSION['LAST_ACTIVITY'] = time();
 
 ?>
-<!-- Header -->
 <header>
   <div class="container nav">
     <div class="welcome">
@@ -27,15 +26,12 @@ $_SESSION['LAST_ACTIVITY'] = time();
     <a href="koneksi/logout.php" class="logout">Logout</a>
   </div>
 </header>
-<!-- Sidebar -->
 <aside class="sidebar" id="sidebar">
 
-    <!-- Logo -->
     <div class="sidebar-logo">
         <a href="<?= $base_url ?>index.php" class="<?= $current_page == 'index.php' ? 'active' : '' ?>"><span class="logo-full">MYDAILY</span></a>
     </div>
 
-    <!-- Menu -->
     <a href="<?= $base_url ?>dashboard.php" class="<?= $current_page == 'dashboard.php' ? 'active' : '' ?>">
         <i class="menu-icon fa-solid fa-house"></i>
         <span class="menu-text">Dashboard</span>
