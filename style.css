@@ -8,12 +8,13 @@
 /* ─── DESIGN TOKENS ─────────────────────────────────────── */
 :root {
   /* Core palette */
-  --clr-bg:          #0b0f1a;
+  --clr-bg:          #ffffffa9;
   --clr-bg-2:        #111827;
   --clr-surface:     rgba(255,255,255,0.05);
   --clr-surface-2:   rgba(255,255,255,0.09);
   --clr-border:      rgba(255,255,255,0.10);
   --clr-border-hover:rgba(255,255,255,0.22);
+  --clr-header:      rgba(0, 68, 255, 0.85);
 
   /* Accent */
   --clr-accent:      #4f8ef7;
@@ -24,7 +25,8 @@
   --clr-warning:     #fbbf24;
 
   /* Text */
-  --clr-text:        #e8edf5;
+  --clr-text:        #000000;
+  --clr-text2:       #ffffff;
   --clr-text-muted:  #8b98b1;
   --clr-text-faint:  #4b5570;
 
@@ -71,7 +73,7 @@ header {
   position: fixed;
   top: 0; left: 0; right: 0;
   height: var(--header-h);
-  background: rgba(11,15,26,0.85);
+  background: linear-gradient(135deg, var(--clr-accent), var(--clr-accent-2));
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border-bottom: 1px solid var(--clr-border);
@@ -90,10 +92,10 @@ header .nav {
 }
 
 .welcome {
-  font-family: 'Syne', sans-serif;
+  font-family: 'Poppins', sans-serif;
   font-size: 16px;
   font-weight: 700;
-  color: var(--clr-text);
+  color: var(--clr-text2);
   letter-spacing: 0.3px;
 }
 
@@ -107,7 +109,7 @@ header .nav {
   border-radius: 100px;
   background: var(--clr-surface);
   border: 1px solid var(--clr-border);
-  color: var(--clr-text);
+  color: var(--clr-text2);
   font-size: 13px;
   font-weight: 600;
   text-decoration: none;
@@ -1113,7 +1115,7 @@ label {
   padding: 10px 14px;
   border-radius: var(--radius);
   border: 1px solid var(--clr-border);
-  background: rgba(255,255,255,0.03);
+  background: rgba(255, 0, 0, 0.03);
   transition: var(--t);
   position: relative;
 }
