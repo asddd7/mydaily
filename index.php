@@ -171,4 +171,21 @@ if($total_today == 0){
 
 </div>
 </body>
+<script>
+const hamburger = document.querySelector('.hamburger');
+const sidebar = document.querySelector('.sidebar');
+const overlay = document.querySelector('.sidebar-overlay');
+
+hamburger.addEventListener('click', () => {
+  sidebar.classList.toggle('mobile-open');
+  overlay.classList.toggle('show');
+  hamburger.classList.toggle('open');
+});
+
+overlay.addEventListener('click', () => {
+  sidebar.classList.remove('mobile-open');
+  overlay.classList.remove('show');
+  hamburger.classList.remove('open');
+});
+</script>
 </html>

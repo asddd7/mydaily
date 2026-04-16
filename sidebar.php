@@ -31,7 +31,9 @@ $_SESSION['LAST_ACTIVITY'] = time();
     <div class="sidebar-logo">
         <a href="<?= $base_url ?>index.php" class="<?= $current_page == 'index.php' ? 'active' : '' ?>"><span class="logo-full">MYDAILY</span></a>
     </div>
-
+    <button id="toggleSidebar" class="toggle-btn">
+        ☰
+    </button>
     <a href="<?= $base_url ?>dashboard.php" class="<?= $current_page == 'dashboard.php' ? 'active' : '' ?>">
         <i class="menu-icon fa-solid fa-house"></i>
         <span class="menu-text">Dashboard</span>
@@ -68,3 +70,23 @@ $_SESSION['LAST_ACTIVITY'] = time();
     </a>
 </aside>
 <?php include 'sub/floating_clock.php'; ?>
+<script>
+const sidebar = document.getElementById("sidebar");
+const toggleBtn = document.getElementById("toggleSidebar");
+
+// load state
+if (localStorage.getItem("sidebar") === "collapsed") {
+    sidebar.classList.add("collapsed");
+}
+
+// toggle
+toggleBtn.addEventListener("click", function() {
+    sidebar.classList.toggle("collapsed");
+
+    if (sidebar.classList.contains("collapsed")) {
+        localStorage.setItem("sidebar", "collapsed");
+    } else {
+        localStorage.setItem("sidebar", "expanded");
+    }
+});
+</script>
