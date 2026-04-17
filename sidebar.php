@@ -20,20 +20,31 @@ $_SESSION['LAST_ACTIVITY'] = time();
 ?>
 <header>
   <div class="container nav">
+
+    <!-- TOGGLE + LOGO (MOBILE ONLY) -->
+    <div class="mobile-menu">
+        <button id="toggleSidebarHeader" class="toggle-btn">☰</button>
+        <span class="logo-mobile">MYDAILY</span>
+    </div>
+
     <div class="welcome">
         Welcome, <strong><?= htmlspecialchars($username); ?></strong>
     </div>
+
     <a href="koneksi/logout.php" class="logout">Logout</a>
   </div>
 </header>
-<aside class="sidebar" id="sidebar">
+<aside class="sidebar no-transition mobile-collapsed" id="sidebar">
 
-    <div class="sidebar-logo">
-        <a href="<?= $base_url ?>index.php" class="<?= $current_page == 'index.php' ? 'active' : '' ?>"><span class="logo-full">MYDAILY</span></a>
-    </div>
     <button id="toggleSidebar" class="toggle-btn">
         ☰
     </button>
+    <div class="sidebar-logo">
+        <a href="<?= $base_url ?>index.php" class="<?= $current_page == 'index.php' ? 'active' : '' ?>">
+            <span class="logo-full">MYDAILY</span>
+            <span class="logo-mini">MY</span>
+        </a>
+    </div>
     <a href="<?= $base_url ?>dashboard.php" class="<?= $current_page == 'dashboard.php' ? 'active' : '' ?>">
         <i class="menu-icon fa-solid fa-house"></i>
         <span class="menu-text">Dashboard</span>
@@ -72,21 +83,47 @@ $_SESSION['LAST_ACTIVITY'] = time();
 <?php include 'sub/floating_clock.php'; ?>
 <script>
 const sidebar = document.getElementById("sidebar");
-const toggleBtn = document.getElementById("toggleSidebar");
+const toggleBtn = document.getElementById("toggleSidebar"); // desktop
+const toggleBtnHeader = document.getElementById("toggleSidebarHeader"); // mobile
 
-// load state
-if (localStorage.getItem("sidebar") === "collapsed") {
-    sidebar.classList.add("collapsed");
+function isMobile() {
+    return window.innerWidth <= 768;
 }
 
-// toggle
-toggleBtn.addEventListener("click", function() {
-    sidebar.classList.toggle("collapsed");
+// default mobile = tertutup
+if (isMobile()) {
+    sidebar.classList.remove("show");
+}
 
-    if (sidebar.classList.contains("collapsed")) {
-        localStorage.setItem("sidebar", "collapsed");
-    } else {
-        localStorage.setItem("sidebar", "expanded");
+// desktop state
+if (!isMobile()) {
+    if (localStorage.getItem("sidebar") === "collapsed") {
+        sidebar.classList.add("collapsed");
     }
+}
+
+// remove anim delay
+window.addEventListener("load", function() {
+    sidebar.classList.remove("no-transition");
 });
+
+// TOGGLE DESKTOP
+if (toggleBtn) {
+    toggleBtn.addEventListener("click", function () {
+        sidebar.classList.toggle("collapsed");
+
+        if (sidebar.classList.contains("collapsed")) {
+            localStorage.setItem("sidebar", "collapsed");
+        } else {
+            localStorage.setItem("sidebar", "expanded");
+        }
+    });
+}
+
+// TOGGLE MOBILE (HEADER)
+if (toggleBtnHeader) {
+    toggleBtnHeader.addEventListener("click", function () {
+        sidebar.classList.toggle("show");
+    });
+}
 </script>

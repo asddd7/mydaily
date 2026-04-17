@@ -243,19 +243,19 @@ header .nav {
 }
 
 .sidebar a:hover {
-  background: var(--clr-surface-2);
+  background: var(--clr-text2);
   color: var(--clr-text);
   transform: translateX(3px);
 }
 
 .sidebar a.active {
   background: linear-gradient(135deg, rgba(79,142,247,0.2), rgba(124,58,237,0.15));
-  color: var(--clr-accent);
+  color: var(--clr-text2);
   border: 1px solid rgba(79,142,247,0.25);
   font-weight: 600;
 }
 
-.sidebar a.active i { color: var(--clr-accent); }
+.sidebar a.active i { color: var(--clr-text2); }
 
 .sidebar a.active::before {
   content: '';
@@ -268,20 +268,39 @@ header .nav {
 
 /* Collapsed sidebar */
 .sidebar.collapsed { width: 70px; }
-.sidebar.collapsed .sidebar-logo span,
 .sidebar.collapsed .sidebar-section,
 .sidebar.collapsed a span { opacity: 0; width: 0; overflow: hidden; display: none; }
 .sidebar.collapsed a { justify-content: center; padding: 11px; }
-.sidebar.collapsed .sidebar-logo { padding: 4px 8px 20px; justify-content: center; }
+.sidebar.collapsed .sidebar-logo { padding: 4px 8px 10px; justify-content: left; }
 .sidebar.collapsed ~ .content {
   margin-left: var(--sidebar-collapsed-w);
   width: calc(100% - var(--sidebar-collapsed-w));
 }
-
+.sidebar.no-transition {
+    transition: none !important;
+}
+.sidebar-logo::after {
+    content: "";
+}
+.sidebar.collapsed .sidebar-logo::after {
+    content: "M";
+    font-size: 20px;
+    font-weight: bold;
+    color: white; /* sesuaikan */
+}
+.logo-mini {
+    display: none;
+}
+.sidebar.collapsed .logo-full {
+    display: none;
+}
+.sidebar.collapsed .logo-mini {
+    font-weight: bold;
+}
 .toggle-btn {
   background: none;
   border: 1px solid var(--clr-border);
-  color: var(--clr-text-muted);
+  color: var(--clr-text2);
   font-size: 14px;
   cursor: pointer;
   padding: 8px 10px;
@@ -294,9 +313,14 @@ header .nav {
 }
 
 .toggle-btn:hover {
-  background: var(--clr-surface);
-  color: var(--clr-text);
+  background: var(--clr-bg);
+  color: var(--clr-text2);
   border-color: var(--clr-border-hover);
+}
+
+/* default sembunyikan mobile menu di desktop */
+.mobile-menu {
+    display: none;
 }
 
 /* ─── CONTENT AREA ─────────────────────────────────────── */
@@ -1350,16 +1374,59 @@ body.login-page {
 
   .hamburger { display: flex; }
 
-  /* Sidebar slides in from left */
-  .sidebar {
-    transform: translateX(-100%);
-    box-shadow: none;
-  }
 
+    /* sidebar default hidden */
+    .sidebar {
+        transform: translateX(-100%);
+        position: fixed;
+        z-index: 999;
+        height: 100%;
+        top: 0;
+        left: 0;
+    }
+
+    /* ketika dibuka */
+    .sidebar.show {
+        transform: translateX(0);
+    }
+
+    /* sembunyikan text saat kecil */
+    .sidebar:not(.show) .menu-text {
+        display: none;
+    }
+
+    .sidebar:not(.show) .logo-full {
+        display: none;
+    }
+
+    .sidebar:not(.show) .logo-mini {
+        display: inline;
+    }
+
+    .sidebar.show .logo-full {
+        display: inline;
+    }
+
+    .sidebar.show .logo-mini {
+        display: none;
+    }
+
+    
+    /* sembunyikan toggle dalam sidebar */
+    #toggleSidebar {
+        display: none;
+    }
+    
   .sidebar.mobile-open {
     transform: translateX(0);
     box-shadow: 8px 0 40px rgba(0,0,0,0.5);
   }
+
+.mobile-menu {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
 
   /* Content takes full width on mobile */
   .content {
