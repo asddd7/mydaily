@@ -39,12 +39,6 @@ $_SESSION['LAST_ACTIVITY'] = time();
     <button id="toggleSidebar" class="toggle-btn">
         ☰
     </button>
-    <div class="sidebar-logo">
-        <a href="<?= $base_url ?>index.php" class="<?= $current_page == 'index.php' ? 'active' : '' ?>">
-            <span class="logo-full">MYDAILY</span>
-            <span class="logo-mini">MY</span>
-        </a>
-    </div>
     <a href="<?= $base_url ?>dashboard.php" class="<?= $current_page == 'dashboard.php' ? 'active' : '' ?>">
         <i class="menu-icon fa-solid fa-house"></i>
         <span class="menu-text">Dashboard</span>
@@ -80,50 +74,74 @@ $_SESSION['LAST_ACTIVITY'] = time();
         <span class="menu-text">Profil</span>
     </a>
 </aside>
+
+<!-- PINDAH KE SINI -->
+<div id="sidebarBackdrop" class="sidebar-backdrop"></div>
 <?php include 'sub/floating_clock.php'; ?>
 <script>
 const sidebar = document.getElementById("sidebar");
-const toggleBtn = document.getElementById("toggleSidebar"); // desktop
-const toggleBtnHeader = document.getElementById("toggleSidebarHeader"); // mobile
+const toggleBtn = document.getElementById("toggleSidebar");
+const toggleBtnHeader = document.getElementById("toggleSidebarHeader");
+const backdrop = document.getElementById("sidebarBackdrop");
 
 function isMobile() {
     return window.innerWidth <= 768;
 }
 
-// default mobile = tertutup
-if (isMobile()) {
-    sidebar.classList.remove("show");
-}
-
-// desktop state
-if (!isMobile()) {
-    if (localStorage.getItem("sidebar") === "collapsed") {
-        sidebar.classList.add("collapsed");
+// INIT STATE
+function initSidebar() {
+    if (isMobile()) {
+        sidebar.classList.remove("collapsed");
+        sidebar.classList.remove("show");
+        backdrop.classList.remove("active");
+    } else {
+        if (localStorage.getItem("sidebar") === "collapsed") {
+            sidebar.classList.add("collapsed");
+        }
     }
 }
 
-// remove anim delay
-window.addEventListener("load", function() {
+initSidebar();
+
+// REMOVE TRANSITION DELAY
+window.addEventListener("load", () => {
     sidebar.classList.remove("no-transition");
 });
 
-// TOGGLE DESKTOP
+// DESKTOP TOGGLE
 if (toggleBtn) {
-    toggleBtn.addEventListener("click", function () {
+    toggleBtn.addEventListener("click", () => {
         sidebar.classList.toggle("collapsed");
 
-        if (sidebar.classList.contains("collapsed")) {
-            localStorage.setItem("sidebar", "collapsed");
-        } else {
-            localStorage.setItem("sidebar", "expanded");
-        }
+        localStorage.setItem(
+            "sidebar",
+            sidebar.classList.contains("collapsed") ? "collapsed" : "expanded"
+        );
     });
 }
 
-// TOGGLE MOBILE (HEADER)
+// MOBILE TOGGLE
 if (toggleBtnHeader) {
-    toggleBtnHeader.addEventListener("click", function () {
+    toggleBtnHeader.addEventListener("click", () => {
         sidebar.classList.toggle("show");
+        backdrop.classList.toggle("active");
     });
 }
+
+// CLICK BACKDROP = CLOSE
+backdrop.addEventListener("click", () => {
+    sidebar.classList.remove("show");
+    backdrop.classList.remove("active");
+});
+
+// AUTO FIX SAAT RESIZE
+window.addEventListener("resize", initSidebar);
+document.querySelectorAll(".sidebar a").forEach(link => {
+    link.addEventListener("click", () => {
+        if (isMobile()) {
+            sidebar.classList.remove("show");
+            backdrop.classList.remove("active");
+        }
+    });
+});
 </script>

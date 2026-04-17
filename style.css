@@ -171,7 +171,7 @@ header .nav {
   padding: 24px 14px;
   overflow-y: auto;
   overflow-x: hidden;
-  z-index: 190;
+  z-index: 1000;
   transition: transform var(--t), width var(--t);
   scrollbar-width: thin;
   scrollbar-color: var(--clr-border) transparent;
@@ -180,7 +180,23 @@ header .nav {
 .sidebar::-webkit-scrollbar { width: 4px; }
 .sidebar::-webkit-scrollbar-track { background: transparent; }
 .sidebar::-webkit-scrollbar-thumb { background: var(--clr-border); border-radius: 4px; }
+/* BACKDROP */
+.sidebar-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    z-index: 999;
+    display: none;
+    pointer-events: none;
+}
 
+.sidebar-backdrop.active {
+    display: block;
+    pointer-events: auto;
+}
 .sidebar-logo {
   font-family: 'Syne', sans-serif;
   font-size: 17px;
@@ -1375,20 +1391,17 @@ body.login-page {
   .hamburger { display: flex; }
 
 
-    /* sidebar default hidden */
-    .sidebar {
-        transform: translateX(-100%);
-        position: fixed;
-        z-index: 999;
-        height: 100%;
-        top: 0;
-        left: 0;
-    }
+  /* MOBILE DEFAULT (HIDDEN) */
+  @media (max-width: 768px) {
+      .sidebar {
+          transform: translateX(-100%);
+          width: 240px;
+      }
 
-    /* ketika dibuka */
-    .sidebar.show {
-        transform: translateX(0);
-    }
+      .sidebar.show {
+          transform: translateX(0);
+      }
+  }
 
     /* sembunyikan text saat kecil */
     .sidebar:not(.show) .menu-text {

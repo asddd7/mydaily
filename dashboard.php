@@ -11,6 +11,27 @@ $user_id  = $_SESSION['id'];
 $username = $_SESSION['username'] ?? 'Guest';
 $tanggal_hari_ini = date('Y-m-d');
 
+$q_money = mysqli_query($conn, "
+    SELECT SUM(amount) as total_money 
+    FROM money_plan 
+    WHERE username='$username'
+    AND type='expense'
+    AND tanggal='$tanggal_hari_ini'
+");
+
+$money = mysqli_fetch_assoc($q_money)['total_money'];
+$total_money = $money ? $money : 0;
+
+$q_note = mysqli_query($conn, "
+    SELECT title, created_at 
+    FROM notes 
+    WHERE user_id='$user_id' 
+    ORDER BY created_at DESC 
+    LIMIT 1
+");
+
+$latest_note = mysqli_fetch_assoc($q_note);
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $jam_sekarang = date('H:i:s');
 
@@ -49,6 +70,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->close();
     }
 }
+
 
 // Riwayat
 $riwayat = [];
@@ -94,6 +116,34 @@ $stmt->close();
 <div class="layout">
 <?php include 'sidebar.php'; ?>
 <main class="content">
+
+<div class="card">
+        <h3>📅 Daily Summary - <?= date("d F Y"); ?></h3>
+
+        <div style="margin-top:20px;line-height:1.8;font-size:16px;">
+
+            <hr style="margin:15px 0;">
+
+            <p>
+                <strong>💰 Total Pengeluaran Hari Ini:</strong> 
+                Rp <?= number_format($total_money,0,',','.'); ?>
+            </p>
+
+            <hr style="margin:15px 0;">
+
+            <p><strong>📝 Catatan Terbaru:</strong></p>
+
+            <?php if ($latest_note) : ?>
+                <div style="margin-top:8px;background:#f1f5f9;padding:12px;border-radius:8px;">
+                    <strong><?= htmlspecialchars($latest_note['title']); ?></strong><br>
+                    <small><?= date("d M Y H:i", strtotime($latest_note['created_at'])); ?></small>
+                </div>
+            <?php else : ?>
+                <p>Belum ada catatan.</p>
+            <?php endif; ?>
+
+        </div>
+    </div>
 
 <div class="card checkin-card">
     <h3>Absen Hari Ini</h3>
