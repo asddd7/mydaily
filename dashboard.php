@@ -118,20 +118,20 @@ $stmt->close();
 <main class="content">
 
 <div class="card">
-        <h3>📅 Daily Summary - <?= date("d F Y"); ?></h3>
+        <h3>Daily Summary - <?= date("d F Y"); ?></h3>
 
         <div style="margin-top:20px;line-height:1.8;font-size:16px;">
 
             <hr style="margin:15px 0;">
 
             <p>
-                <strong>💰 Total Pengeluaran Hari Ini:</strong> 
+                <strong>Total Pengeluaran Hari Ini:</strong> 
                 Rp <?= number_format($total_money,0,',','.'); ?>
             </p>
 
             <hr style="margin:15px 0;">
 
-            <p><strong>📝 Catatan Terbaru:</strong></p>
+            <p><strong>Catatan Terbaru:</strong></p>
 
             <?php if ($latest_note) : ?>
                 <div style="margin-top:8px;background:#f1f5f9;padding:12px;border-radius:8px;">

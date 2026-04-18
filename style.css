@@ -74,7 +74,7 @@ header {
   position: fixed;
   top: 0; left: 0; right: 0;
   height: var(--header-h);
-  background: linear-gradient(135deg, var(--clr-accent), var(--clr-accent-2));
+  background: linear-gradient(135deg, #4338ca 0%, #2563eb 50%, #0ea5e9 100%);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border-bottom: 1px solid var(--clr-border);
@@ -123,6 +123,45 @@ header .nav {
   border-color: var(--clr-border-hover);
   transform: translateY(-1px);
   box-shadow: var(--shadow-glow);
+}
+
+.alert-timeout {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: linear-gradient(135deg, #ffe0e0, #ffd6d6);
+    border: 1px solid #ff4d4d;
+    color: #b30000;
+    padding: 12px 15px;
+    border-radius: 10px;
+    margin-bottom: 15px;
+    animation: fadeIn 0.5s ease-in-out;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+
+.alert-timeout .icon {
+    font-size: 22px;
+}
+
+.alert-timeout .text strong {
+    display: block;
+    font-size: 14px;
+}
+
+.alert-timeout .text p {
+    margin: 2px 0 0;
+    font-size: 13px;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-5px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 /* Hamburger for mobile */
@@ -579,7 +618,7 @@ tr[draggable="true"]:active { cursor: grabbing; }
 /* ─── BUTTONS ─────────────────────────────────────────────── */
 button, .btn-checkin, .btn-checkout {
   cursor: pointer;
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'poppins', sans-serif;
   font-weight: 600;
   border: none;
   border-radius: var(--radius-sm);
@@ -608,7 +647,7 @@ button, .btn-checkin, .btn-checkout {
 }
 
 .btn-checkin {
-  background: linear-gradient(135deg, #22d3a3, #16a34a);
+  background: linear-gradient(135deg, #07b385, #16a34a);
   color: #fff;
   padding: 11px 22px;
   border-radius: 100px;
@@ -621,7 +660,7 @@ button, .btn-checkin, .btn-checkout {
 }
 
 .btn-checkout {
-  background: linear-gradient(135deg, #f87171, #dc2626);
+  background: linear-gradient(135deg, #ff4646, #dc2626);
   color: #fff;
   padding: 11px 22px;
   border-radius: 100px;
@@ -1064,18 +1103,20 @@ label {
   box-shadow: 0 4px 12px rgba(79,142,247,0.35);
 }
 
-.marked-date {
-  background: rgba(251,191,36,0.18);
-  border: 1px solid rgba(251,191,36,0.35) !important;
-  color: var(--clr-warning);
-  font-weight: 700;
-  border-radius: var(--radius-sm);
+.calendar-table td.marked-date {
+    background-color: #facc15;
+    color: #fff;
+    font-weight: 700;
+    border-radius: var(--radius-sm);
+    box-shadow: 0 4px 12px rgba(255, 255, 255, 0.849);
 }
 
-.marked-date.done-date {
-  background: rgba(34,211,163,0.15);
-  border: 1px solid rgba(34,211,163,0.3) !important;
-  color: var(--clr-success);
+.calendar-table td.done-date {
+  background: rgba(0, 255, 21, 0.767);
+  color: #fff;
+  font-weight: 700;
+  border-radius: var(--radius-sm);
+  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.849);
 }
 
 .calendar-marks { list-style: none; margin-top: 14px; }
@@ -1097,9 +1138,9 @@ label {
 .calendar-marks li:hover { background: rgba(79,142,247,0.06); }
 
 .delete-mark {
-  background: rgba(248,113,113,0.12);
+  background: rgb(255, 0, 0);
   border: 1px solid rgba(248,113,113,0.25);
-  color: var(--clr-danger);
+  color: var(--clr-text2);
   padding: 5px 10px;
   border-radius: var(--radius-sm);
   cursor: pointer;
@@ -1108,7 +1149,7 @@ label {
   transition: var(--t);
 }
 
-.delete-mark:hover { background: rgba(248,113,113,0.2); }
+.delete-mark:hover { background: rgba(248, 113, 113, 0.507); }
 
 .mark-text { transition: var(--t); flex: 1; }
 .done .mark-text { text-decoration: line-through; opacity: 0.45; }

@@ -21,7 +21,6 @@ $_SESSION['LAST_ACTIVITY'] = time();
 <header>
   <div class="container nav">
 
-    <!-- TOGGLE + LOGO (MOBILE ONLY) -->
     <div class="mobile-menu">
         <button id="toggleSidebarHeader" class="toggle-btn">☰</button>
         <span class="logo-mobile">MYDAILY</span>
@@ -32,6 +31,7 @@ $_SESSION['LAST_ACTIVITY'] = time();
     </div>
 
     <a href="koneksi/logout.php" class="logout">Logout</a>
+
   </div>
 </header>
 <aside class="sidebar no-transition mobile-collapsed" id="sidebar">

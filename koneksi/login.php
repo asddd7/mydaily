@@ -37,7 +37,7 @@ if (isset($_POST['login'])) {
 
             $_SESSION['token'] = bin2hex(random_bytes(32));
 
-            header("Location: ../index.php");
+            header("Location: ../dashboard.php");
             exit;
 
         } else {
@@ -63,8 +63,12 @@ if (isset($_POST['login'])) {
 <div class="login-container">
     <h2>Login</h2>
 <?php if(isset($_GET['timeout'])): ?>
-    <div style="color:red;margin-bottom:10px;">
-        Sesi anda telah berakhir karena tidak aktif.
+    <div class="alert-timeout">
+        <div class="icon">⏰</div>
+        <div class="text">
+            <strong>Sesi Berakhir</strong>
+            <p>Kamu tidak aktif terlalu lama. Silakan login kembali.</p>
+        </div>
     </div>
 <?php endif; ?>
 
