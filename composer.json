@@ -1,0 +1,22 @@
+{
+    "name": "admin/mydaily",
+    "autoload": {
+        "psr-4": {
+            "Admin\\Mydaily\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "asddd7",
+            "email": "adipatisuryadimyati@gmail.com"
+        }
+    ],
+    "require": {
+        "phpoffice/phpspreadsheet": "1.29"
+    },
+    "config": {
+        "audit": {
+            "block-insecure": false
+        }
+    }
+}

@@ -128,35 +128,40 @@ header .nav {
 .alert-timeout {
     display: flex;
     align-items: center;
-    gap: 12px;
-    background: linear-gradient(135deg, #ffe0e0, #ffd6d6);
-    border: 1px solid #ff4d4d;
-    color: #b30000;
-    padding: 12px 15px;
-    border-radius: 10px;
-    margin-bottom: 15px;
-    animation: fadeIn 0.5s ease-in-out;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    gap: 15px;
+    max-width: 400px;
+    padding: 16px 20px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #ffecec, #fff5f5);
+    border: 1px solid #ffb3b3;
+    box-shadow: 0 6px 20px rgba(255, 0, 0, 0.08);
+    font-family: 'Segoe UI', sans-serif;
+    animation: fadeIn 0.4s ease-in-out;
 }
 
 .alert-timeout .icon {
-    font-size: 22px;
+    font-size: 28px;
+    color: #ff4d4d;
 }
 
 .alert-timeout .text strong {
     display: block;
-    font-size: 14px;
+    font-size: 16px;
+    color: #cc0000;
+    margin-bottom: 4px;
 }
 
 .alert-timeout .text p {
-    margin: 2px 0 0;
-    font-size: 13px;
+    font-size: 14px;
+    color: #663333;
+    margin: 0;
 }
 
+/* Optional: animasi masuk */
 @keyframes fadeIn {
     from {
         opacity: 0;
-        transform: translateY(-5px);
+        transform: translateY(-10px);
     }
     to {
         opacity: 1;
@@ -629,6 +634,22 @@ button, .btn-checkin, .btn-checkout {
   gap: 7px;
   font-size: 14px;
   line-height: 1;
+}
+
+input[type="file"] {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 2px dashed #007bff;
+    border-radius: 8px;
+    background: #f9fbff;
+    cursor: pointer;
+}
+
+
+/* Hover effect input */
+input[type="file"]:hover {
+    background: #eef5ff;
 }
 
 /* Primary */

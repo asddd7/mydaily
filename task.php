@@ -1,6 +1,10 @@
 <?php
 include 'koneksi/koneksi.php';
 session_start();
+require 'vendor/autoload.php';
+
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Shared\Date;
 
 if (!isset($_SESSION['login'])) {
     header("Location: koneksi/login.php");
@@ -146,6 +150,118 @@ foreach ($tugas_list as $tugas) {
     $tgl = $tugas['deadline'];
     $tugas_per_tanggal[$tgl][] = $tugas;
 }
+
+if (isset($_POST['delete_subtask'])) {
+    $id = intval($_POST['delete_subtask']);
+
+    $stmt = $conn->prepare("DELETE FROM tugas WHERE id=? AND user_id=?");
+    $stmt->bind_param("ii", $id, $user_id);
+    $stmt->execute();
+    $stmt->close();
+}
+
+if (isset($_POST['edit_subtask_id'], $_POST['edit_subtask_nama'])) {
+
+    $id = intval($_POST['edit_subtask_id']);
+    $nama = trim($_POST['edit_subtask_nama']);
+
+    if ($nama) {
+        $stmt = $conn->prepare("UPDATE tugas SET nama_tugas=? WHERE id=? AND user_id=?");
+        $stmt->bind_param("sii", $nama, $id, $user_id);
+        $stmt->execute();
+        $stmt->close();
+    }
+}
+
+if (isset($_POST['import_excel'])) {
+
+    $file = $_FILES['file_excel']['tmp_name'];
+
+    $spreadsheet = IOFactory::load($file);
+    $sheet = $spreadsheet->getActiveSheet();
+
+    $data = [];
+    $map = [];
+
+    $highestRow = $sheet->getHighestRow();
+
+    for ($row = 2; $row <= $highestRow; $row++) {
+
+        $nama_tugas = trim($sheet->getCell("A{$row}")->getValue());
+        $deadlineRaw = $sheet->getCell("B{$row}")->getValue();
+        $parent     = trim($sheet->getCell("C{$row}")->getValue());
+
+        if (!$nama_tugas) continue;
+
+        // =========================
+        // FIX DEADLINE (PALING AMAN)
+        // =========================
+        $deadline = null;
+
+        // 1. Jika Excel date serial
+        if (is_numeric($deadlineRaw)) {
+            $deadline = Date::excelToDateTimeObject($deadlineRaw);
+        }
+
+        // 2. Jika string tanggal
+        else {
+            $formats = ['d/m/Y', 'd-m-Y', 'Y-m-d', 'm/d/Y'];
+
+            foreach ($formats as $format) {
+                $date = DateTime::createFromFormat($format, $deadlineRaw);
+                if ($date !== false) {
+                    $deadline = $date;
+                    break;
+                }
+            }
+        }
+
+        // 3. fallback kalau gagal
+        if ($deadline instanceof DateTime) {
+            $deadline = $deadline->format('Y-m-d');
+        } else {
+            $deadline = date('Y-m-d');
+        }
+
+        // =========================
+        // INSERT TASK
+        // =========================
+        $stmt = $conn->prepare("
+            INSERT INTO tugas (nama_tugas, deadline, user_id, parent_id)
+            VALUES (?, ?, ?, NULL)
+        ");
+        $stmt->bind_param("ssi", $nama_tugas, $deadline, $user_id);
+        $stmt->execute();
+
+        $id = $stmt->insert_id;
+        $stmt->close();
+
+        $map[$nama_tugas] = $id;
+
+        $data[] = [
+            'id' => $id,
+            'parent' => $parent
+        ];
+    }
+
+    // =========================
+    // SET PARENT CHILD
+    // =========================
+    foreach ($data as $row) {
+
+        if (!empty($row['parent']) && isset($map[$row['parent']])) {
+
+            $stmt = $conn->prepare("
+                UPDATE tugas SET parent_id=? WHERE id=? AND user_id=?
+            ");
+            $stmt->bind_param("iii", $map[$row['parent']], $row['id'], $user_id);
+            $stmt->execute();
+            $stmt->close();
+        }
+    }
+
+    echo "<script>alert('Import berhasil!');window.location.href=document.referrer;</script>";
+}
 ?>
 
 <!DOCTYPE html>
@@ -165,8 +281,14 @@ foreach ($tugas_list as $tugas) {
 
 <div class="card">
 <h3>📌 Daftar Tugas</h3>
-<button class="btn-action" onclick="openModal('utama')">Tambah Tugas</button>
 
+<button class="btn-action" onclick="openModal('utama')">Tambah Tugas</button>
+<a href="template_import.xlsx" class="btn-action">Download Template Excel</a>
+
+<form method="post" enctype="multipart/form-data">
+    <input type="file" name="file_excel" accept=".xlsx" required>
+    <button class="btn-add-task" type="submit" name="import_excel">Import Excel</button>
+</form>
 <?php if (!empty($tugas_per_tanggal)): ?>
     <?php foreach ($tugas_per_tanggal as $tanggal => $tugas_tgl): ?>
         <h4><?= date('d M Y', strtotime($tanggal)); ?></h4>
@@ -177,6 +299,13 @@ foreach ($tugas_list as $tugas) {
                 <th>Aksi</th>
             </tr>
             <?php foreach ($tugas_tgl as $tugas): ?>
+
+            <?php
+            $stmtSub = $conn->prepare("SELECT * FROM tugas WHERE parent_id=? AND user_id=? ORDER BY urutan ASC");
+            $stmtSub->bind_param("ii", $tugas['id'], $user_id);
+            $stmtSub->execute();
+            $subtasks = $stmtSub->get_result();
+            ?>
             <?php 
                 $checked = $tugas['selesai'] ? "checked" : "";
                 $style   = $tugas['selesai'] ? "text-decoration:line-through;color:gray;" : "";
@@ -208,6 +337,33 @@ foreach ($tugas_list as $tugas) {
                     </button>
                 </td>
             </tr>
+            <?php while ($sub = $subtasks->fetch_assoc()): ?>
+
+            <?php 
+                $subChecked = $sub['selesai'] ? "checked" : "";
+                $subStyle   = $sub['selesai'] ? "text-decoration:line-through;color:gray;" : "";
+            ?>
+
+            <tr style="background:#f9fafb;">
+                <td style="padding-left:30px; <?= $subStyle ?>">
+                    └── <?= htmlspecialchars($sub['nama_tugas']); ?>
+                </td>
+                <td>
+                    <input type="checkbox"
+                        onchange="toggleTask(<?= $sub['id'] ?>, this)"
+                        <?= $sub['selesai'] ? "checked" : "" ?>>
+                </td>
+                <td>
+                    <button class="btn-action" onclick="editSubtask(<?= $sub['id'] ?>, '<?= addslashes($sub['nama_tugas']) ?>')">
+                        <i class="fa-solid fa-pen"></i>
+                    </button>
+
+                    <button class="btn-action" onclick="deleteSubtask(<?= $sub['id'] ?>)">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                </td>
+            </tr>
+            <?php endwhile; ?>
             <?php endforeach; ?>
         </table>
     <?php endforeach; ?>
@@ -311,12 +467,28 @@ function updateSubtask(e, parentId){
 }
 
 function deleteTask(id){
-    if(confirm("Yakin ingin menghapus tugas ini?")){
+    if(confirm("Hapus task ini beserta subtask?")){
         const formData = new FormData();
         formData.append("delete_task", id);
 
-        fetch("", {method:"POST", body:formData})
-        .then(()=> location.reload());
+        fetch("", {
+            method: "POST",
+            body: formData
+        })
+        .then(() => location.reload());
+    }
+}
+
+function deleteSubtask(id){
+    if(confirm("Hapus subtask ini?")){
+        const formData = new FormData();
+        formData.append("delete_subtask", id);
+
+        fetch("", {
+            method:"POST",
+            body:formData
+        })
+        .then(()=> location.reload()); // biar langsung update
     }
 }
 
@@ -345,36 +517,33 @@ function openEditTask(id, nama, deadline){
         <input type="date" name="edit_deadline" value="${deadline}" required>
     `;
 }
-function deleteSubtask(id, parentId){
+function deleteSubtask(id){
     if(confirm("Hapus subtask ini?")){
         const formData = new FormData();
         formData.append("delete_subtask", id);
 
-        fetch("sub/load_subtask.php?parent_id="+parentId, {
+        fetch("", {
             method:"POST",
             body:formData
         })
-        .then(()=> fetch("sub/load_subtask.php?parent_id="+parentId))
-        .then(res=>res.text())
-        .then(data=> document.getElementById("subtaskList").innerHTML=data);
+        .then(()=> location.reload()); // biar langsung update
     }
 }
 
-function editSubtask(id, nama, parentId){
+function editSubtask(id, nama){
     const newName = prompt("Edit subtask:", nama);
+
     if(newName && newName.trim() !== ""){
 
         const formData = new FormData();
         formData.append("edit_subtask_id", id);
         formData.append("edit_subtask_nama", newName);
 
-        fetch("sub/load_subtask.php?parent_id="+parentId,{
+        fetch("", {
             method:"POST",
             body:formData
         })
-        .then(()=> fetch("sub/load_subtask.php?parent_id="+parentId))
-        .then(res=>res.text())
-        .then(data=> document.getElementById("subtaskList").innerHTML=data);
+        .then(()=> location.reload());
     }
 }
 

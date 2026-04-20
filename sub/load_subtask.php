@@ -40,32 +40,6 @@ if ($result->num_rows > 0) {
         $checked = $row['selesai'] ? "checked" : "";
         $style = $row['selesai'] ? "text-decoration:line-through;color:gray;" : "";
 
-    echo "
-    <li style='margin-bottom:6px;'>
-
-        <form method='post' style='display:inline;' 
-            onsubmit='updateSubtask(event, {$parent_id})'>
-            <input type='hidden' name='task_id' value='{$row['id']}'>
-            <input type='checkbox' name='selesai' value='1'
-                onchange='this.form.submit()' $checked>
-        </form>
-
-        <span style='$style'>
-            " . htmlspecialchars($row['nama_tugas']) . "
-        </span>
-
-        <button onclick='editSubtask({$row['id']}, \"" . addslashes($row['nama_tugas']) . "\", {$parent_id})'
-                style='margin-left:5px;background:#f59e0b;color:white;border:none;padding:3px 6px;border-radius:4px;'>
-            Edit
-        </button>
-
-        <button onclick='deleteSubtask({$row['id']}, {$parent_id})'
-                style='margin-left:5px;background:#ef4444;color:white;border:none;padding:3px 6px;border-radius:4px;'>
-            Hapus
-        </button>
-
-    </li>";
-
     }
 
     echo "</ul>";
