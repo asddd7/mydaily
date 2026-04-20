@@ -310,17 +310,17 @@ if (isset($_POST['import_excel'])) {
                 $checked = $tugas['selesai'] ? "checked" : "";
                 $style   = $tugas['selesai'] ? "text-decoration:line-through;color:gray;" : "";
             ?>
-            <tr draggable="true" data-id="<?= $tugas['id']; ?>">
+            <tr class="main-task" data-id="<?= $tugas['id']; ?>" onclick="toggleSubtask(<?= $tugas['id']; ?>)">
                 <td style="<?= $style ?>"><?= htmlspecialchars($tugas['nama_tugas']); ?></td>
                 <td>
                     <input type="checkbox" onchange="toggleTask(<?= $tugas['id'] ?>, this)" <?= $checked ?>>
                 </td>
                 <td>
                     <button class="btn-action"
-                        onclick="openModal('tugas', <?= $tugas['id']; ?>, 'Tambah Subtask')">+</button>
+                        onclick="event.stopPropagation(); openModal('tugas', <?= $tugas['id']; ?>, 'Tambah Subtask')">+</button>
 
                     <button class="btn-action"
-                        onclick="openEditTask(
+                        onclick="event.stopPropagation(); openEditTask(
                             <?= $tugas['id']; ?>,
                             '<?= addslashes($tugas['nama_tugas']); ?>',
                             '<?= $tugas['deadline']; ?>'
@@ -328,11 +328,11 @@ if (isset($_POST['import_excel'])) {
                         <i class="fa-solid fa-pen"></i>
                     </button>
 
-                    <button class="btn-action" onclick="copyTask(<?= $tugas['id']; ?>)">
+                    <button class="btn-action" onclick="event.stopPropagation(); copyTask(<?= $tugas['id']; ?>)">
                         <i class="fa-solid fa-copy"></i>
                     </button>
 
-                    <button class="btn-action" onclick="deleteTask(<?= $tugas['id']; ?>)">
+                    <button class="btn-action" onclick="event.stopPropagation(); deleteTask(<?= $tugas['id']; ?>)">
                         <i class="fa-solid fa-trash"></i>
                     </button>
                 </td>
@@ -344,7 +344,7 @@ if (isset($_POST['import_excel'])) {
                 $subStyle   = $sub['selesai'] ? "text-decoration:line-through;color:gray;" : "";
             ?>
 
-            <tr style="background:#f9fafb;">
+            <tr class="subtask subtask-<?= $tugas['id']; ?>" style="background:#f9fafb; display:none;">
                 <td style="padding-left:30px; <?= $subStyle ?>">
                     └── <?= htmlspecialchars($sub['nama_tugas']); ?>
                 </td>
@@ -607,6 +607,18 @@ function saveOrder(table){
     fetch("", {
         method:"POST",
         body:formData
+    });
+}
+
+function toggleSubtask(parentId) {
+    const subtasks = document.querySelectorAll('.subtask-' + parentId);
+
+    subtasks.forEach(row => {
+        if (row.style.display === "none") {
+            row.style.display = "table-row";
+        } else {
+            row.style.display = "none";
+        }
     });
 }
 </script>
