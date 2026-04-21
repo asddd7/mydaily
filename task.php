@@ -301,7 +301,9 @@ if (isset($_POST['import_excel'])) {
             <?php foreach ($tugas_tgl as $tugas): ?>
 
             <?php
-            $stmtSub = $conn->prepare("SELECT * FROM tugas WHERE parent_id=? AND user_id=? ORDER BY urutan ASC");
+            $stmtSub = $conn->prepare("SELECT * FROM tugas WHERE parent_id=? AND user_id=? ORDER BY CASE WHEN urutan IS NULL THEN 1 ELSE 0 END,
+            urutan ASC,
+            id ASC");
             $stmtSub->bind_param("ii", $tugas['id'], $user_id);
             $stmtSub->execute();
             $subtasks = $stmtSub->get_result();

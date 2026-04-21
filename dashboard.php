@@ -46,7 +46,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     $jam_sekarang = date('H:i:s');
-    
 
     // Mulai
     if (isset($_POST['absen_masuk'])) {
