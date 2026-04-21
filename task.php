@@ -45,8 +45,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $task_id = intval($_POST['task_id']);
         $selesai = isset($_POST['selesai']) ? 1 : 0;
 
-        $stmt = $conn->prepare("UPDATE tugas SET selesai=? WHERE id=? AND user_id=?");
-        $stmt->bind_param("iii", $selesai, $task_id, $user_id);
+        if ($selesai) {
+            $stmt = $conn->prepare("
+                UPDATE tugas 
+                SET selesai=1, selesai_at=NOW() 
+                WHERE id=? AND user_id=?
+            ");
+            $stmt->bind_param("ii", $task_id, $user_id);
+        } else {
+            $stmt = $conn->prepare("
+                UPDATE tugas 
+                SET selesai=0, selesai_at=NULL 
+                WHERE id=? AND user_id=?
+            ");
+            $stmt->bind_param("ii", $task_id, $user_id);
+        }
+
         $stmt->execute();
         $stmt->close();
     }
@@ -313,7 +327,18 @@ if (isset($_POST['import_excel'])) {
                 $style   = $tugas['selesai'] ? "text-decoration:line-through;color:gray;" : "";
             ?>
             <tr class="main-task" data-id="<?= $tugas['id']; ?>" onclick="toggleSubtask(<?= $tugas['id']; ?>)">
-                <td style="<?= $style ?>"><?= htmlspecialchars($tugas['nama_tugas']); ?></td>
+                <td>
+                    <span class="task-text" style="<?= $style ?>">
+                        <?= htmlspecialchars($tugas['nama_tugas']); ?>
+                    </span>
+
+                    <?php if ($tugas['selesai'] && $tugas['selesai_at']) : ?>
+                        <br>
+                        <small class="done-time" style="color:green;">
+                            ✔ Selesai: <?= date('d M Y H:i', strtotime($tugas['selesai_at'])); ?>
+                        </small>
+                    <?php endif; ?>
+                </td>
                 <td>
                     <input type="checkbox" onchange="toggleTask(<?= $tugas['id'] ?>, this)" <?= $checked ?>>
                 </td>
@@ -347,8 +372,17 @@ if (isset($_POST['import_excel'])) {
             ?>
 
             <tr class="subtask subtask-<?= $tugas['id']; ?>" style="background:#f9fafb; display:none;">
-                <td style="padding-left:30px; <?= $subStyle ?>">
-                    └── <?= htmlspecialchars($sub['nama_tugas']); ?>
+                <td style="padding-left:30px;">
+                    <span class="task-text" style="<?= $subStyle ?>">
+                        └── <?= htmlspecialchars($sub['nama_tugas']); ?>
+                    </span>
+
+                    <?php if ($sub['selesai'] && $sub['selesai_at']) : ?>
+                        <br>
+                        <small class="done-time" style="color:green;">
+                            ✔ <?= date('d M Y H:i', strtotime($sub['selesai_at'])); ?>
+                        </small>
+                    <?php endif; ?>
                 </td>
                 <td>
                     <input type="checkbox"
@@ -446,15 +480,34 @@ function toggleTask(taskId, checkbox) {
     if(checkbox.checked) formData.append('selesai', 1);
 
     fetch('', {method:'POST', body:formData})
-        .then(()=> {
-            if(checkbox.checked){
-                checkbox.parentElement.previousElementSibling.style.textDecoration='line-through';
-                checkbox.parentElement.previousElementSibling.style.color='gray';
-            } else {
-                checkbox.parentElement.previousElementSibling.style.textDecoration='none';
-                checkbox.parentElement.previousElementSibling.style.color='black';
-            }
-        });
+    .then(()=> {
+        const td = checkbox.parentElement.previousElementSibling;
+        const textEl = td.querySelector('.task-text');
+
+        if(checkbox.checked){
+            textEl.style.textDecoration='line-through';
+            textEl.style.color='gray';
+
+            // hapus timestamp lama
+            const oldTime = td.querySelector('.done-time');
+            if(oldTime) oldTime.remove();
+
+            const now = new Date().toLocaleString();
+
+            td.innerHTML += `
+                <br>
+                <small class="done-time" style="color:green;">
+                    ✔ ${now}
+                </small>
+            `;
+        } else {
+            textEl.style.textDecoration='none';
+            textEl.style.color='black';
+
+            const oldTime = td.querySelector('.done-time');
+            if(oldTime) oldTime.remove();
+        }
+    });
 }
 
 function updateSubtask(e, parentId){
@@ -478,19 +531,6 @@ function deleteTask(id){
             body: formData
         })
         .then(() => location.reload());
-    }
-}
-
-function deleteSubtask(id){
-    if(confirm("Hapus subtask ini?")){
-        const formData = new FormData();
-        formData.append("delete_subtask", id);
-
-        fetch("", {
-            method:"POST",
-            body:formData
-        })
-        .then(()=> location.reload()); // biar langsung update
     }
 }
 
