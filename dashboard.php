@@ -2,6 +2,11 @@
 include 'koneksi/koneksi.php';
 session_start();
 
+// Generate CSRF token (hanya jika belum ada)
+if (empty($_SESSION['csrf'])) {
+    $_SESSION['csrf'] = bin2hex(random_bytes(32));
+}
+
 if (!isset($_SESSION['login'])) {
     header("Location: koneksi/login.php");
     exit;
@@ -11,16 +16,17 @@ $user_id  = $_SESSION['id'];
 $username = $_SESSION['username'] ?? 'Guest';
 $tanggal_hari_ini = date('Y-m-d');
 
-$q_money = mysqli_query($conn, "
+$stmt = $conn->prepare("
     SELECT SUM(amount) as total_money 
     FROM money_plan 
-    WHERE username='$username'
-    AND type='expense'
-    AND tanggal='$tanggal_hari_ini'
+    WHERE username=? AND type='expense' AND tanggal=?
 ");
-
-$money = mysqli_fetch_assoc($q_money)['total_money'];
-$total_money = $money ? $money : 0;
+$stmt->bind_param("ss", $username, $tanggal_hari_ini);
+$stmt->execute();
+$result = $stmt->get_result();
+$data = $result->fetch_assoc();
+$total_money = $data['total_money'] ?? 0;
+$stmt->close();
 
 $q_note = mysqli_query($conn, "
     SELECT title, created_at 
@@ -33,7 +39,14 @@ $q_note = mysqli_query($conn, "
 $latest_note = mysqli_fetch_assoc($q_note);
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
+    // Validasi CSRF
+    if (!isset($_POST['csrf']) || $_POST['csrf'] !== $_SESSION['csrf']) {
+        die("CSRF terdeteksi!");
+    }
+
     $jam_sekarang = date('H:i:s');
+    
 
     // Mulai
     if (isset($_POST['absen_masuk'])) {
@@ -94,6 +107,13 @@ if ($row = $result->fetch_assoc()) {
     $check_out_today = !empty($row['jam_pulang']);
 }
 $stmt->close();
+
+$stmt = $conn->prepare("
+    SELECT SUM(amount) 
+    FROM money_plan 
+    WHERE username=? AND type='expense' AND tanggal=?
+");
+$stmt->bind_param("ss", $username, $tanggal_hari_ini);
 ?>
 <!DOCTYPE html>
 <html>
@@ -151,6 +171,7 @@ $stmt->close();
     <?php if(!empty($error)) echo "<p class='error'>$error</p>"; ?>
 
     <form method="post" style="display:flex; gap:10px; justify-content:center; margin-bottom:15px;">
+        <input type="hidden" name="csrf" value="<?= $_SESSION['csrf']; ?>">
         <button type="submit" name="absen_masuk" class="btn-checkin" <?= $check_in_today ? 'disabled style="opacity:0.6; cursor:not-allowed;"' : '' ?>>Mulai</button>
         <button type="submit" name="absen_pulang" class="btn-checkout" <?= (!$check_in_today || $check_out_today) ? 'disabled style="opacity:0.6; cursor:not-allowed;"' : '' ?>>Selesai</button>
     </form>
