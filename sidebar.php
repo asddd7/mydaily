@@ -1,4 +1,8 @@
 <?php
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
 $base_url = (strpos($_SERVER['PHP_SELF'], '/sub/') !== false) ? '../' : '';
 $current_page = basename($_SERVER['PHP_SELF']);
 header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
@@ -27,7 +31,7 @@ $_SESSION['LAST_ACTIVITY'] = time();
     </div>
 
     <div class="welcome">
-        Welcome, <strong><?= htmlspecialchars($username); ?></strong>
+        Welcome, <strong><?= htmlspecialchars($_SESSION['username'] ?? 'Guest'); ?></strong>
     </div>
 
     <a href="koneksi/logout.php" class="logout">Logout</a>
@@ -143,5 +147,11 @@ document.querySelectorAll(".sidebar a").forEach(link => {
             backdrop.classList.remove("active");
         }
     });
+});
+document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") {
+        sidebar.classList.remove("show");
+        backdrop.classList.remove("active");
+    }
 });
 </script>

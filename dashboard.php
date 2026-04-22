@@ -231,7 +231,9 @@ $stmt->bind_param("ss", $username, $tanggal_hari_ini);
 
       <div style="display:flex; justify-content:space-between; margin-top:12px;">
         <button type="submit" style="flex:1; margin-right:5px;">Simpan</button>
-        <button type="button" onclick="closeModal()" style="flex:1; margin-left:5px; background:#ef4444;">Tutup</button>
+        <button type="button" onclick="closeModal()" style="flex:1;">
+            <i class="fa-solid fa-xmark"></i> Batal
+        </button>
       </div>
 
     </form>
