@@ -57,11 +57,13 @@ if (isset($_POST['login'])) {
 <head>
     <title>Login</title>
     <link rel="stylesheet" href="../style.css?v=2">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body class="login-page">
 
 <div class="login-container">
     <h2>Login</h2>
+
 <?php if(isset($_GET['timeout'])): ?>
     <div class="alert-timeout">
         <div class="icon">⏰</div>
@@ -72,18 +74,25 @@ if (isset($_POST['login'])) {
     </div>
 <?php endif; ?>
 
-<form method="POST">
+<form method="POST" class="login-form">
     <input type="hidden" name="token" value="<?= $_SESSION['token']; ?>">
 
-    <input type="email" name="email" placeholder="Email" required>
-    <input type="password" name="password" placeholder="Password" required>
+    <div class="input-group">
+        <input type="email" name="email" placeholder="Email" required>
+    </div>
+
+    <div class="input-group">
+        <input type="password" name="password" placeholder="Password" required>
+    </div>
 
     <button type="submit" name="login">Login</button>
 </form>
+
+<div class="login-footer">
     <p>Belum punya akun? <a href="register.php">Register</a></p>
     <p>Lupa password? <a href="forgot_password.php">Reset Password</a></p>
 </div>
-
+</div>
 </body>
 
 </html>

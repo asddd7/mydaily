@@ -121,47 +121,35 @@ header .nav {
 }
 
 .alert-timeout {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    max-width: 400px;
-    padding: 16px 20px;
-    border-radius: 12px;
-    background: linear-gradient(135deg, #ffecec, #fff5f5);
-    border: 1px solid #ffb3b3;
-    box-shadow: 0 6px 20px rgba(255, 0, 0, 0.08);
-    font-family: 'Segoe UI', sans-serif;
-    animation: fadeIn 0.4s ease-in-out;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  max-width: 400px;
+  padding: 16px 20px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #ffecec, #fff5f5);
+  border: 1px solid #ffb3b3;
+  box-shadow: 0 6px 20px rgba(255, 0, 0, 0.08);
+  font-family: 'Segoe UI', sans-serif;
+  animation: fadeIn 0.4s ease-in-out;
 }
 
 .alert-timeout .icon {
-    font-size: 28px;
-    color: #ff4d4d;
+  font-size: 28px;
+  color: #ff4d4d;
 }
 
 .alert-timeout .text strong {
-    display: block;
-    font-size: 16px;
-    color: #cc0000;
-    margin-bottom: 4px;
+  display: block;
+  font-size: 16px;
+  color: #cc0000;
+  margin-bottom: 4px;
 }
 
 .alert-timeout .text p {
-    font-size: 14px;
-    color: #663333;
-    margin: 0;
-}
-
-/* Optional: animasi masuk */
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(-10px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+  font-size: 14px;
+  color: #663333;
+  margin: 0;
 }
 
 /* Hamburger for mobile */
@@ -203,7 +191,7 @@ header .nav {
   background:
   radial-gradient(ellipse 60% 50% at 15% 25%, rgba(79,142,247,0.15) 0%, transparent 60%),
   radial-gradient(ellipse 50% 60% at 85% 75%, rgba(124,58,237,0.12) 0%, transparent 55%),
-  var(--clr-bg-2  );
+  var(--clr-bg-2);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
   border-right: 1px solid var(--clr-border);
@@ -221,20 +209,20 @@ header .nav {
 .sidebar::-webkit-scrollbar-thumb { background: var(--clr-border); border-radius: 4px; }
 /* BACKDROP */
 .sidebar-backdrop {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.5);
-    z-index: 999;
-    display: none;
-    pointer-events: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+  z-index: 999;
+  display: none;
+  pointer-events: none;
 }
 
 .sidebar-backdrop.active {
-    display: block;
-    pointer-events: auto;
+  display: block;
+  pointer-events: auto;
 }
 .sidebar-logo {
   font-family: 'Syne', sans-serif;
@@ -332,25 +320,29 @@ header .nav {
   width: calc(100% - var(--sidebar-collapsed-w));
 }
 .sidebar.no-transition {
-    transition: none !important;
+  transition: none !important;
 }
 .sidebar-logo::after {
-    content: "";
+  content: "";
 }
+
 .sidebar.collapsed .sidebar-logo::after {
-    content: "M";
-    font-size: 20px;
-    font-weight: bold;
-    color: white; /* sesuaikan */
+  content: "M";
+  font-size: 20px;
+  font-weight: bold;
+  color: white;
 }
+
 .logo-mini {
-    display: none;
+  display: none;
 }
+
 .sidebar.collapsed .logo-full {
-    display: none;
+  display: none;
 }
+
 .sidebar.collapsed .logo-mini {
-    font-weight: bold;
+  font-weight: bold;
 }
 .toggle-btn {
   background: none;
@@ -375,7 +367,7 @@ header .nav {
 
 /* default sembunyikan mobile menu di desktop */
 .mobile-menu {
-    display: none;
+  display: none;
 }
 
 /* ─── CONTENT AREA ─────────────────────────────────────── */
@@ -618,7 +610,7 @@ tr[draggable="true"]:active { cursor: grabbing; }
 /* ─── BUTTONS ─────────────────────────────────────────────── */
 button, .btn-checkin, .btn-checkout {
   cursor: pointer;
-  font-family: 'poppins', sans-serif;
+  font-family: 'Poppins', sans-serif;
   font-weight: 600;
   border: none;
   border-radius: var(--radius-sm);
@@ -632,19 +624,17 @@ button, .btn-checkin, .btn-checkout {
 }
 
 input[type="file"] {
-    width: 100%;
-    padding: 10px;
-    margin-bottom: 15px;
-    border: 2px dashed #007bff;
-    border-radius: 8px;
-    background: #f9fbff;
-    cursor: pointer;
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 15px;
+  border: 2px dashed #007bff;
+  border-radius: 8px;
+  background: #f9fbff;
+  cursor: pointer;
 }
 
-
-/* Hover effect input */
 input[type="file"]:hover {
-    background: #eef5ff;
+  background: #eef5ff;
 }
 
 /* Primary */
@@ -1120,11 +1110,11 @@ label {
 }
 
 .calendar-table td.marked-date {
-    background-color: #facc15;
-    color: #fff;
-    font-weight: 700;
-    border-radius: var(--radius-sm);
-    box-shadow: 0 4px 12px rgba(255, 255, 255, 0.849);
+  background-color: #facc15;
+  color: #fff;
+  font-weight: 700;
+  border-radius: var(--radius-sm);
+  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.849);
 }
 
 .calendar-table td.done-date {
@@ -1258,7 +1248,10 @@ label {
 }
 
 /* ─── LOGIN PAGE ─────────────────────────────────────────── */
+
+
 body.login-page {
+  font-family: Arial, sans-serif;
   padding-top: 0;
   min-height: 100vh;
   display: flex;
@@ -1267,7 +1260,7 @@ body.login-page {
   background:
     radial-gradient(ellipse 60% 50% at 15% 25%, rgba(79,142,247,0.15) 0%, transparent 60%),
     radial-gradient(ellipse 50% 60% at 85% 75%, rgba(124,58,237,0.12) 0%, transparent 55%),
-    var(--clr-bg-2  );
+    var(--clr-bg-2);
 }
 
 .login-container {
@@ -1275,8 +1268,8 @@ body.login-page {
   backdrop-filter: blur(24px);
   border: 1px solid var(--clr-border);
   width: 100%;
-  max-width: 420px;
-  padding: 44px 36px;
+  max-width: 400px;
+  padding: 25px;
   border-radius: var(--radius-xl);
   box-shadow: 0 32px 80px rgba(0,0,0,0.5);
   text-align: center;
@@ -1285,6 +1278,14 @@ body.login-page {
   overflow: hidden;
   margin: 20px;
   color: var(--clr-text2);
+}
+
+.input-group input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 14px;
 }
 
 .login-container::before {
@@ -1306,13 +1307,20 @@ body.login-page {
 .login-container .logo span { color: var(--clr-accent); }
 
 .login-container h2 {
+  text-align: center;
   font-size: 15px;
   font-weight: 400;
   color: var(--clr-text2);
-  margin-bottom: 28px;
+  margin-bottom: 20px;
 }
 
-.login-container form { display: flex; flex-direction: column; gap: 14px; text-align: left; color: var(--clr-text2);}
+.login-container form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  text-align: left;
+  color: var(--clr-text2);
+}
 
 .login-container button {
   padding: 13px;
@@ -1449,54 +1457,36 @@ body.login-page {
 
 
   /* MOBILE DEFAULT (HIDDEN) */
-  @media (max-width: 768px) {
-      .sidebar {
-          transform: translateX(-100%);
-          width: 240px;
-      }
-
-      .sidebar.show {
-          transform: translateX(0);
-      }
+  .sidebar {
+    transform: translateX(-100%);
+    width: 240px;
   }
 
-    /* sembunyikan text saat kecil */
-    .sidebar:not(.show) .menu-text {
-        display: none;
-    }
+  .sidebar.show {
+    transform: translateX(0);
+  }
 
-    .sidebar:not(.show) .logo-full {
-        display: none;
-    }
+  /* Hide text when sidebar is collapsed on mobile */
+  .sidebar:not(.show) .menu-text { display: none; }
+  .sidebar:not(.show) .logo-full { display: none; }
+  .sidebar:not(.show) .logo-mini { display: inline; }
+  .sidebar.show .logo-full       { display: inline; }
+  .sidebar.show .logo-mini       { display: none; }
 
-    .sidebar:not(.show) .logo-mini {
-        display: inline;
-    }
+  /* Hide toggle button inside sidebar on mobile */
+  #toggleSidebar { display: none; }
 
-    .sidebar.show .logo-full {
-        display: inline;
-    }
-
-    .sidebar.show .logo-mini {
-        display: none;
-    }
-
-    
-    /* sembunyikan toggle dalam sidebar */
-    #toggleSidebar {
-        display: none;
-    }
-    
+  
   .sidebar.mobile-open {
     transform: translateX(0);
     box-shadow: 8px 0 40px rgba(0,0,0,0.5);
   }
 
 .mobile-menu {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    }
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
 
   /* Content takes full width on mobile */
   .content {
@@ -1544,4 +1534,84 @@ body.login-page {
   .card { padding: 14px; }
   .content { padding: 12px; }
   .money-card h1 { font-size: 28px; }
+}
+
+/* 📱 MOBILE OPTIMIZATION */
+@media (max-width: 480px) {
+  .login-container {
+    margin: 15px;
+    padding: 20px;
+  }
+
+  .login-container h2 {
+    font-size: 20px;
+  }
+
+  .input-group input {
+    padding: 14px;
+    font-size: 16px;
+  }
+
+  button {
+    padding: 14px;
+    font-size: 16px;
+  }
+}
+
+/* 🔥 FIX KHUSUS LOGIN MOBILE */
+@media (max-width: 768px) {
+
+  body.login-page {
+    padding: 16px;
+    align-items: flex-start;
+  }
+
+  .login-container {
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    padding: 24px 18px;
+    border-radius: 18px;
+  }
+
+  .login-container h2 {
+    font-size: 20px;
+    margin-bottom: 16px;
+  }
+
+  .input-group input {
+    padding: 14px;
+    font-size: 16px; /* biar gak zoom di iPhone */
+    border-radius: 10px;
+  }
+
+  .login-container button {
+    padding: 14px;
+    font-size: 16px;
+    border-radius: 10px;
+  }
+
+  .login-footer {
+    margin-top: 18px;
+    font-size: 13px;
+  }
+
+  .alert-timeout {
+    flex-direction: column;
+    text-align: center;
+    padding: 14px;
+  }
+
+  .alert-timeout .icon {
+    font-size: 24px;
+  }
+
+  .login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  body.login-page {
+    min-height: 100dvh;
+  }
 }

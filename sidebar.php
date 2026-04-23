@@ -8,7 +8,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
 header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
 header("Pragma: no-cache");
 if (isset($_SESSION['LAST_ACTIVITY'])) {
-
+    $_SESSION['EXPIRE_TIME'] = 1800; // 
     if (time() - $_SESSION['LAST_ACTIVITY'] > $_SESSION['EXPIRE_TIME']) {
 
         session_unset();
@@ -18,9 +18,11 @@ if (isset($_SESSION['LAST_ACTIVITY'])) {
         exit;
     }
 }
-
 $_SESSION['LAST_ACTIVITY'] = time();
 
+header("X-Frame-Options: SAMEORIGIN");
+header("X-Content-Type-Options: nosniff");
+header("X-XSS-Protection: 1; mode=block");
 ?>
 <header>
   <div class="container nav">
@@ -34,7 +36,9 @@ $_SESSION['LAST_ACTIVITY'] = time();
         Welcome, <strong><?= htmlspecialchars($_SESSION['username'] ?? 'Guest'); ?></strong>
     </div>
 
-    <a href="koneksi/logout.php" class="logout">Logout</a>
+    <form action="koneksi/logout.php" method="POST">
+        <button type="submit" class="logout">Logout</button>
+    </form>
 
   </div>
 </header>
@@ -153,5 +157,11 @@ document.addEventListener("keydown", (e) => {
         sidebar.classList.remove("show");
         backdrop.classList.remove("active");
     }
+});
+
+document.querySelectorAll(".sidebar a").forEach(link => {
+    link.addEventListener("click", function () {
+        this.style.pointerEvents = "none";
+    });
 });
 </script>
