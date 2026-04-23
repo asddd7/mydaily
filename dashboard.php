@@ -118,6 +118,7 @@ $stmt->bind_param("ss", $username, $tanggal_hari_ini);
 <html>
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Dashboard</title>
 <link rel="stylesheet" href="style.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
@@ -169,7 +170,7 @@ $stmt->bind_param("ss", $username, $tanggal_hari_ini);
     <?php if(!empty($success)) echo "<p class='success'>$success</p>"; ?>
     <?php if(!empty($error)) echo "<p class='error'>$error</p>"; ?>
 
-    <form method="post" style="display:flex; gap:10px; justify-content:center; margin-bottom:15px;">
+    <form method="post" class="absen-form">
         <input type="hidden" name="csrf" value="<?= $_SESSION['csrf']; ?>">
         <button type="submit" name="absen_masuk" class="btn-checkin" <?= $check_in_today ? 'disabled style="opacity:0.6; cursor:not-allowed;"' : '' ?>>Mulai</button>
         <button type="submit" name="absen_pulang" class="btn-checkout" <?= (!$check_in_today || $check_out_today) ? 'disabled style="opacity:0.6; cursor:not-allowed;"' : '' ?>>Selesai</button>
@@ -198,6 +199,7 @@ $stmt->bind_param("ss", $username, $tanggal_hari_ini);
 <div class="card">
     <h3>Riwayat Absen</h3>
     <?php if (!empty($riwayat)): ?>
+    <div class="table-wrapper">
     <table class="checkin-history">
         <tr><th>Tanggal</th><th>Mulai</th><th>Selesai</th></tr>
         <?php foreach ($riwayat as $row): ?>
@@ -238,6 +240,7 @@ $stmt->bind_param("ss", $username, $tanggal_hari_ini);
 
     </form>
 
+  </div>
   </div>
 </div>
 

@@ -779,6 +779,19 @@ button:disabled {
 
 .close-btn:hover { background: rgba(248,113,113,0.15); color: var(--clr-danger); border-color: rgba(248,113,113,0.3); }
 
+/* ───────── ABSEN ─────────────── */
+
+.absen-form {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.absen-form button {
+    flex: 1;
+    min-width: 120px;
+}
+
 /* ─── MODAL ─────────────────────────────────────────────── */
 .modal {
   position: fixed;
@@ -1614,4 +1627,48 @@ body.login-page {
   body.login-page {
     min-height: 100dvh;
   }
+
+  .table-wrapper {
+    overflow-x: auto;
+  }
+
+  .content {
+        padding: 10px;
+    }
+
+    .card {
+        padding: 12px;
+    }
+
+    h3 {
+        font-size: 16px;
+    }
+
+    table {
+        font-size: 12px;
+    }
+
+    .calendar-table th,
+    .calendar-table td {
+        padding: 6px;
+        font-size: 11px;
+    }
+
+    .calendar-header {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .calendar-marks ul {
+        font-size: 12px;
+    }
+
+    .calendar-table {
+    width: 100%;
+    table-layout: fixed;
+}
+
+.calendar-table td {
+    height: 40px;
+}
 }
