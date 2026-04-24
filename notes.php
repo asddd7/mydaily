@@ -1,6 +1,7 @@
 <?php
 session_start();
 include 'koneksi/koneksi.php';
+mysqli_query($conn, "SET time_zone = '+07:00'");
 
 if (!isset($_SESSION['login'])) {
     header("Location: koneksi/login.php");
