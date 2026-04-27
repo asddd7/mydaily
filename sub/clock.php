@@ -8,19 +8,34 @@ if(empty($_SESSION['login'])){
 }
 
 $user_id  = $_SESSION['id'];
-$username = $_SESSION['username'] ?? 'Guest';
 
 if(isset($_POST['mode'])){
     $mode = $_POST['mode'];
 
+    // default
     $countdown_seconds = 0;
+    $work = 25;
+    $break = 5;
 
-    if($mode === "countdown" && !empty($_POST['minutes'])){
-        $countdown_seconds = intval($_POST['minutes']) * 60;
+    // HANDLE MODE
+    if($mode === "countdown"){
+        if(!empty($_POST['minutes'])){
+            $countdown_seconds = intval($_POST['minutes']) * 60;
+        }
     }
 
-    $stmt = $conn->prepare("UPDATE users SET clock_mode=?, countdown_seconds=? WHERE id=?");
-    $stmt->bind_param("sii",$mode,$countdown_seconds,$user_id);
+    if($mode === "pomodoro"){
+        if(!empty($_POST['work']))  $work  = intval($_POST['work']);
+        if(!empty($_POST['break'])) $break = intval($_POST['break']);
+    }
+
+    // SATU QUERY SAJA (fix bug overwrite)
+    $stmt = $conn->prepare("
+        UPDATE users 
+        SET clock_mode=?, countdown_seconds=?, pomodoro_work=?, pomodoro_break=? 
+        WHERE id=?
+    ");
+    $stmt->bind_param("siiii",$mode,$countdown_seconds,$work,$break,$user_id);
     $stmt->execute();
     $stmt->close();
 
@@ -28,33 +43,12 @@ if(isset($_POST['mode'])){
     exit;
 }
 
-
+// ambil data sekarang
 $q = $conn->prepare("SELECT clock_mode FROM users WHERE id=?");
 $q->bind_param("i",$user_id);
 $q->execute();
 $current = $q->get_result()->fetch_assoc()['clock_mode'];
 $q->close();
-
-if(isset($_POST['mode'])){
-    $mode = $_POST['mode'];
-
-    $work = 25;
-    $break = 5;
-
-    if($mode === "pomodoro"){
-        if(!empty($_POST['work'])) $work = intval($_POST['work']);
-        if(!empty($_POST['break'])) $break = intval($_POST['break']);
-    }
-
-    $stmt = $conn->prepare("UPDATE users SET clock_mode=?, pomodoro_work=?, pomodoro_break=? WHERE id=?");
-    $stmt->bind_param("siii",$mode,$work,$break,$user_id);
-    $stmt->execute();
-    $stmt->close();
-
-    header("Location: clock.php?success=1");
-    exit;
-}
-
 ?>
 
 <!DOCTYPE html>
@@ -96,6 +90,10 @@ if(isset($_POST['mode'])){
             Countdown
         </label>
 
+        <div id="countdownInput" style="margin-top:10px; display:none;">
+            <input type="number" name="minutes" placeholder="Countdown (menit)" min="1">
+        </div>
+
         <label class="radio-container">
             <input type="radio" name="mode" value="pomodoro" <?= $current=='pomodoro'?'checked':''; ?>>
             <span class="radio-custom"></span>
@@ -117,6 +115,21 @@ if(isset($_POST['mode'])){
     </div>
 </div>
 <script>
+const radios = document.querySelectorAll('input[name="mode"]');
+const countdownInput = document.getElementById('countdownInput');
+const pomodoroInputs = document.querySelector('input[name="work"]').parentElement;
+
+function toggleInputs(){
+    let selected = document.querySelector('input[name="mode"]:checked').value;
+
+    countdownInput.style.display = (selected === 'countdown') ? 'block' : 'none';
+    pomodoroInputs.style.display = (selected === 'pomodoro') ? 'block' : 'none';
+}
+
+radios.forEach(r => r.addEventListener('change', toggleInputs));
+
+// run pertama
+toggleInputs();
 function goBack(){
     if(document.referrer !== ""){
         window.history.back();
