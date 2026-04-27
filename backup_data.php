@@ -134,7 +134,7 @@ $stmt->close();
     <ul>
     <?php foreach ($files as $f): ?>
         <li>
-            <a href="download.php?id=<?= $f['id'] ?>">
+            <a href="koneksi/download.php?id=<?= $f['id'] ?>">
                 <?= htmlspecialchars($f['custom_name'] ?: $f['file_name']) ?>
             </a>
             <small>(<?= date('d-m-Y H:i', strtotime($f['uploaded_at'])) ?>)</small>
