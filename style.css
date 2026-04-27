@@ -960,6 +960,14 @@ input[type=password], input[type=number], select, textarea {
   appearance: none;
 }
 
+.backup-form input[type="text"] {
+    color: #000 !important;
+}
+
+.backup-form input[type="text"]::placeholder {
+    color: #666;
+}
+
 input[type=text]::placeholder, textarea::placeholder { color: var(--clr-text-faint); }
 
 input[type=text]:focus, input[type=date]:focus, input[type=email]:focus,

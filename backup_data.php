@@ -117,7 +117,7 @@ $stmt->close();
         <p style="color:red;font-weight:bold;"><?= $error ?></p>
     <?php endif; ?>
 
-    <form method="POST" enctype="multipart/form-data">
+    <form method="POST" enctype="multipart/form-data" class="backup-form">
         <label>Nama File (opsional):</label><br>
         <input type="text" name="custom_name" placeholder="Misal: Laporan Januari"><br><br>
 
