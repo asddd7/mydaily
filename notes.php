@@ -89,11 +89,11 @@ $notes = mysqli_query($conn, "SELECT * FROM notes
                 <small><?= $row['created_at']; ?></small>
 
                 <div style="margin-top:5px;">
-                    <button class="btn-edit" onclick="openEditModal(
-                        '<?= $row['id']; ?>',
-                        '<?= htmlspecialchars(addslashes($row['title'])); ?>',
-                        '<?= htmlspecialchars(addslashes($row['content'])); ?>'
-                    )">Edit</button>
+                <button class="btn-edit" onclick='openEditModal(
+                    <?= json_encode($row["id"]); ?>,
+                    <?= json_encode($row["title"]); ?>,
+                    <?= json_encode($row["content"]); ?>
+                )'>Edit</button>
 
                     <a href="?delete=<?= $row['id']; ?>" 
                        onclick="return confirm('Hapus catatan ini?')"
