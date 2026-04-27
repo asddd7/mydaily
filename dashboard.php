@@ -176,6 +176,7 @@ $stmt->bind_param("ss", $username, $tanggal_hari_ini);
         <button type="submit" name="absen_pulang" class="btn-checkout" <?= (!$check_in_today || $check_out_today) ? 'disabled style="opacity:0.6; cursor:not-allowed;"' : '' ?>>Selesai</button>
     </form>
 
+    <div class="card checkin-card" id="calendarSection">
     <div class="calendar-header">
         <button onclick="changeMonth(-1)">❮</button>
         <h4 id="monthYear"></h4>
@@ -193,6 +194,7 @@ $stmt->bind_param("ss", $username, $tanggal_hari_ini);
     <div class="calendar-marks">
         <h4>📌 Penanda Bulan Ini</h4>
         <ul id="marksList"></ul>
+    </div>
     </div>
 </div>
 
@@ -214,7 +216,8 @@ $stmt->bind_param("ss", $username, $tanggal_hari_ini);
     <p style="text-align:center;">Tidak Ada Riwayat.</p>
     <?php endif; ?>
 </div>
-
+</main>
+</div>
 <div id="markerModal" class="modal">
   <div class="modal-content">
 
@@ -242,11 +245,6 @@ $stmt->bind_param("ss", $username, $tanggal_hari_ini);
 
   </div>
   </div>
-</div>
-
-
-
-</main>
 </div>
 
 <script>
