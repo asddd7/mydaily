@@ -1,4 +1,6 @@
 <?php
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
 session_start();
 include 'koneksi/koneksi.php';
 mysqli_query($conn, "SET time_zone = '+07:00'");
@@ -18,12 +20,24 @@ if (isset($_POST['save_note'])) {
     $title   = mysqli_real_escape_string($conn, $_POST['title']);
     $content = mysqli_real_escape_string($conn, $_POST['content']);
 
-    if (!empty($title) && !empty($content)) {
-        mysqli_query($conn, "INSERT INTO notes (user_id, title, content) 
-                             VALUES ('$user_id', '$title', '$content')");
-        header("Location: notes.php");
-        exit;
+    $imageName = null;
+
+    if (!empty($_FILES['image']['name'])) {
+        $imageName = time() . "_" . basename($_FILES['image']['name']);
+        $tmp       = $_FILES['image']['tmp_name'];
+
+        $uploadPath = __DIR__ . "/uploads/" . $imageName;
+
+        if (!move_uploaded_file($tmp, $uploadPath)) {
+            die("Upload gagal! cek folder uploads permission.");
+        }
     }
+
+    mysqli_query($conn, "INSERT INTO notes (user_id, title, content, image) 
+                         VALUES ('$user_id', '$title', '$content', '$imageName')");
+
+    header("Location: notes.php");
+    exit;
 }
 
 /* =========================
@@ -34,10 +48,25 @@ if (isset($_POST['update_note'])) {
     $title   = mysqli_real_escape_string($conn, $_POST['title']);
     $content = mysqli_real_escape_string($conn, $_POST['content']);
 
+    $imageQuery = "";
+
+    if (!empty($_FILES['image']['name'])) {
+        $imageName = time() . "_" . basename($_FILES['image']['name']);
+        $tmp       = $_FILES['image']['tmp_name'];
+
+        $uploadPath = __DIR__ . "/uploads/" . $imageName;
+
+        if (!move_uploaded_file($tmp, $uploadPath)) {
+            die("Upload gagal! cek folder uploads permission.");
+        }
+
+        $imageQuery = ", image='$imageName'";
+    }
+
     mysqli_query($conn, "UPDATE notes 
-                         SET title='$title', content='$content' 
+                         SET title='$title', content='$content' $imageQuery
                          WHERE id='$note_id' AND user_id='$user_id'");
-    
+
     header("Location: notes.php");
     exit;
 }
@@ -79,20 +108,27 @@ $notes = mysqli_query($conn, "SELECT * FROM notes
         <br><br>
 
         <?php while ($row = mysqli_fetch_assoc($notes)) : ?>
-            <div class="note-item">
-                <h4>
-                    <a href="sub/note_detail.php?id=<?= $row['id']; ?>" class="note-link">
-                        <?= htmlspecialchars($row['title']); ?>
-                    </a>
-                </h4>
+        <div class="note-item">
 
-                <small><?= $row['created_at']; ?></small>
+            <?php if (!empty($row['image'])): ?>
+                <img src="uploads/<?= htmlspecialchars($row['image']); ?>" 
+                    style="max-width:200px; display:block; margin-top:10px;">
+            <?php endif; ?>
+
+            <h4>
+                <a href="sub/note_detail.php?id=<?= $row['id']; ?>" class="note-link">
+                    <?= htmlspecialchars($row['title']); ?>
+                </a>
+            </h4>
+
+            <small><?= $row['created_at']; ?></small>
 
                 <div style="margin-top:5px;">
                 <button class="btn-edit" onclick='openEditModal(
                     <?= json_encode($row["id"]); ?>,
                     <?= json_encode($row["title"]); ?>,
-                    <?= json_encode($row["content"]); ?>
+                    <?= json_encode($row["content"]); ?>,
+                    <?= json_encode($row["image"]); ?>
                 )'>Edit</button>
 
                     <a href="?delete=<?= $row['id']; ?>" 
@@ -115,15 +151,16 @@ $notes = mysqli_query($conn, "SELECT * FROM notes
     <div class="modal-content">
         <h3>Tambah Catatan</h3>
 
-        <form method="POST">
-            <input type="text" name="title" placeholder="Judul Catatan" required>
-            <textarea name="content" rows="8" placeholder="Tulis catatan..." required></textarea>
+    <form method="POST" enctype="multipart/form-data">
+        <input type="text" name="title" placeholder="Judul Catatan" required>
+        <textarea name="content" rows="8" placeholder="Tulis catatan..." required></textarea>
 
-            <div style="display:flex; gap:10px; margin-top:10px;">
-                <button type="submit" name="save_note" style="flex:1;">Simpan</button>
-                <button type="button" onclick="closeModal()" style="flex:1; background:#ef4444;">Tutup</button>
-            </div>
-        </form>
+        <input type="file" name="image" accept="image/*">
+
+        <div style="display:flex; gap:10px; margin-top:10px;">
+            <button type="submit" name="save_note">Simpan</button>
+        </div>
+    </form>
     </div>
 </div>
 
@@ -133,18 +170,18 @@ $notes = mysqli_query($conn, "SELECT * FROM notes
 <div class="modal" id="editModal">
     <div class="modal-content">
         <h3>Edit Catatan</h3>
+        <div id="edit_image_preview" style="margin:10px 0;"></div>
 
-        <form method="POST">
-            <input type="hidden" name="note_id" id="edit_id">
+    <form method="POST" enctype="multipart/form-data">
+        <input type="hidden" name="note_id" id="edit_id">
 
-            <input type="text" name="title" id="edit_title" required>
-            <textarea name="content" rows="8" id="edit_content" required></textarea>
+        <input type="text" name="title" id="edit_title" required>
+        <textarea name="content" id="edit_content" required></textarea>
 
-            <div style="display:flex; gap:10px; margin-top:10px;">
-                <button type="submit" name="update_note" style="flex:1;">Update</button>
-                <button type="button" onclick="closeModal()" style="flex:1; background:#ef4444;">Tutup</button>
-            </div>
-        </form>
+        <input type="file" name="image" accept="image/*">
+
+        <button type="submit" name="update_note">Update</button>
+    </form>
     </div>
 </div>
 
@@ -156,10 +193,22 @@ function openAddModal(){
     addModal.classList.add("show");
 }
 
-function openEditModal(id, title, content){
+function openEditModal(id, title, content, image){
     document.getElementById("edit_id").value = id;
     document.getElementById("edit_title").value = title;
     document.getElementById("edit_content").value = content;
+
+    let preview = document.getElementById("edit_image_preview");
+
+    if(image && image !== "null"){
+        preview.innerHTML = `
+            <small>Gambar saat ini:</small><br>
+            <img src="uploads/${image}" 
+                 style="max-width:150px; border-radius:8px; margin-top:5px;">
+        `;
+    } else {
+        preview.innerHTML = "<small style='color:gray'>Tidak ada gambar</small>";
+    }
 
     editModal.classList.add("show");
 }

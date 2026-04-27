@@ -40,15 +40,23 @@ if (!$note) {
 <div class="layout">
 <?php include '../sidebar.php'; ?>
 <div class="content">
-    <div class="card">
-        <h2><?= htmlspecialchars($note['title']); ?></h2>
-        <small><?= $note['created_at']; ?></small>
-        <hr>
-        <p><?= nl2br(htmlspecialchars($note['content'])); ?></p>
+<div class="card">
+    <h2><?= htmlspecialchars($note['title']); ?></h2>
+    <small><?= $note['created_at']; ?></small>
+    <?php if (!empty($note['image']) && file_exists("../uploads/".$note['image'])): ?>
+    <img src="../uploads/<?= htmlspecialchars($note['image']); ?>" class="note-detail-img">
+    <?php else: ?>
+        <small style="color:gray;">Tidak ada gambar</small>
+    <?php endif; ?>
 
-        <br>
-    </div>
+    <hr>
+
+    <p><?= nl2br(htmlspecialchars($note['content'])); ?></p>
+
+    <br>
+</div>
 <a href="../notes.php" class="btn-back">← Kembali</a>
+</div>
 </div>
 </div>
 </body>

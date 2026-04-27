@@ -1542,6 +1542,28 @@ body.login-page {
   .login-container { padding: 32px 22px; margin: 12px; }
 }
 
+/* =========================
+   NOTE DETAIL IMAGE
+========================= */
+.note-detail-img {
+    max-width: 100%;
+    width: 400px;       /* batas lebar di desktop */
+    height: auto;
+    display: block;
+    margin: 15px 0;
+    border-radius: 10px;
+    object-fit: cover;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+@media (max-width: 768px) {
+    .note-detail-img {
+        width: 100%;   /* full lebar di HP */
+        max-width: 100%;
+        border-radius: 8px;
+    }
+}
+
 /* Very small */
 @media (max-width: 360px) {
   .card { padding: 14px; }
