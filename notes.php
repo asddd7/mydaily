@@ -130,8 +130,8 @@ $notes = mysqli_query($conn, "SELECT * FROM notes
                        onclick="return confirm('Hapus catatan ini?')"
                        class="delete-mark">Hapus</a>
                 </div>
-                <hr>
             </div>
+            <hr>
         <?php endwhile; ?>
 
     </div>
