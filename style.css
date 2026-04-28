@@ -735,12 +735,13 @@ input[type="file"]:hover {
   background: rgb(251, 190, 36);
   border: 1px solid rgba(251,191,36,0.3);
   color: var(--clr-text2);
-  padding: 6px 12px;
   border-radius: var(--radius-sm);
+  padding: 5px 10px;
   font-size: 12px;
+  font-weight: 600;
 }
 
-.btn-edit:hover { background: rgba(251,191,36,0.22); border-color: var(--clr-warning); }
+.btn-edit:hover { background: rgba(251, 190, 36, 0.644); border-color: var(--clr-warning); }
 
 .btn-action {
   background: rgba(79,142,247,0.12);
@@ -1168,9 +1169,9 @@ label {
   background: rgb(255, 0, 0);
   border: 1px solid rgba(248,113,113,0.25);
   color: var(--clr-text2);
-  padding: 5px 10px;
-  border-radius: var(--radius-sm);
   cursor: pointer;
+  border-radius: var(--radius-sm);
+  padding: 5px 10px;
   font-size: 12px;
   font-weight: 600;
   transition: var(--t);
