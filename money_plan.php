@@ -131,6 +131,9 @@ Pengeluaran: <strong style="color:red;">Rp <?= number_format($expense,0,',','.')
 </select>
 
 <select name="tahun" required>
+
+<hr>
+
 <?php 
 $start_year = 2023; 
 $current_year = date('Y');
