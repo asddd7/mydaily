@@ -58,11 +58,6 @@ header("X-XSS-Protection: 1; mode=block");
         <span class="menu-text">Tugas</span>
     </a>
 
-    <a href="<?= $base_url ?>task_repeat.php" class="<?= $current_page == 'task_repeat.php' ? 'active' : '' ?>">
-        <i class="menu-icon fa-solid fa-repeat"></i>
-        <span class="menu-text">Tugas (Berulang)</span>
-    </a>
-
     <a href="<?= $base_url ?>backup_data.php" class="<?= $current_page == 'backup_data.php' ? 'active' : '' ?>">
         <i class="menu-icon fa-solid fa-database"></i>
         <span class="menu-text">BackUp Data</span>
