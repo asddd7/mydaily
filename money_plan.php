@@ -164,7 +164,9 @@ Rp <?= number_format($saldo_month,0,',','.'); ?>
 <?php while($row = mysqli_fetch_assoc($data)) : ?>
 <tr>
 <td><?= date('d M Y', strtotime($row['tanggal'])); ?></td>
-<td><?= $row['type']=='income' ? '🟢' : '🔴'; ?></td>
+<td class="<?= $row['type']; ?>">
+    <?= $row['type']=='income' ? 'Pemasukan' : 'Pengeluaran'; ?>
+</td>
 <td><?= htmlspecialchars($row['category']); ?></td>
 <td>Rp <?= number_format($row['amount'],0,',','.'); ?></td>
 <td>
@@ -181,27 +183,85 @@ Rp <?= number_format($saldo_month,0,',','.'); ?>
 
 <!-- Modal Tambah Data -->
 <div class="modal" id="moneyModal">
-<div class="modal-content">
-<h3>Tambah Transaksi</h3>
+  <div class="modal-content">
 
-<form method="post">
-<select name="type" required>
-<option value="income">Pemasukan</option>
-<option value="expense">Pengeluaran</option>
-</select>
+    <h3 style="margin-bottom:15px;">➕ Tambah Transaksi</h3>
 
-<input type="text" name="category" placeholder="Kategori" required>
-<input type="number" name="amount" placeholder="Jumlah" required>
-<input type="date" name="tanggal" value="<?= date('Y-m-d'); ?>" required>
-<input type="text" name="description" placeholder="Keterangan">
+    <form method="post" class="form-grid">
 
-      <div style="display:flex; justify-content:space-between; margin-top:12px;">
-        <button type="submit" style="flex:1; margin-right:5px;" name="add_money">Simpan</button>
-        <button type="button" onclick="closeModal()" style="flex:1; margin-left:5px; background:#ef4444;">Tutup</button>
+        <div class="form-group">
+            <label>Jenis Transaksi</label>
+            <select name="type" required>
+            <option value="income">🟢 Pemasukan</option>
+            <option value="expense">🔴 Pengeluaran</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Kategori</label>
+
+            <!-- Dropdown -->
+            <select id="category_select" onchange="syncCategory()" required>
+                <option value="">-- Pilih Kategori --</option>
+                <option value="Gaji">Gaji</option>
+                <option value="Makan">Makan</option>
+                <option value="Transport">Transport</option>
+                <option value="Belanja">Belanja</option>
+                <option value="Tagihan">Tagihan</option>
+                <option value="Investasi">Investasi</option>
+                <option value="Lainnya">Lainnya (Custom)</option>
+            </select>
+
+            <!-- Input manual -->
+            <input type="text" name="category" id="category_input"
+                placeholder="Atau ketik kategori sendiri"
+                class="form-text" required>
+        </div>
+
+        <div class="form-group">
+            <label>Nominal</label>
+
+            <!-- Dropdown -->
+            <select id="amount_select" onchange="syncAmount()">
+                <option value="">-- Pilih Nominal --</option>
+                <option value="10000">Rp 10.000</option>
+                <option value="20000">Rp 20.000</option>
+                <option value="50000">Rp 50.000</option>
+                <option value="100000">Rp 100.000</option>
+                <option value="200000">Rp 200.000</option>
+                <option value="500000">Rp 500.000</option>
+                <option value="1000000">Rp 1.000.000</option>
+                <option value="custom">Custom</option>
+            </select>
+
+            <!-- Input manual -->
+            <input type="number" name="amount" id="amount_input"
+                placeholder="Atau isi nominal sendiri"
+                class="form-text" required>
+        </div>
+
+      <div class="form-group">
+        <label>Tanggal</label>
+        <input type="date" name="tanggal" value="<?= date('Y-m-d'); ?>" required>
       </div>
-</form>
 
-</div>
+      <div class="form-group full">
+        <label>Keterangan (opsional)</label>
+        <input type="text" class="form-text" name="description" placeholder="Catatan tambahan">
+      </div>
+
+      <div class="modal-action">
+        <button type="submit" name="add_money" class="btn-save">
+          💾 Simpan
+        </button>
+        <button type="button" onclick="closeModal()" class="btn-cancel">
+          ✖ Tutup
+        </button>
+      </div>
+
+    </form>
+
+  </div>
 </div>
 
 <script>
@@ -225,6 +285,38 @@ document.addEventListener("keydown", function(e){
     if(e.key === "Escape"){
         closeModal();
     }
+});
+
+function syncCategory(){
+    let select = document.getElementById("category_select");
+    let input = document.getElementById("category_input");
+
+    if(select.value === "Lainnya"){
+        input.value = "";
+        input.focus();
+    } else {
+        input.value = select.value;
+    }
+}
+
+document.getElementById("category_input").addEventListener("input", function(){
+    document.getElementById("category_select").value = "Lainnya";
+});
+
+function syncAmount(){
+    let select = document.getElementById("amount_select");
+    let input = document.getElementById("amount_input");
+
+    if(select.value === "custom"){
+        input.value = "";
+        input.focus();
+    } else {
+        input.value = select.value;
+    }
+}
+
+document.getElementById("amount_input").addEventListener("input", function(){
+    document.getElementById("amount_select").value = "custom";
 });
 </script>
 

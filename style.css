@@ -975,6 +975,18 @@ input[type=password] {
   appearance: none;
 }
 
+/* FIX UTAMA: kasih jarak antara select dan input */
+#category_select,
+#amount_select {
+    margin-bottom: 8px;
+}
+
+/* Supaya input gak nempel */
+#category_input,
+#amount_input {
+    margin-top: 4px;
+}
+
 /* khusus untuk input di dalam modalInputs */
 #modalInputs input[type="text"],
 #modalInputs input[type="date"] {
@@ -989,6 +1001,36 @@ input[type=password] {
   transition: var(--t);
   -webkit-appearance: none;
   appearance: none;
+}
+
+.badge {
+    display: inline-block;
+    width: 15px;
+    height: 15px;
+    border-radius: 4px; /* ini bikin kotak agak rounded */
+}
+
+.badge.income {
+    background-color: #2ecc71; /* hijau */
+}
+
+.badge.expense {
+    background-color: #e74c3c; /* merah */
+}
+
+/* Kolom jenis full warna */
+td.income {
+    background-color: #2ecc71 !important; /* hijau */
+    color: white;
+    font-weight: 600;
+    text-align: center;
+}
+
+td.expense {
+    background-color: #e74c3c !important; /* merah */
+    color: white;
+    font-weight: 600;
+    text-align: center;
 }
 
 /* efek focus biar lebih hidup */
@@ -1116,6 +1158,37 @@ select[name="type"]:focus {
 /* Hover */
 select[name="type"]:hover {
     border-color: #888;
+}
+
+select[name="category"], select[name="amount"] {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background-color: #fff;
+    font-size: 14px;
+    color: #333;
+    outline: none;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+/* Saat focus (diklik) */
+select[name="category"]:focus, select[name="amount"]:focus {
+    border-color: #4a90e2;
+    box-shadow: 0 0 5px rgba(74, 144, 226, 0.4);
+}
+
+/* Hover */
+select[name="category"]:hover, select[name="amount"]:hover {
+    border-color: #888;
+}
+
+.form-text {
+  font-size: 12px;
+  color: var(--clr-text2) !important;
+  margin-top: -8px;
+  margin-bottom: 8px;
 }
 
 .post-form button[name=submit] {
