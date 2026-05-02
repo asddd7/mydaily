@@ -10,17 +10,6 @@ if (!isset($_SESSION['login'])) {
 $username = $_SESSION['username'] ?? 'Guest';
 $user_id  = $_SESSION['id'];
 
-/* Create tABLE*/
-mysqli_query($conn, "CREATE TABLE IF NOT EXISTS money_plan (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    username VARCHAR(100),
-    type ENUM('income','expense'),
-    category VARCHAR(100),
-    amount DECIMAL(12,2),
-    description TEXT,
-    tanggal DATE DEFAULT CURRENT_DATE
-)");
-
 if (isset($_POST['add_money'])) {
     $type = $_POST['type'];
     $category = htmlspecialchars($_POST['category']);
