@@ -77,6 +77,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->bind_param("ii", $task_id, $user_id);
         $stmt->execute();
         $stmt->close();
+
+        echo json_encode(["status" => "success"]);
+        exit;
     }
 
     if (isset($_POST['copy_task'])) {
@@ -172,6 +175,9 @@ if (isset($_POST['delete_subtask'])) {
     $stmt->bind_param("ii", $id, $user_id);
     $stmt->execute();
     $stmt->close();
+
+    echo json_encode(["status" => "success"]);
+    exit;
 }
 
 if (isset($_POST['edit_subtask_id'], $_POST['edit_subtask_nama'])) {
@@ -533,7 +539,9 @@ function deleteTask(id){
             method: "POST",
             body: formData
         })
-        .then(() => location.reload());
+        .then(() => {
+    document.querySelector(`[data-id="${id}"]`).remove();
+});
     }
 }
 
@@ -571,7 +579,13 @@ function deleteSubtask(id){
             method:"POST",
             body:formData
         })
-        .then(()=> location.reload()); // biar langsung update
+        .then(() => {
+            document.querySelectorAll("tr").forEach(row => {
+                if(row.querySelector && row.querySelector("button")?.getAttribute("onclick")?.includes(id)) {
+                    row.remove();
+                }
+            });
+        });
     }
 }
 
