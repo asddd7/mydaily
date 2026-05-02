@@ -1036,7 +1036,7 @@ input[type=date] {
   border-radius: var(--radius);
   border: 1px solid var(--clr-border);
   background: rgba(255,255,255,0.06);
-  color: var(--clr-text2);
+  color: var(--clr-text2) !important;
   transition: var(--t);
 }
 
@@ -1092,6 +1092,30 @@ select {
   background-position: right 14px center;
   padding-right: 40px;
   cursor: pointer;
+}
+
+select[name="type"] {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background-color: #fff;
+    font-size: 14px;
+    color: #333;
+    outline: none;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+/* Saat focus (diklik) */
+select[name="type"]:focus {
+    border-color: #4a90e2;
+    box-shadow: 0 0 5px rgba(74, 144, 226, 0.4);
+}
+
+/* Hover */
+select[name="type"]:hover {
+    border-color: #888;
 }
 
 .post-form button[name=submit] {

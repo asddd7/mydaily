@@ -182,7 +182,7 @@ Rp <?= number_format($saldo_month,0,',','.'); ?>
 <!-- Modal Tambah Data -->
 <div class="modal" id="moneyModal">
 <div class="modal-content">
-<h2>Tambah Transaksi</h2>
+<h3>Tambah Transaksi</h3>
 
 <form method="post">
 <select name="type" required>
