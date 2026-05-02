@@ -228,11 +228,11 @@ $stmt->bind_param("ss", $username, $tanggal_hari_ini);
     <form id="markerForm">
       <input type="hidden" name="tanggal" id="markerDate">
 
-      <label>Judul</label>
-      <input type="text" name="title" placeholder="Contoh: Meeting client" required>
+        <label class="form-label">Judul</label>
+        <input type="text" name="title" class="form-title" placeholder="Contoh: Meeting client" required>
 
-      <label>Catatan</label>
-      <textarea name="description" rows="3" placeholder="Tambahkan catatan..."></textarea>
+        <label class="form-label">Catatan</label>
+        <textarea name="description" class="form-desc" rows="3" placeholder="Tambahkan catatan..."></textarea>
 
       <div style="display:flex; justify-content:space-between; margin-top:12px;">
         <button type="submit" style="flex:1; margin-right:5px;">Simpan</button>

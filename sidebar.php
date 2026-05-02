@@ -1,3 +1,4 @@
+<link rel="icon" type="image/x-icon" href="favicon.ico">
 <?php
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
