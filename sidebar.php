@@ -84,10 +84,10 @@ header("X-XSS-Protection: 1; mode=block");
     </div>
 
     <div class="header-right">
-        <form action="koneksi/logout.php" method="POST">
-            <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token']; ?>">
-            <button type="submit" class="logout">Logout</button>
-        </form>
+    <form action="koneksi/logout.php" method="POST" onsubmit="return confirmLogout()">
+        <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token']; ?>">
+        <button type="submit" class="logout">Logout</button>
+    </form>
     </div>
 
 </div>
@@ -231,4 +231,11 @@ window.addEventListener("storage", function(e) {
         updateNotif(); // ✅ BENAR
     }
 });
+
+function confirmLogout() {
+    if (window.confirm("Apakah yakin ingin logout?")) {
+        return true;
+    }
+    return false;
+}
 </script>
