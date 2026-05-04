@@ -21,6 +21,11 @@ if (isset($_SESSION['LAST_ACTIVITY'])) {
 }
 $_SESSION['LAST_ACTIVITY'] = time();
 
+// saat generate token
+if (empty($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+
 header("X-Frame-Options: SAMEORIGIN");
 header("X-Content-Type-Options: nosniff");
 header("X-XSS-Protection: 1; mode=block");
@@ -38,6 +43,7 @@ header("X-XSS-Protection: 1; mode=block");
     </div>
 
     <form action="koneksi/logout.php" method="POST">
+        <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token']; ?>">
         <button type="submit" class="logout">Logout</button>
     </form>
 
