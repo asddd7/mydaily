@@ -41,9 +41,47 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
-    if (isset($_POST['task_id'])) {
-        $task_id = intval($_POST['task_id']);
-        $selesai = isset($_POST['selesai']) ? 1 : 0;
+    if (isset($_POST['main_task_id'])) {
+
+        $task_id = intval($_POST['main_task_id']);
+        $selesai = intval($_POST['selesai']);
+
+        // update main task
+        if ($selesai) {
+            $stmt = $conn->prepare("
+                UPDATE tugas 
+                SET selesai=1, selesai_at=NOW() 
+                WHERE id=? AND user_id=?
+            ");
+        } else {
+            $stmt = $conn->prepare("
+                UPDATE tugas 
+                SET selesai=0, selesai_at=NULL 
+                WHERE id=? AND user_id=?
+            ");
+        }
+
+        $stmt->bind_param("ii", $task_id, $user_id);
+        $stmt->execute();
+        $stmt->close();
+
+        // 🔥 AUTO UPDATE SUBTASK
+        $stmt = $conn->prepare("
+            UPDATE tugas 
+            SET selesai=?, selesai_at=IF(?=1, NOW(), NULL)
+            WHERE parent_id=? AND user_id=?
+        ");
+        $stmt->bind_param("iiii", $selesai, $selesai, $task_id, $user_id);
+        $stmt->execute();
+        $stmt->close();
+
+        exit;
+    }
+
+        if (isset($_POST['sub_task_id'])) {
+
+        $task_id = intval($_POST['sub_task_id']);
+        $selesai = intval($_POST['selesai']);
 
         if ($selesai) {
             $stmt = $conn->prepare("
@@ -51,18 +89,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 SET selesai=1, selesai_at=NOW() 
                 WHERE id=? AND user_id=?
             ");
-            $stmt->bind_param("ii", $task_id, $user_id);
         } else {
             $stmt = $conn->prepare("
                 UPDATE tugas 
                 SET selesai=0, selesai_at=NULL 
                 WHERE id=? AND user_id=?
             ");
-            $stmt->bind_param("ii", $task_id, $user_id);
         }
 
+        $stmt->bind_param("ii", $task_id, $user_id);
         $stmt->execute();
         $stmt->close();
+        exit;
     }
 
     if (isset($_POST['delete_task'])) {
@@ -340,7 +378,7 @@ if (isset($_POST['import_excel'])) {
                 $checked = $tugas['selesai'] ? "checked" : "";
                 $style   = $tugas['selesai'] ? "text-decoration:line-through;color:gray;" : "";
             ?>
-            <tr class="main-task" data-id="<?= $tugas['id']; ?>" onclick="toggleSubtask(<?= $tugas['id']; ?>)">
+            <tr class="main-task" data-id="<?= $tugas['id']; ?>" onclick="handleRowClick(event, <?= $tugas['id']; ?>)">
                 <td>
                     <span class="task-text" style="<?= $style ?>">
                         <?= htmlspecialchars($tugas['nama_tugas']); ?>
@@ -354,7 +392,10 @@ if (isset($_POST['import_excel'])) {
                     <?php endif; ?>
                 </td>
                 <td>
-                    <input type="checkbox" onchange="toggleTask(<?= $tugas['id'] ?>, this)" <?= $checked ?>>
+                <input type="checkbox"
+                    onclick="event.stopPropagation()"
+                    onchange="toggleMainTask(<?= $tugas['id'] ?>, this)"
+                    <?= $checked ?>>
                 </td>
                 <td>
                     <button class="btn-action"
@@ -385,7 +426,9 @@ if (isset($_POST['import_excel'])) {
                 $subStyle   = $sub['selesai'] ? "text-decoration:line-through;color:gray;" : "";
             ?>
 
-            <tr class="subtask subtask-<?= $tugas['id']; ?>" style="background:#f9fafb; display:none;">
+            <tr class="subtask subtask-<?= $tugas['id']; ?>" 
+                data-id="<?= $sub['id']; ?>" 
+                style="background:#f9fafb; display:none;">
                 <td style="padding-left:30px;">
                     <span class="task-text" style="<?= $subStyle ?>">
                         └── <?= htmlspecialchars($sub['nama_tugas']); ?>
@@ -399,9 +442,10 @@ if (isset($_POST['import_excel'])) {
                     <?php endif; ?>
                 </td>
                 <td>
-                    <input type="checkbox"
-                        onchange="toggleTask(<?= $sub['id'] ?>, this)"
-                        <?= $sub['selesai'] ? "checked" : "" ?>>
+                <input type="checkbox"
+                    onclick="event.stopPropagation()"
+                    onchange="toggleSubTaskStatus(<?= $sub['id'] ?>, this)"
+                    <?= $sub['selesai'] ? "checked" : "" ?>>
                 </td>
                 <td>
                     <button class="btn-action" onclick="editSubtask(<?= $sub['id'] ?>, '<?= addslashes($sub['nama_tugas']) ?>')">
@@ -490,39 +534,95 @@ window.onclick = function(event) {
     if (event.target === modal) closeModal();
 }
 
-function toggleTask(taskId, checkbox) {
+function toggleMainTask(taskId, checkbox) {
     const formData = new FormData();
-    formData.append('task_id', taskId);
+    formData.append('main_task_id', taskId);
 
     if (checkbox.checked) {
         formData.append('selesai', 1);
+    } else {
+        formData.append('selesai', 0);
     }
 
     fetch('', { method: 'POST', body: formData })
         .then(() => {
             triggerNotifUpdate();
+
+            // 🔥 UPDATE UI MAIN + SUBTASK LANGSUNG
             updateTaskUI(taskId, checkbox.checked ? "done" : "undone");
-            window.location.href = "task.php";
+
+            document.querySelectorAll('.subtask-' + taskId).forEach(row => {
+                const subId = row.getAttribute("data-id");
+                updateSubtaskUI(subId, checkbox.checked ? "done" : "undone");
+            });
+
         });
 }
 
+function toggleSubTaskStatus(taskId, checkbox) {
+    const formData = new FormData();
+    formData.append('sub_task_id', taskId);
+    formData.append('selesai', checkbox.checked ? 1 : 0);
+
+    fetch('', { method: 'POST', body: formData })
+    .then(() => {
+        setTimeout(() => {
+            updateSubtaskUI(taskId, checkbox.checked ? "done" : "undone");
+        }, 50);
+
+        triggerNotifUpdate();
+    });
+}
+
+function toggleSubtaskVisibility(parentId) {
+    const subtasks = document.querySelectorAll('.subtask-' + parentId);
+
+    subtasks.forEach(row => {
+        row.style.display = (row.style.display === "none") ? "table-row" : "none";
+    });
+}
 
 function updateSubtaskUI(id, status) {
-    const row = document.querySelector(`button[onclick*="${id}"]`)?.closest("tr");
+
+    const row = document.querySelector(`tr.subtask[data-id="${id}"]`);
     if (!row) return;
 
     const text = row.querySelector(".task-text");
     const checkbox = row.querySelector("input[type='checkbox']");
 
+    let doneTime = row.querySelector(".done-time");
+
     if (status === "done") {
+
         text.style.textDecoration = "line-through";
         text.style.color = "gray";
         checkbox.checked = true;
+
+        // kalau belum ada timestamp → buat
+        if (!doneTime) {
+            const now = new Date().toLocaleString();
+
+            doneTime = document.createElement("small");
+            doneTime.className = "done-time";
+            doneTime.style.color = "green";
+            doneTime.style.display = "block";
+            doneTime.style.marginTop = "3px";
+            doneTime.innerText = "✔ Selesai: " + now;
+
+            text.parentElement.appendChild(doneTime);
+        }
+
     } else {
+
         text.style.textDecoration = "none";
         text.style.color = "black";
         checkbox.checked = false;
+
+        if (doneTime) doneTime.remove();
     }
+
+    // 🔥 smooth animation trigger
+    text.style.transition = "all 0.2s ease";
 }
 
 function deleteTask(id) {
@@ -676,7 +776,7 @@ function saveOrder(table){
     });
 }
 
-function toggleSubtask(parentId) {
+function toggleSubTask(parentId) {
     const subtasks = document.querySelectorAll('.subtask-' + parentId);
 
     subtasks.forEach(row => {
@@ -774,6 +874,16 @@ function showToast(msg) {
 
     function triggerNotifUpdate() {
     localStorage.setItem("notif_update", Date.now());
+}
+
+function handleRowClick(event, id) {
+
+    // kalau klik checkbox / button → STOP
+    if (event.target.tagName === "INPUT" || event.target.tagName === "BUTTON" || event.target.closest("button")) {
+        return;
+    }
+
+    toggleSubTask(id);
 }
 </script>
 

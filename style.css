@@ -1341,6 +1341,12 @@ select[name="amount"]:hover { border-color: #888; }
 ══════════════════════════════════════════════════════════ */
 .task-title { flex: 1; font-size: 14px; color: var(--clr-text); transition: var(--t); }
 .task-title:hover { color: var(--clr-accent); }
+.task-done {
+    text-decoration: line-through;
+    color: rgb(0, 255, 106);
+    transition: all 0.2s ease;
+    transform: scale(0.98);
+}
 
 /* Quest / Achievement lists */
 .quest-list,
