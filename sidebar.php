@@ -4,6 +4,33 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
+$user_id = $_SESSION['id'] ?? 0;
+
+$stmtNotif = $conn->prepare("
+    SELECT id AS task_id, nama_tugas AS nama_task
+    FROM tugas
+    WHERE selesai = 0 
+      AND user_id = ?
+      AND parent_id IS NULL
+
+    UNION
+
+    SELECT 
+        parent.id AS task_id,
+        parent.nama_tugas AS nama_task
+    FROM tugas child
+    JOIN tugas parent ON child.parent_id = parent.id
+    WHERE child.selesai = 0 
+      AND child.user_id = ?
+
+    GROUP BY task_id, nama_task
+");
+$stmtNotif->bind_param("ii", $user_id, $user_id);
+$stmtNotif->execute();
+$resultNotif = $stmtNotif->get_result();
+
+$jumlahNotif = $resultNotif->num_rows;
+
 $base_url = (strpos($_SERVER['PHP_SELF'], '/sub/') !== false) ? '../' : '';
 $current_page = basename($_SERVER['PHP_SELF']);
 header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
@@ -38,16 +65,31 @@ header("X-XSS-Protection: 1; mode=block");
         <span class="logo-mobile">MYDAILY</span>
     </div>
 
-    <div class="welcome">
-        Welcome, <strong><?= htmlspecialchars($_SESSION['username'] ?? 'Guest'); ?></strong>
+    <div class="header-center">
+        <div class="welcome">
+            Welcome, <strong><?= htmlspecialchars($_SESSION['username'] ?? 'Guest'); ?></strong>
+        </div>
+
+        <div class="notif-wrapper">
+            <a href="<?= $base_url ?>task.php" class="notif-btn-link">
+                <button id="notifBtn" class="notif-btn">
+                    🔔
+                    <?php if ($jumlahNotif > 0): ?>
+                        <span class="notif-badge"><?= $jumlahNotif ?></span>
+                    <?php endif; ?>
+                </button>
+            </a>
+        </div>
     </div>
 
-    <form action="koneksi/logout.php" method="POST">
-        <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token']; ?>">
-        <button type="submit" class="logout">Logout</button>
-    </form>
+    <div class="header-right">
+        <form action="koneksi/logout.php" method="POST">
+            <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token']; ?>">
+            <button type="submit" class="logout">Logout</button>
+        </form>
+    </div>
 
-  </div>
+</div>
 </header>
 <aside class="sidebar no-transition mobile-collapsed" id="sidebar">
 

@@ -150,6 +150,9 @@ header .nav {
   font-weight: 700;
   color: var(--clr-text2);
   letter-spacing: 0.3px;
+  display: flex;
+  align-items: left;
+  white-space: nowrap;
 }
 
 .welcome span { color: var(--clr-accent); }
@@ -195,6 +198,7 @@ header .nav {
   text-decoration: none;
   transition: var(--t);
   cursor: pointer;
+  margin-left: auto;
 }
 
 .logout:hover {
@@ -376,6 +380,96 @@ header .nav {
 .loading {
     opacity: 0.6;
     cursor: wait;
+}
+
+.container.nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.header-right {
+    flex: 1;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+}
+
+.notif-wrapper {
+    position: relative;
+    margin-right: 15px;
+}
+
+.notif-btn {
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    position: relative;
+}
+
+.notif-badge {
+    position: absolute;
+    top: -5px;
+    right: -8px;
+    background: red;
+    color: white;
+    font-size: 12px;
+    padding: 2px 6px;
+    border-radius: 50%;
+}
+
+.notif-dropdown {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: 35px;
+    background: white;
+    width: 250px;
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    padding: 10px;
+    z-index: 999;
+}
+
+.notif-dropdown h4 {
+    margin: 0 0 10px;
+}
+
+.notif-item {
+    padding: 8px;
+    border-bottom: 1px solid #eee;
+    font-size: 14px;
+}
+
+.notif-item:last-child {
+    border-bottom: none;
+}
+
+.notif-empty {
+    text-align: center;
+    color: gray;
+}
+
+.notif-btn-link {
+    text-decoration: none;
+    color: inherit;
+}
+
+.notif-btn {
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    position: relative;
+}
+
+.header-center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
 }
 
 /* Toggle button */
