@@ -9,7 +9,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
 header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
 header("Pragma: no-cache");
 if (isset($_SESSION['LAST_ACTIVITY'])) {
-    $_SESSION['EXPIRE_TIME'] = 1800; // 
+    define('SESSION_TIMEOUT', 1800);
     if (time() - $_SESSION['LAST_ACTIVITY'] > $_SESSION['EXPIRE_TIME']) {
 
         session_unset();
@@ -153,17 +153,14 @@ document.querySelectorAll(".sidebar a").forEach(link => {
             backdrop.classList.remove("active");
         }
     });
+        link.addEventListener("click", function () {
+        this.classList.add("loading");
+    });
 });
 document.addEventListener("keydown", (e) => {
     if (e.key === "Escape") {
         sidebar.classList.remove("show");
         backdrop.classList.remove("active");
     }
-});
-
-document.querySelectorAll(".sidebar a").forEach(link => {
-    link.addEventListener("click", function () {
-        this.classList.add("loading");
-    });
 });
 </script>
