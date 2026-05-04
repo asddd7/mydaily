@@ -547,6 +547,7 @@ function toggleMainTask(taskId, checkbox) {
     fetch('', { method: 'POST', body: formData })
         .then(() => {
             triggerNotifUpdate();
+            updateNotif();
 
             // 🔥 UPDATE UI MAIN + SUBTASK LANGSUNG
             updateTaskUI(taskId, checkbox.checked ? "done" : "undone");
@@ -555,6 +556,7 @@ function toggleMainTask(taskId, checkbox) {
                 const subId = row.getAttribute("data-id");
                 updateSubtaskUI(subId, checkbox.checked ? "done" : "undone");
             });
+            window.location.href = "task.php";
 
         });
 }
@@ -646,6 +648,7 @@ function deleteTask(id) {
             }
                 if (data.status === "success") {
                 triggerNotifUpdate();
+                updateNotif();
                 showToast("Task dihapus");
                 window.location.href = "task.php";
             }
@@ -868,6 +871,7 @@ function showToast(msg) {
         .then(() => {
         showToast("Task ditambahkan");
         triggerNotifUpdate();
+        updateNotif();
         window.location.href = "task.php";
         });
     });

@@ -21,7 +21,8 @@ $stmtNotif = $conn->prepare("
     FROM tugas child
     JOIN tugas parent ON child.parent_id = parent.id
     WHERE child.selesai = 0 
-      AND child.user_id = ?
+    AND child.user_id = ?
+    AND parent.selesai = 0
 
     GROUP BY task_id, nama_task
 ");
@@ -208,13 +209,11 @@ document.addEventListener("keydown", (e) => {
 
 function updateNotif() {
     fetch("koneksi/get_notif.php?ts=" + Date.now(), {
-        method: "GET",
         cache: "no-store"
     })
     .then(res => res.json())
     .then(data => {
         const badge = document.getElementById("notifCount");
-
         if (!badge) return;
 
         if (data.count > 0) {
@@ -223,27 +222,13 @@ function updateNotif() {
         } else {
             badge.style.display = "none";
         }
-    });
-    fetch("koneksi/get_notif.php?v=" + Math.random())
-        .then(res => res.json())
-        .then(data => {
-            const badge = document.getElementById("notifCount");
-
-            if (!badge) return;
-
-            if (data.count > 0) {
-                badge.style.display = "inline-block";
-                badge.innerText = data.count;
-            } else {
-                badge.style.display = "none";
-            }
-        })
-        .catch(err => console.error("Error fetching notifications:", err));
+    })
+    .catch(err => console.error(err));
 }
 
 window.addEventListener("storage", function(e) {
     if (e.key === "notif_update") {
-        updateNotif();
+        updateNotif(); // ✅ BENAR
     }
 });
 </script>
