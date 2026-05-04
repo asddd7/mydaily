@@ -78,7 +78,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->execute();
         $stmt->close();
 
-        echo json_encode(["status" => "success"]);
+        header('Content-Type: application/json');
+
+        echo json_encode([
+            "status" => "success",
+            "id" => $task_id
+        ]);
         exit;
     }
 
@@ -264,6 +269,8 @@ if (isset($_POST['import_excel'])) {
         ];
     }
 
+    
+
     // =========================
     // SET PARENT CHILD
     // =========================
@@ -306,7 +313,7 @@ if (isset($_POST['import_excel'])) {
 <button class="btn-action" onclick="openModal('utama')">Tambah Tugas</button>
 <a href="template_import.xlsx" class="btn-action">Download Template Excel</a>
 
-<form method="post" enctype="multipart/form-data">
+<form id="formAddTask" enctype="multipart/form-data">
     <input type="file" name="file_excel" accept=".xlsx" required>
     <button class="btn-add-task" type="submit" name="import_excel">Import Excel</button>
 </form>
@@ -486,63 +493,63 @@ window.onclick = function(event) {
 function toggleTask(taskId, checkbox) {
     const formData = new FormData();
     formData.append('task_id', taskId);
-    if(checkbox.checked) formData.append('selesai', 1);
 
-    fetch('', {method:'POST', body:formData})
-    .then(()=> {
-        const td = checkbox.parentElement.previousElementSibling;
-        const textEl = td.querySelector('.task-text');
-
-        if(checkbox.checked){
-            textEl.style.textDecoration='line-through';
-            textEl.style.color='gray';
-
-            // hapus timestamp lama
-            const oldTime = td.querySelector('.done-time');
-            if(oldTime) oldTime.remove();
-
-            const now = new Date().toLocaleString();
-
-            td.innerHTML += `
-                <br>
-                <small class="done-time" style="color:green;">
-                    ✔ ${now}
-                </small>
-            `;
-        } else {
-            textEl.style.textDecoration='none';
-            textEl.style.color='black';
-
-            const oldTime = td.querySelector('.done-time');
-            if(oldTime) oldTime.remove();
-        }
-    });
-}
-
-function updateSubtask(e, parentId){
-    e.preventDefault();
-    const form = e.target;
-    const formData = new FormData(form);
-
-    fetch("sub/load_subtask.php?parent_id=" + parentId, {method:"POST", body:formData})
-    .then(()=> fetch("sub/load_subtask.php?parent_id=" + parentId))
-    .then(res => res.text())
-    .then(data => document.getElementById("subtaskList").innerHTML = data);
-}
-
-function deleteTask(id){
-    if(confirm("Hapus task ini beserta subtask?")){
-        const formData = new FormData();
-        formData.append("delete_task", id);
-
-        fetch("", {
-            method: "POST",
-            body: formData
-        })
-        .then(() => {
-    document.querySelector(`[data-id="${id}"]`).remove();
-});
+    if (checkbox.checked) {
+        formData.append('selesai', 1);
     }
+
+    fetch('', { method: 'POST', body: formData })
+        .then(() => {
+            triggerNotifUpdate();
+            updateTaskUI(taskId, checkbox.checked ? "done" : "undone");
+            window.location.href = "task.php";
+        });
+}
+
+
+function updateSubtaskUI(id, status) {
+    const row = document.querySelector(`button[onclick*="${id}"]`)?.closest("tr");
+    if (!row) return;
+
+    const text = row.querySelector(".task-text");
+    const checkbox = row.querySelector("input[type='checkbox']");
+
+    if (status === "done") {
+        text.style.textDecoration = "line-through";
+        text.style.color = "gray";
+        checkbox.checked = true;
+    } else {
+        text.style.textDecoration = "none";
+        text.style.color = "black";
+        checkbox.checked = false;
+    }
+}
+
+function deleteTask(id) {
+    if (!confirm("Hapus task ini beserta subtask?")) return;
+
+    const formData = new FormData();
+    formData.append("delete_task", id);
+
+    fetch("", { method: "POST", body: formData })
+        .then(res => res.json())
+        .then(data => {
+
+            if (data.status === "success") {
+
+                const row = document.querySelector(`[data-id="${id}"]`);
+                if (row) row.remove();
+
+                document.querySelectorAll(`.subtask-${id}`).forEach(el => el.remove());
+
+                showToast("Task dihapus");
+            }
+                if (data.status === "success") {
+                triggerNotifUpdate();
+                showToast("Task dihapus");
+                window.location.href = "task.php";
+            }
+        });
 }
 
 function copyTask(id){
@@ -679,6 +686,94 @@ function toggleSubtask(parentId) {
             row.style.display = "none";
         }
     });
+}
+
+function updateTaskUI(id, status) {
+    const row = document.querySelector(`[data-id="${id}"]`);
+    if (!row) return;
+
+    const text = row.querySelector(".task-text");
+    const checkbox = row.querySelector("input[type='checkbox']");
+
+    let doneTime = row.querySelector(".done-time");
+
+    if (status === "done") {
+        text.style.textDecoration = "line-through";
+        text.style.color = "gray";
+        checkbox.checked = true;
+
+        const now = new Date().toLocaleString();
+
+        // HAPUS dulu kalau ada (biar tidak double)
+        if (doneTime) doneTime.remove();
+
+        // TARUH DI BAWAH TEKS (bukan innerHTML append)
+        const wrapper = text.parentElement;
+
+        const small = document.createElement("small");
+        small.className = "done-time";
+        small.style.color = "green";
+        small.style.display = "block";
+        small.style.marginTop = "3px";
+        small.innerText = "✔ Selesai: " + now;
+
+        wrapper.appendChild(small);
+
+    } else {
+        text.style.textDecoration = "none";
+        text.style.color = "black";
+        checkbox.checked = false;
+
+        if (doneTime) doneTime.remove();
+    }
+
+    showToast("Task diperbarui");
+}
+
+function showToast(msg) {
+    let toast = document.createElement("div");
+    toast.innerText = msg;
+    toast.style.cssText = `
+        position:fixed;
+        bottom:20px;
+        right:20px;
+        background:#111;
+        color:#fff;
+        padding:10px 15px;
+        border-radius:8px;
+        z-index:9999;
+        opacity:0;
+        transition:0.3s;
+    `;
+
+    document.body.appendChild(toast);
+
+    setTimeout(() => toast.style.opacity = 1, 50);
+    setTimeout(() => {
+        toast.style.opacity = 0;
+        setTimeout(() => toast.remove(), 300);
+    }, 1500);
+}
+
+    document.getElementById("formAddTask")?.addEventListener("submit", function(e) {
+        e.preventDefault();
+
+        const formData = new FormData(this);
+
+        fetch("", {
+            method: "POST",
+            body: formData
+        })
+        .then(res => res.text())
+        .then(() => {
+        showToast("Task ditambahkan");
+        triggerNotifUpdate();
+        window.location.href = "task.php";
+        });
+    });
+
+    function triggerNotifUpdate() {
+    localStorage.setItem("notif_update", Date.now());
 }
 </script>
 

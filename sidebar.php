@@ -75,7 +75,7 @@ header("X-XSS-Protection: 1; mode=block");
                 <button id="notifBtn" class="notif-btn">
                     🔔
                     <?php if ($jumlahNotif > 0): ?>
-                        <span class="notif-badge"><?= $jumlahNotif ?></span>
+                        <span class="notif-badge" id="notifCount"><?= $jumlahNotif ?></span>
                     <?php endif; ?>
                 </button>
             </a>
@@ -203,6 +203,47 @@ document.addEventListener("keydown", (e) => {
     if (e.key === "Escape") {
         sidebar.classList.remove("show");
         backdrop.classList.remove("active");
+    }
+});
+
+function updateNotif() {
+    fetch("koneksi/get_notif.php?ts=" + Date.now(), {
+        method: "GET",
+        cache: "no-store"
+    })
+    .then(res => res.json())
+    .then(data => {
+        const badge = document.getElementById("notifCount");
+
+        if (!badge) return;
+
+        if (data.count > 0) {
+            badge.style.display = "inline-block";
+            badge.innerText = data.count;
+        } else {
+            badge.style.display = "none";
+        }
+    });
+    fetch("koneksi/get_notif.php?v=" + Math.random())
+        .then(res => res.json())
+        .then(data => {
+            const badge = document.getElementById("notifCount");
+
+            if (!badge) return;
+
+            if (data.count > 0) {
+                badge.style.display = "inline-block";
+                badge.innerText = data.count;
+            } else {
+                badge.style.display = "none";
+            }
+        })
+        .catch(err => console.error("Error fetching notifications:", err));
+}
+
+window.addEventListener("storage", function(e) {
+    if (e.key === "notif_update") {
+        updateNotif();
     }
 });
 </script>
