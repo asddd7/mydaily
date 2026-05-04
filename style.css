@@ -130,7 +130,7 @@ header {
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border-bottom: 1px solid var(--clr-border);
-  z-index: 200;
+  z-index: 10001;
 }
 
 header .nav {
@@ -398,7 +398,8 @@ header .nav {
 
 .notif-wrapper {
     position: relative;
-    margin-right: 15px;
+    display: inline-flex;
+    align-items: center;
 }
 
 .notif-btn {
@@ -407,6 +408,7 @@ header .nav {
     font-size: 20px;
     cursor: pointer;
     position: relative;
+    z-index: 5001;
 }
 
 .notif-badge {
@@ -421,16 +423,48 @@ header .nav {
 }
 
 .notif-dropdown {
-    display: none;
-    position: absolute;
-    right: 0;
-    top: 35px;
-    background: white;
-    width: 250px;
-    border-radius: 8px;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-    padding: 10px;
-    z-index: 999;
+  position: absolute;
+  top: calc(100% + 10px); /* 👈 PASTI TURUN KE BAWAH */
+  right: -250px; /* SESUAIKAN AGAR TIDAK KE KANAN */
+  left: auto;
+
+  min-width: 260px;
+  max-height: 60vh;
+  overflow-y: auto;
+
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+
+  z-index: 999999;
+  
+  opacity: 0;
+  transform: translateY(-10px);
+  pointer-events: none;
+  transition: 0.2s ease;
+}
+
+.notif-dropdown[style*="block"] {
+    transform: translateY(0);
+    opacity: 1;
+}
+
+.notif-dropdown a {
+    display: block;
+    padding: 10px 12px;
+    text-decoration: none;
+    color: #333;
+    white-space: nowrap;
+}
+
+.notif-dropdown.show {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+
+.notif-dropdown a:hover {
+    background: #f2f2f2;
 }
 
 .notif-dropdown h4 {
@@ -465,7 +499,21 @@ header .nav {
     position: relative;
 }
 
+.lihat-semua {
+    display: block;
+    text-align: center;
+    padding: 8px;
+    font-weight: bold;
+    color: #007bff;
+    border-top: 1px solid #eee;
+}
+
+.lihat-semua:hover {
+    background: #f5f5f5;
+}
+
 .header-center {
+    flex: 1;
     display: flex;
     justify-content: center;
     align-items: center;

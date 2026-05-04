@@ -71,16 +71,39 @@ header("X-XSS-Protection: 1; mode=block");
             Welcome, <strong><?= htmlspecialchars($_SESSION['username'] ?? 'Guest'); ?></strong>
         </div>
 
-        <div class="notif-wrapper">
-            <a href="<?= $base_url ?>task.php" class="notif-btn-link">
-                <button id="notifBtn" class="notif-btn">
-                    🔔
-                    <?php if ($jumlahNotif > 0): ?>
-                        <span class="notif-badge" id="notifCount"><?= $jumlahNotif ?></span>
-                    <?php endif; ?>
-                </button>
-            </a>
-        </div>
+    <div class="notif-wrapper">
+        <button id="notifBtn" class="notif-btn">
+            🔔
+            <?php if ($jumlahNotif > 0): ?>
+                <span class="notif-badge" id="notifCount"><?= $jumlahNotif ?></span>
+            <?php endif; ?>
+        </button>
+
+    <div id="notifDropdown" class="notif-dropdown">
+
+    <?php
+    $notifList = [];
+    while ($row = $resultNotif->fetch_assoc()) {
+        $notifList[] = $row;
+    }
+
+    $limit = 3;
+    $total = count($notifList);
+    ?>
+
+    <?php foreach (array_slice($notifList, 0, $limit) as $row): ?>
+        <a href="<?= $base_url ?>task.php?task_id=<?= $row['task_id'] ?>">
+            <?= htmlspecialchars($row['nama_task']) ?>
+        </a>
+    <?php endforeach; ?>
+
+    <?php if ($total > $limit): ?>
+        <a href="<?= $base_url ?>task.php" class="lihat-semua">
+            🔽 Lihat lebih banyak (<?= $total - $limit ?>)
+        </a>
+    <?php endif; ?>
+
+    </div>
     </div>
 
     <div class="header-right">
@@ -238,4 +261,16 @@ function confirmLogout() {
     }
     return false;
 }
+
+const notifBtn = document.getElementById("notifBtn");
+const notifDropdown = document.getElementById("notifDropdown");
+
+notifBtn.addEventListener("click", function(e) {
+    e.stopPropagation();
+    notifDropdown.classList.toggle("show");
+});
+
+document.addEventListener("click", function() {
+    notifDropdown.classList.remove("show");
+});
 </script>
