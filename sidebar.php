@@ -157,7 +157,7 @@ document.addEventListener("keydown", (e) => {
 
 document.querySelectorAll(".sidebar a").forEach(link => {
     link.addEventListener("click", function () {
-        this.style.pointerEvents = "none";
+        this.classList.add("loading");
     });
 });
 </script>

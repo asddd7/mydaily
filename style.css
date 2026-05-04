@@ -373,6 +373,11 @@ header .nav {
   border-radius: 0 3px 3px 0;
 }
 
+.loading {
+    opacity: 0.6;
+    cursor: wait;
+}
+
 /* Toggle button */
 .toggle-btn {
   background: none;
