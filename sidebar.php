@@ -37,7 +37,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
 header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
 header("Pragma: no-cache");
 if (isset($_SESSION['LAST_ACTIVITY'])) {
-    define('SESSION_TIMEOUT', 1800);
+    define('SESSION_TIMEOUT', 18000);
     if (time() - $_SESSION['LAST_ACTIVITY'] > $_SESSION['EXPIRE_TIME']) {
 
         session_unset();
