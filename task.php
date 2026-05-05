@@ -351,7 +351,7 @@ if (isset($_POST['import_excel'])) {
 <button class="btn-action" onclick="openModal('utama')">Tambah Tugas</button>
 <a href="template_import.xlsx" class="btn-action">Download Template Excel</a>
 
-<form id="formAddTask" enctype="multipart/form-data">
+<form id="formAddTask" method="post" enctype="multipart/form-data">
     <input type="file" name="file_excel" accept=".xlsx" required>
     <button class="btn-add-task" type="submit" name="import_excel">Import Excel</button>
 </form>
@@ -859,7 +859,6 @@ function showToast(msg) {
 }
 
     document.getElementById("formAddTask")?.addEventListener("submit", function(e) {
-        e.preventDefault();
 
         const formData = new FormData(this);
 
@@ -869,10 +868,8 @@ function showToast(msg) {
         })
         .then(res => res.text())
         .then(() => {
-        showToast("Task ditambahkan");
-        triggerNotifUpdate();
-        updateNotif();
-        window.location.href = "task.php";
+            showToast("Import berhasil");
+            location.reload();
         });
     });
 
