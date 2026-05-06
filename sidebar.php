@@ -32,7 +32,7 @@ $resultNotif = $stmtNotif->get_result();
 
 $jumlahNotif = $resultNotif->num_rows;
 
-$base_url = (strpos($_SERVER['PHP_SELF'], '/sub/') !== false) ? '../' : '';
+$base_url = '../';
 $current_page = basename($_SERVER['PHP_SELF']);
 header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
 header("Pragma: no-cache");
@@ -148,6 +148,11 @@ header("X-XSS-Protection: 1; mode=block");
     <a href="<?= $base_url ?>profile.php" class="<?= $current_page == 'profile.php' ? 'active' : '' ?>">
         <i class="menu-icon fa-solid fa-user"></i>
         <span class="menu-text">Profil</span>
+    </a>
+
+    <a href="<?= $base_url ?>koneksi/database_structure.php" class="<?= $current_page == 'database_structure.php' ? 'active' : '' ?>">
+        <i class="menu-icon fa-solid fa-table"></i>
+        <span class="menu-text">Struktur DB</span>
     </a>
 </aside>
 
