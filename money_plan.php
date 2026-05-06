@@ -17,11 +17,47 @@ if (isset($_POST['add_money'])) {
     $description = htmlspecialchars($_POST['description']);
     $tanggal = $_POST['tanggal'];
 
+    $payment_method = $_POST['payment_method'];
+
     mysqli_query($conn, "INSERT INTO money_plan 
-        (username, type, category, amount, description, tanggal)
-        VALUES 
-        ('$username','$type','$category','$amount','$description','$tanggal')");
+    (username, type, category, amount, description, tanggal, payment_method)
+    VALUES 
+    ('$username','$type','$category','$amount','$description','$tanggal','$payment_method')");
 }
+
+/* Total Cash */
+$cash_income = mysqli_fetch_assoc(mysqli_query($conn,
+    "SELECT SUM(amount) as total FROM money_plan 
+     WHERE username='$username' 
+     AND type='income'
+     AND payment_method='cash'"
+))['total'] ?? 0;
+
+$cash_expense = mysqli_fetch_assoc(mysqli_query($conn,
+    "SELECT SUM(amount) as total FROM money_plan 
+     WHERE username='$username' 
+     AND type='expense'
+     AND payment_method='cash'"
+))['total'] ?? 0;
+
+$cash_balance = $cash_income - $cash_expense;
+
+/* Total Online */
+$online_income = mysqli_fetch_assoc(mysqli_query($conn,
+    "SELECT SUM(amount) as total FROM money_plan 
+     WHERE username='$username' 
+     AND type='income'
+     AND payment_method='online'"
+))['total'] ?? 0;
+
+$online_expense = mysqli_fetch_assoc(mysqli_query($conn,
+    "SELECT SUM(amount) as total FROM money_plan 
+     WHERE username='$username' 
+     AND type='expense'
+     AND payment_method='online'"
+))['total'] ?? 0;
+
+$online_balance = $online_income - $online_expense;
 
 /* Delete */
 if (isset($_GET['delete'])) {
@@ -83,6 +119,7 @@ $months = [
 <!DOCTYPE html>
 <html>
 <head>
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Money Plan</title>
 <link rel="stylesheet" href="style.css">
@@ -97,20 +134,35 @@ $months = [
 <div class="content">
 
 <div class="card">
+
+<div class="money-card">   
 <h2>💰 Total Saldo Keseluruhan</h2>
 <h1 style="color:<?= $saldo < 0 ? 'red' : 'green'; ?>">
 Rp <?= number_format($saldo,0,',','.'); ?>
 </h1>
+<hr>
+<h2>💵 Cash Balance</h2>
+<h1>Rp <?= number_format($cash_balance,0,',','.'); ?></h1>
 <p>
-Pemasukan: <strong style="color:green;">Rp <?= number_format($income,0,',','.'); ?></strong> |
-Pengeluaran: <strong style="color:red;">Rp <?= number_format($expense,0,',','.'); ?></strong>
+  Pemasukan: <span class="income">Rp <?= number_format($cash_income,0,',','.') ?></span> |
+  Pengeluaran: <span class="expense">Rp <?= number_format($cash_expense,0,',','.') ?></span>
 </p>
+<hr>
+<h2>📱 Online Balance</h2>
+<h1>Rp <?= number_format($online_balance,0,',','.'); ?></h1>
+<p>
+  Pemasukan: <span class="income">Rp <?= number_format($online_income,0,',','.') ?></span> |
+  Pengeluaran: <span class="expense">Rp <?= number_format($online_expense,0,',','.') ?></span>
+</p>
+</div>
+
+
 <button class="btn-add-task" onclick="openModal()">+ Tambah Transaksi</button>
 </div>
 
-<!-- Filter Bulan -->
+<!-- Riwayat -->
 <div class="card">
-<h3>📅 Rekap Bulanan</h3>
+    <h3>📅 Rekap Bulanan</h3>
 
 <form method="get" style="margin-bottom:15px;">
 <select name="bulan" required>
@@ -118,9 +170,7 @@ Pengeluaran: <strong style="color:red;">Rp <?= number_format($expense,0,',','.')
     <option value="<?= $num ?>" <?= $num==$selected_month?'selected':''; ?>><?= $name ?></option>
 <?php endforeach; ?>
 </select>
-
 <select name="tahun" required>
-
 <hr>
 
 <?php 
@@ -133,23 +183,6 @@ for($y=$start_year;$y<=$current_year;$y++): ?>
 
 <button type="submit" class="btn-add-task">Filter</button>
 </form>
-
-<p>Pemasukan: <strong style="color:green;">
-Rp <?= number_format($income_month,0,',','.'); ?>
-</strong></p>
-
-<p>Pengeluaran: <strong style="color:red;">
-Rp <?= number_format($expense_month,0,',','.'); ?>
-</strong></p>
-
-<p>Saldo Bulan Ini:
-<strong style="color:<?= $saldo_month < 0 ? 'red' : 'green'; ?>">
-Rp <?= number_format($saldo_month,0,',','.'); ?>
-</strong></p>
-</div>
-
-<!-- Riwayat -->
-<div class="card">
 <h3>📋 Riwayat Transaksi (<?= $months[$selected_month] ?> <?= $selected_year ?>)</h3>
 
 <table width="100%" border="1" cellpadding="8" cellspacing="0">
@@ -170,7 +203,7 @@ Rp <?= number_format($saldo_month,0,',','.'); ?>
 <td><?= htmlspecialchars($row['category']); ?></td>
 <td>Rp <?= number_format($row['amount'],0,',','.'); ?></td>
 <td>
-<a href="?delete=<?= $row['id']; ?>" class="btn-delete" onclick="return confirm('Hapus transaksi?')">Hapus</a>
+<a href="?delete=<?= $row['id']; ?>" class="delete-mark" onclick="return confirm('Hapus transaksi?')">Hapus</a>
 </td>
 </tr>
 <?php endwhile; ?>
@@ -240,15 +273,23 @@ Rp <?= number_format($saldo_month,0,',','.'); ?>
                 class="form-text" required>
         </div>
 
-      <div class="form-group">
-        <label>Tanggal</label>
-        <input type="date" name="tanggal" value="<?= date('Y-m-d'); ?>" required>
-      </div>
+        <div class="form-group">
+            <label>Tanggal</label>
+            <input type="date" name="tanggal" value="<?= date('Y-m-d'); ?>" required>
+        </div>
 
-      <div class="form-group full">
-        <label>Keterangan (opsional)</label>
-        <input type="text" class="form-text" name="description" placeholder="Catatan tambahan">
-      </div>
+        <div class="form-group full">
+            <label>Keterangan (opsional)</label>
+            <input type="text" class="form-text" name="description" placeholder="Catatan tambahan">
+        </div>
+
+        <div class="form-group">
+            <label>Metode Pembayaran</label>
+            <select name="payment_method" required>
+                <option value="cash">💵 Cash</option>
+                <option value="online">📱 Saldo Online</option>
+            </select>
+        </div>
 
       <div class="modal-action">
         <button type="submit" name="add_money" class="btn-save">
