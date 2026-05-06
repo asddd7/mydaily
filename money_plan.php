@@ -244,6 +244,7 @@ for($y=$start_year;$y<=$current_year;$y++): ?>
                 <option value="Investasi">Investasi</option>
                 <option value="Lainnya">Lainnya (Custom)</option>
             </select>
+            
 
             <!-- Input manual -->
             <input type="text" name="category" id="category_input"
