@@ -150,10 +150,12 @@ header("X-XSS-Protection: 1; mode=block");
         <span class="menu-text">Profil</span>
     </a>
 
+    <?php if (($_SESSION['role'] ?? '') === 'admin'): ?>
     <a href="<?= $base_url ?>koneksi/database_structure.php" class="<?= $current_page == 'database_structure.php' ? 'active' : '' ?>">
         <i class="menu-icon fa-solid fa-table"></i>
         <span class="menu-text">Struktur DB</span>
     </a>
+    <?php endif; ?>
 </aside>
 
 <!-- PINDAH KE SINI -->

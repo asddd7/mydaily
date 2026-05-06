@@ -32,6 +32,7 @@ if (isset($_POST['login'])) {
             $_SESSION['id']       = $user['id'];
             $_SESSION['email']    = $user['email'];
             $_SESSION['username'] = $user['username'];
+            $_SESSION['role'] = $user['role'];
             $_SESSION['LAST_ACTIVITY'] = time();
             $_SESSION['EXPIRE_TIME']   = 1800;
 

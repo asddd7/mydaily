@@ -1,6 +1,13 @@
 <?php
 include 'koneksi.php';
 
+session_start();
+
+if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
+    header("Location: ../dashboard.php");
+    exit;
+}
+
 $resultTables = $conn->query("SHOW TABLES");
 
 $tables = [];
