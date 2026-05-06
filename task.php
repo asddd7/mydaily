@@ -380,7 +380,9 @@ if (isset($_POST['import_excel'])) {
             ?>
             <tr class="main-task" data-id="<?= $tugas['id']; ?>" onclick="handleRowClick(event, <?= $tugas['id']; ?>)">
                 <td>
-                    <span class="task-text" style="<?= $style ?>">
+                    <span class="task-text" 
+                        title="<?= htmlspecialchars($tugas['nama_tugas']); ?>"
+                        style="<?= $style ?>">
                         <?= htmlspecialchars($tugas['nama_tugas']); ?>
                     </span>
 
@@ -886,6 +888,7 @@ function handleRowClick(event, id) {
 
     toggleSubTask(id);
 }
+
 </script>
 
 </body>
