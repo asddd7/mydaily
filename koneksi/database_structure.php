@@ -25,11 +25,17 @@ while ($row = $resultTables->fetch_array()) {
 <?php include '../sidebar.php'; ?>
 <main class="content">
 
-<h2>📊 Struktur Semua Tabel Database</h2>
+<div class="search-wrapper">
+    <h3>Cari Struktur Table</h3>
+    <input type="text" id="searchTable" placeholder="Search...">
+    <div class="dropdown" id="dropdownResult">
+        <!-- isi hasil -->
+    </div>
+</div>
 
 <?php foreach ($tables as $table): ?>
 
-<div class="table-box">
+<div class="table-box" data-name="<?= strtolower($table) ?>" style="display:none;">
     <h3>📁 <?= $table ?></h3>
 
     <?php
@@ -61,6 +67,47 @@ function copyText(id) {
         alert("✅ Berhasil di-copy!");
     }).catch(err => {
         alert("❌ Gagal copy");
+    });
+}
+
+const tables = <?= json_encode($tables) ?>;
+const input = document.getElementById("searchTable");
+const dropdown = document.getElementById("dropdownResult");
+
+input.addEventListener("input", function () {
+    const value = this.value.toLowerCase();
+    dropdown.innerHTML = "";
+
+    if (value === "") {
+        dropdown.style.display = "none";
+        return;
+    }
+
+    const filtered = tables.filter(t => t.toLowerCase().includes(value));
+
+    filtered.forEach(table => {
+        const item = document.createElement("div");
+        item.textContent = table;
+
+        item.onclick = () => {
+            input.value = table;
+            dropdown.style.display = "none";
+            showTable(table);
+        };
+
+        dropdown.appendChild(item);
+    });
+
+    dropdown.style.display = "block";
+});
+
+function showTable(name) {
+    document.querySelectorAll(".table-box").forEach(box => {
+        if (box.dataset.name === name.toLowerCase()) {
+            box.style.display = "block";
+        } else {
+            box.style.display = "none";
+        }
     });
 }
 </script>
