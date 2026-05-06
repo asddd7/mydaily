@@ -56,6 +56,7 @@ if (isset($_POST['login'])) {
 <!DOCTYPE html>
 <html>
 <head>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <title>Login</title>
     <link rel="stylesheet" href="../style.css?v=2">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -82,8 +83,12 @@ if (isset($_POST['login'])) {
         <input type="email" name="email" placeholder="Email" required>
     </div>
 
-    <div class="input-group">
-        <input type="password" name="password" placeholder="Password" required>
+    <div class="input-group password-group">
+        <input type="password" name="password" id="password" placeholder="Password" required>
+
+    <span class="toggle-password" onclick="togglePassword()">
+        <i class="fa-solid fa-eye" id="toggleIcon"></i>
+    </span>
     </div>
 
     <button type="submit" name="login">Login</button>
@@ -95,5 +100,20 @@ if (isset($_POST['login'])) {
 </div>
 </div>
 </body>
+<script>
+function togglePassword() {
+    const password = document.getElementById("password");
+    const icon = document.getElementById("toggleIcon");
 
+    if (password.type === "password") {
+        password.type = "text";
+        icon.classList.remove("fa-eye");
+        icon.classList.add("fa-eye-slash");
+    } else {
+        password.type = "password";
+        icon.classList.remove("fa-eye-slash");
+        icon.classList.add("fa-eye");
+    }
+}
+</script>
 </html>

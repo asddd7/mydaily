@@ -1412,6 +1412,38 @@ select[name="amount"]:hover { border-color: #888; }
   font-size: 14px;
 }
 
+.password-group {
+    position: relative;
+}
+
+.password-group input {
+    width: 100%;
+    padding-right: 40px;
+}
+
+.toggle-password {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    user-select: none;
+    font-size: 18px;
+}
+
+.toggle-password {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: #666;
+}
+
+.toggle-password i {
+    font-size: 16px;
+}
+
 /* ══════════════════════════════════════════════════════════
    BADGES & UTILITIES
 ══════════════════════════════════════════════════════════ */
