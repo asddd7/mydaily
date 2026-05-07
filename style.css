@@ -1526,38 +1526,6 @@ select[name="amount"]:hover { border-color: #888; }
   font-size: 14px;
 }
 
-.password-group {
-    position: relative;
-}
-
-.password-group input {
-    width: 100%;
-    padding-right: 40px;
-}
-
-.toggle-password {
-    position: absolute;
-    right: 10px;
-    top: 50%;
-    transform: translateY(-50%);
-    cursor: pointer;
-    user-select: none;
-    font-size: 18px;
-}
-
-.toggle-password {
-    position: absolute;
-    right: 10px;
-    top: 50%;
-    transform: translateY(-50%);
-    cursor: pointer;
-    color: #666;
-}
-
-.toggle-password i {
-    font-size: 16px;
-}
-
 /* ══════════════════════════════════════════════════════════
    BADGES & UTILITIES
 ══════════════════════════════════════════════════════════ */
@@ -2012,6 +1980,23 @@ select[name="amount"]:hover { border-color: #888; }
   text-align: left;
 }
 
+.install-btn{
+    width:100%;
+    margin-top:15px;
+    padding:12px;
+    border:none;
+    border-radius:10px;
+    background:#0f172a;
+    color:white;
+    font-size:16px;
+    cursor:pointer;
+    transition:0.3s;
+}
+
+.install-btn:hover{
+    opacity:0.9;
+}
+
 /* ══════════════════════════════════════════════════════════
    RESPONSIVE — TABLET (≤ 1024px)
 ══════════════════════════════════════════════════════════ */
@@ -2169,27 +2154,53 @@ select[name="amount"]:hover { border-color: #888; }
   .alert-timeout .icon { font-size: 24px; }
 }
 
-/* ===== RESPONSIVE ===== */
-@media (max-width: 768px) {
-    .form-grid {
-        grid-template-columns: 1fr;
-    }
+  .form-grid {
+      grid-template-columns: 1fr;
+  }
 
-    .form-group.full {
-        grid-column: span 1;
-    }
+  .form-group.full {
+      grid-column: span 1;
+  }
 
-    .modal-action {
-        justify-content: stretch;
-        flex-direction: column;
-    }
+  .modal-action {
+      justify-content: stretch;
+      flex-direction: column;
+  }
 
-    .btn-save,
-    .btn-cancel {
-        width: 100%;
-    }
+  .btn-save,
+  .btn-cancel {
+      width: 100%;
+  }
+
+.password-wrapper {
+    position: relative;
+    width: 100%;
+    display: flex;
+    align-items: center;
 }
 
+.password-wrapper input {
+    width: 100%;
+    padding-right: 45px;
+}
+
+.toggle-password {
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 24px;
+    height: 24px;
+
+    cursor: pointer;
+    z-index: 2;
+    color: #999;
+}
 /* ══════════════════════════════════════════════════════════
    RESPONSIVE — VERY SMALL (≤ 360px)
 ══════════════════════════════════════════════════════════ */

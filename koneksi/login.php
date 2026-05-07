@@ -60,6 +60,11 @@ if (isset($_POST['login'])) {
     <title>Login</title>
     <link rel="stylesheet" href="../style.css?v=2">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="manifest" href="../manifest.json">
+    <meta name="theme-color" content="#0f172a">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <link rel="apple-touch-icon" href="../icon-192.png">
 </head>
 <body class="login-page">
 
@@ -83,7 +88,7 @@ if (isset($_POST['login'])) {
         <input type="email" name="email" placeholder="Email" required>
     </div>
 
-    <div class="input-group password-group">
+    <div class="input-group password-wrapper">
         <input type="password" name="password" id="password" placeholder="Password" required>
 
     <span class="toggle-password" onclick="togglePassword()">
@@ -96,7 +101,9 @@ if (isset($_POST['login'])) {
 
 <div class="login-footer">
     <p>Belum punya akun? <a href="register.php">Register</a></p>
+    <hr>
     <p>Lupa password? <a href="forgot_password.php">Reset Password</a></p>
+    <hr>
 </div>
 </div>
 </body>
