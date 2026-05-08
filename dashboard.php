@@ -235,8 +235,10 @@ $stmt->bind_param("ss", $username, $tanggal_hari_ini);
         <textarea name="description" class="form-desc" rows="3" placeholder="Tambahkan catatan..."></textarea>
 
       <div style="display:flex; justify-content:space-between; margin-top:12px;">
-        <button type="submit" style="flex:1; margin-right:5px;">Simpan</button>
-        <button type="button" onclick="closeModal()" style="flex:1;">
+        <button type="submit">
+            <i class="fa-solid fa-floppy-disk"></i> Simpan
+        </button>
+        <button type="close" onclick="closeModal()">
             <i class="fa-solid fa-xmark"></i> Batal
         </button>
       </div>

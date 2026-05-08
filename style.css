@@ -1268,18 +1268,34 @@ button:disabled {
   box-shadow: 0 8px 24px rgba(79, 142, 247, 0.45);
 }
 
-.modal button[type="button"] {
+.modal button[type="close"] {
   background: rgba(248, 113, 113, 0.12);
   border: 1px solid rgba(248, 113, 113, 0.3);
   color: var(--clr-danger);
   margin-top: 8px;
   box-shadow: none;
+  font-family: 'Poppins', sans-serif;
 }
 
-.modal button[type="button"]:hover {
+.modal button[type="close"]:hover {
   background: rgba(248, 113, 113, 0.2);
   transform: translateY(-1px);
   box-shadow: 0 6px 20px rgba(248, 113, 113, 0.2);
+}
+
+.modal button[type="submit"] {
+  background: rgba(0, 255, 0, 0.12);
+  border: 1px solid rgba(113, 248, 142, 0.3);
+  color: var(--clr-success);
+  margin-top: 8px;
+  box-shadow: none;
+  font-family: 'Poppins', sans-serif;
+}
+
+.modal button[type="submit"]:hover {
+  background: rgba(113, 248, 142, 0.2);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(113, 248, 142, 0.2);
 }
 
 .modal-action {
@@ -1668,129 +1684,322 @@ select[name="amount"]:hover { border-color: #888; }
 ══════════════════════════════════════════════════════════ */
 .calendar-card { margin-top: 20px; }
 
-.calendar-header {
+#calendarSection{
+  margin-top: 20px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 22px;
+  padding: 20px;
+  box-shadow:
+    0 2px 8px rgba(15,23,42,0.04),
+    0 12px 30px rgba(15,23,42,0.06);
+}
+
+/* HEADER */
+.calendar-header{
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  margin-bottom: 16px;
-}
-
-.calendar-header h3 {
-  font-family: 'Syne', sans-serif;
-  font-size: 16px;
-  font-weight: 700;
-  color: var(--clr-text);
-}
-
-.calendar-header button {
-  background: var(--clr-surface-2);
-  border: 1px solid var(--clr-border);
-  color: var(--clr-text-muted);
-  padding: 8px 14px;
-  border-radius: var(--radius-sm);
-  font-size: 13px;
-  font-weight: 600;
-  width: auto;
-}
-
-.calendar-header button:hover {
-  background: rgba(79, 142, 247, 0.12);
-  color: var(--clr-accent);
-  border-color: rgba(79, 142, 247, 0.3);
-}
-
-.calendar-table {
-  width: 100%;
-  border-collapse: collapse;
-  text-align: center;
-}
-
-.calendar-table th {
-  background: rgba(79, 142, 247, 0.1);
-  color: var(--clr-accent);
-  padding: 10px 8px;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.8px;
-  text-transform: uppercase;
-  text-align: center;
-}
-
-.calendar-table td {
-  padding: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.04);
-  height: 44px;
-  text-align: center;
-  font-size: 14px;
-  border-radius: 0;
-  color: var(--clr-text);
-}
-
-.calendar-table td:hover {
-  background: rgba(79, 142, 247, 0.12);
-  color: var(--clr-accent);
-  cursor: pointer;
-}
-
-.calendar-table td.today {
-  background: linear-gradient(135deg, var(--clr-accent), #3b6fd4);
-  color: #fff;
-  font-weight: 700;
-  border-radius: var(--radius-sm);
-  box-shadow: 0 4px 12px rgba(79, 142, 247, 0.35);
-}
-
-.calendar-table td.marked-date {
-  background-color: #facc15;
-  color: #fff;
-  font-weight: 700;
-  border-radius: var(--radius-sm);
-  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.85);
-}
-
-.calendar-table td.done-date {
-  background: rgba(0, 255, 21, 0.767);
-  color: #fff;
-  font-weight: 700;
-  border-radius: var(--radius-sm);
-  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.85);
-}
-
-.calendar-marks { list-style: none; margin-top: 14px; }
-
-.calendar-marks li {
-  display: flex;
   justify-content: space-between;
-  align-items: center;
+  margin-bottom: 18px;
   gap: 10px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  padding: 10px 14px;
-  border-radius: var(--radius);
-  margin-bottom: 6px;
-  transition: var(--t);
+}
+
+.calendar-header h4{
+  font-size: 18px;
+  font-weight: 700;
+  color: #111827;
+  letter-spacing: -0.3px;
+  margin: 0;
+}
+
+.calendar-header button{
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  color: #374151;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all .2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.calendar-header button:hover{
+  background: #f3f4f6;
+  transform: translateY(-1px);
+}
+
+/* TABLE */
+.calendar-table{
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 6px;
+  table-layout: fixed;
+}
+
+.calendar-table thead th{
+  font-size: 11px;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: #9ca3af;
+  padding: 10px 0;
+  letter-spacing: .8px;
+}
+
+/* CELL */
+.calendar-table td{
+  position: relative;
+  background: #f9fafb;
+  border: 1px solid #f1f5f9;
+  height: 72px;
+  border-radius: 18px;
+  vertical-align: top;
+  padding: 10px;
+  text-align: left;
+  font-size: 14px;
+  font-weight: 600;
+  color: #111827;
+  cursor: pointer;
+  transition: all .18s ease;
+}
+
+.calendar-table td:hover{
+  background: #f3f4f6;
+  border-color: #d1d5db;
+  transform: translateY(-1px);
+}
+
+/* TANGGAL HARI INI */
+.calendar-table td.today{
+  background: #2563eb;
+  color: white;
+  border-color: #2563eb;
+  box-shadow: 0 10px 25px rgba(37,99,235,0.25);
+}
+
+/* ADA EVENT */
+.calendar-table td.marked-date{
+  background: #fff7ed;
+  border-color: #fdba74;
+}
+
+/* DONE */
+.calendar-table td.done-date{
+  background: #ecfdf5;
+  border-color: #6ee7b7;
+}
+
+/* DOT EVENT */
+.calendar-table td.marked-date::after{
+  content: "";
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  width: 8px;
+  height: 8px;
+  background: #f59e0b;
+  border-radius: 50%;
+}
+
+.calendar-table td.done-date::after{
+  content: "";
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  width: 8px;
+  height: 8px;
+  background: #10b981;
+  border-radius: 50%;
+}
+
+/* PENANDA */
+.calendar-marks{
+  margin-top: 22px;
+}
+
+.calendar-marks h4{
+  font-size: 15px;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 12px;
+}
+
+.calendar-marks ul{
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+/* ITEM */
+.calendar-marks li{
+  background: #ffffff;
+  border: 1px solid #eef2f7;
+  border-radius: 18px;
+  padding: 14px;
+  margin-bottom: 10px;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 14px;
+
+  transition: all .2s ease;
+}
+
+.calendar-marks li:hover{
+  border-color: #dbeafe;
+  background: #f8fbff;
+}
+
+/* TEXT */
+.mark-text{
+  flex: 1;
+  color: #111827;
+  line-height: 1.5;
   font-size: 14px;
 }
 
-.calendar-marks li:hover { background: rgba(79, 142, 247, 0.06); }
+.mark-text strong{
+  display: inline-block;
+  margin-right: 6px;
+  color: #2563eb;
+}
 
-.delete-mark {
-  background: rgb(255, 0, 0);
-  border: 1px solid rgba(248, 113, 113, 0.25);
-  color: var(--clr-text2);
-  cursor: pointer;
-  border-radius: var(--radius-sm);
-  padding: 5px 10px;
+/* DONE STYLE */
+.done .mark-text{
+  opacity: .55;
+  text-decoration: line-through;
+}
+
+/* ACTION BUTTON */
+.mark-actions{
+  display: flex;
+  gap: 8px;
+}
+
+.btn-done{
+  background: #10b981;
+  border: none;
+  color: white;
+  padding: 9px 14px;
+  border-radius: 12px;
   font-size: 12px;
   font-weight: 600;
-  transition: var(--t);
+  cursor: pointer;
+  transition: .2s;
 }
 
-.delete-mark:hover { background: rgb(247, 89, 89); }
+.btn-done:hover:not(:disabled){
+  transform: translateY(-1px);
+  opacity: .95;
+}
 
-.mark-text { transition: var(--t); flex: 1; }
-.done .mark-text { text-decoration: line-through; opacity: 0.45; }
-.mark-actions button { margin-left: 5px; }
+.btn-done:disabled{
+  opacity: .5;
+  cursor: not-allowed;
+}
+
+.delete-mark{
+  background: #ef4444;
+  border: none;
+  color: white;
+  padding: 9px 14px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: .2s;
+}
+
+.delete-mark:hover{
+  transform: translateY(-1px);
+  opacity: .92;
+}
+
+/* MODAL */
+.modal{
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(0,0,0,0.45);
+  backdrop-filter: blur(4px);
+  opacity: 0;
+  visibility: hidden;
+  transition: 0.25s ease;
+  z-index: 9999;
+}
+
+.modal.show{
+  opacity: 1;
+  visibility: visible;
+}
+
+.modal-content{
+  width: 100%;
+  max-width: 420px;
+  background: #fff;
+  border-radius: 20px;
+  padding: 22px;
+  box-shadow: 0 15px 40px rgba(0,0,0,0.25);
+  animation: modalPop 0.25s ease;
+}
+
+/* Animasi */
+@keyframes modalPop{
+  from{
+    opacity: 0;
+    transform: scale(0.92) translateY(10px);
+  }
+  to{
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+
+.modal-header h3{
+  margin: 0 0 18px;
+  font-size: 20px;
+  color: #111827;
+}
+
+/* FORM */
+.form-label{
+  display: block;
+  margin-bottom: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.form-title,
+.form-desc{
+  width: 100%;
+  border: 1px solid #dbe1ea;
+  background: #f9fafb;
+  border-radius: 14px;
+  padding: 12px 14px;
+  margin-bottom: 14px;
+  font-size: 14px;
+  outline: none;
+  transition: .2s;
+  color: var(--clr-text)!important;
+}
+
+.form-title:focus,
+.form-desc:focus{
+  border-color: #2563eb;
+  background: #fff;
+  box-shadow: 0 0 0 4px rgba(37,99,235,.08);
+}
 
 /* ══════════════════════════════════════════════════════════
    NOTES
@@ -2316,104 +2525,45 @@ select[name="amount"]:hover { border-color: #888; }
   .calendar-card,
   #calendarSection{
     padding: 14px;
-    overflow: hidden;
+    border-radius: 18px;
   }
 
-  .calendar-header{
-    margin-bottom: 12px;
-    gap: 10px;
-  }
-
-  .calendar-header h3,
   .calendar-header h4{
-    font-size: 14px;
-    text-align: center;
-    flex: 1;
+    font-size: 15px;
   }
 
-  .calendar-header button{
-    padding: 6px 10px;
-    font-size: 12px;
-    min-width: 40px;
-    border-radius: 10px;
-  }
-
-  /* Table */
   .calendar-table{
-    table-layout: fixed;
-    width: 100%;
-  }
-
-  .calendar-table th{
-    font-size: 10px;
-    padding: 8px 2px;
+    border-spacing: 4px;
   }
 
   .calendar-table td{
-    height: 42px;
-    padding: 0;
-    font-size: 13px;
-    vertical-align: middle;
+    height: 52px;
+    padding: 6px;
+    font-size: 12px;
+    border-radius: 14px;
   }
 
-  .calendar-table td.today,
-  .calendar-table td.marked-date,
-  .calendar-table td.done-date{
-    border-radius: 10px;
-  }
-
-  /* List penanda */
-  .calendar-marks{
-    margin-top: 18px;
-  }
-
-  .calendar-marks h4{
-    font-size: 14px;
-    margin-bottom: 10px;
+  .calendar-table thead th{
+    font-size: 9px;
   }
 
   .calendar-marks li{
     flex-direction: column;
     align-items: flex-start;
-    gap: 12px;
-    padding: 12px;
-  }
-
-  .mark-text{
-    width: 100%;
-    font-size: 13px;
-    line-height: 1.5;
-    word-break: break-word;
   }
 
   .mark-actions{
     width: 100%;
-    display: flex;
-    gap: 8px;
   }
 
   .mark-actions button{
     flex: 1;
-    margin-left: 0 !important;
-    padding: 10px;
-    font-size: 12px;
-    border-radius: 10px;
   }
 
-  .btn-done{
-    min-height: 42px;
-  }
-
-  .delete-mark{
-    min-height: 42px;
-  }
-
-  /* Modal */
   .modal-content{
-    width: calc(100% - 30px);
-    max-width: 100%;
+    width: calc(100% - 24px);
     padding: 18px;
-    border-radius: 18px;
+    border-radius: 20px;
   }
 
   .form-title,
@@ -2426,6 +2576,36 @@ select[name="amount"]:hover { border-color: #888; }
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
   }
+
+.modal button[type="close"] {
+  background: rgba(248, 113, 113, 0.12);
+  border: 1px solid rgba(248, 113, 113, 0.3);
+  color: var(--clr-danger);
+  margin-top: 8px;
+  box-shadow: none;
+  font-family: 'Poppins', sans-serif;
+}
+
+.modal button[type="close"]:hover {
+  background: rgba(245, 0, 0, 0.932);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(248, 113, 113, 0.2);
+}
+
+.modal button[type="submit"] {
+  background: rgba(0, 255, 0, 0.12);
+  border: 1px solid rgba(113, 248, 142, 0.3);
+  color: var(--clr-success);
+  margin-top: 8px;
+  box-shadow: none;
+  font-family: 'Poppins', sans-serif;
+}
+
+.modal button[type="submit"]:hover {
+  background: rgba(113, 248, 142, 0.2);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(113, 248, 158, 0.2);
+}
 
 
   /* ── Notes ── */
@@ -2630,6 +2810,38 @@ body.login-page::after{
         transform: translateX(0);
     }
 }
+
+.modal{
+    padding: 16px;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .modal-content{
+    width: 100%;
+    max-width: 100%;
+    border-radius: 18px;
+    padding: 18px;
+  }
+
+  .modal-header h3{
+    font-size: 18px;
+    text-align: center;
+    margin-bottom: 18px;
+  }
+
+  .form-title,
+  .form-desc{
+    width: 100%;
+    font-size: 14px;
+  }
+
+  .modal button{
+    min-height: 44px;
+    border-radius: 12px;
+    font-size: 14px;
+  }
+
 }
 
 /* ══════════════════════════════════════════════════════════
