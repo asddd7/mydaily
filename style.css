@@ -1268,7 +1268,7 @@ button:disabled {
   box-shadow: 0 8px 24px rgba(79, 142, 247, 0.45);
 }
 
-.modal button[type="close"] {
+.modal button.close {
   background: rgba(248, 113, 113, 0.12);
   border: 1px solid rgba(248, 113, 113, 0.3);
   color: var(--clr-danger);
@@ -1277,7 +1277,7 @@ button:disabled {
   font-family: 'Poppins', sans-serif;
 }
 
-.modal button[type="close"]:hover {
+.modal button.close:hover {
   background: rgba(248, 113, 113, 0.2);
   transform: translateY(-1px);
   box-shadow: 0 6px 20px rgba(248, 113, 113, 0.2);
@@ -2577,7 +2577,7 @@ select[name="amount"]:hover { border-color: #888; }
     -webkit-overflow-scrolling: touch;
   }
 
-.modal button[type="close"] {
+.modal button.close {
   background: rgba(248, 113, 113, 0.12);
   border: 1px solid rgba(248, 113, 113, 0.3);
   color: var(--clr-danger);
@@ -2586,7 +2586,7 @@ select[name="amount"]:hover { border-color: #888; }
   font-family: 'Poppins', sans-serif;
 }
 
-.modal button[type="close"]:hover {
+.modal button.close:hover {
   background: rgba(245, 0, 0, 0.932);
   transform: translateY(-1px);
   box-shadow: 0 6px 20px rgba(248, 113, 113, 0.2);

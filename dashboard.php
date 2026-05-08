@@ -238,7 +238,7 @@ $stmt->bind_param("ss", $username, $tanggal_hari_ini);
         <button type="submit">
             <i class="fa-solid fa-floppy-disk"></i> Simpan
         </button>
-        <button type="close" onclick="closeModal()">
+        <button type="button" class="close" onclick="closeModal()">
             <i class="fa-solid fa-xmark"></i> Batal
         </button>
       </div>
