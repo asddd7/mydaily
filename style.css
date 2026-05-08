@@ -281,10 +281,29 @@ header .nav {
 .notif-btn {
   background: none;
   border: none;
-  font-size: 20px;
   cursor: pointer;
   position: relative;
   z-index: 5001;
+
+  font-size: 18px; /* kecilin default */
+  color: var(--clr-text2);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  transition: var(--t);
+}
+
+.notif-btn i {
+  font-size: 18px;
+}
+
+.notif-btn:hover {
+  background: rgba(255,255,255,0.1);
 }
 
 .notif-badge {
@@ -301,24 +320,28 @@ header .nav {
 .notif-dropdown {
   position: absolute;
   top: calc(100% + 10px);
-  right: -250px;
-  left: auto;
+
+  left: 50%;
+  right: auto;
+
+  transform: translateX(-50%) translateY(-10px);
+
   min-width: 260px;
-  max-height: 60vh;
-  overflow-y: auto;
+  max-width: 90vw;
+
   background: #fff;
   border-radius: 10px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.15);
   z-index: 999999;
+
   opacity: 0;
-  transform: translateY(-10px);
   pointer-events: none;
   transition: 0.2s ease;
 }
 
 .notif-dropdown.show {
   opacity: 1;
-  transform: translateY(0);
+  transform: translateX(-50%) translateY(0);
   pointer-events: auto;
 }
 
@@ -365,13 +388,13 @@ header .nav {
 
 .notif-dropdown a {
   display: block;
-  padding: 10px 12px;
+  width: 100%;
+  max-width: 100%;
 
-  white-space: nowrap;
   overflow: hidden;
+  white-space: nowrap;
   text-overflow: ellipsis;
 
-  max-width: 100%;
   box-sizing: border-box;
 }
 
@@ -1988,7 +2011,27 @@ select[name="amount"]:hover { border-color: #888; }
   .content { padding: 22px; gap: 20px; }
   .card-grid { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
 
-  .notif-dropdown { right: -100px; }
+.notif-dropdown {
+  position: absolute;
+  top: calc(100% + 10px);
+
+  left: 50%;
+  right: auto;
+
+  transform: translateX(-50%) translateY(-10px);
+
+  min-width: 260px;
+  max-width: 90vw;
+
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+  z-index: 999999;
+
+  opacity: 0;
+  pointer-events: none;
+  transition: 0.2s ease;
+}
 
   .stat-value { font-size: 22px; }
 
@@ -2028,23 +2071,39 @@ select[name="amount"]:hover { border-color: #888; }
     position: relative;
   }
 
-  .notif-dropdown {
-    position: absolute;
-    top: calc(100% + 8px);
-    right: 0;
-    left: auto;
+.notif-dropdown {
+  position: absolute;
+  top: calc(100% + 10px);
 
-    width: 90vw;
-    max-width: 320px;
-    min-width: unset;
+  left: 50%;
+  right: auto;
 
-    max-height: 60vh;
-    overflow-y: auto;
+  transform: translateX(-50%) translateY(-10px);
 
-    border-radius: 14px;
+  min-width: 260px;
+  max-width: 90vw;
 
-    transform: none;
-  }
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+  z-index: 999999;
+
+  opacity: 0;
+  pointer-events: none;
+  transition: 0.2s ease;
+}
+
+.notif-dropdown a {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+
+  box-sizing: border-box;
+}
 
   .lihat-semua {
   display: block;
@@ -2057,16 +2116,28 @@ select[name="amount"]:hover { border-color: #888; }
 
 .lihat-semua:hover { background: #f5f5f5; }
 
-.notif-dropdown a {
-  display: block;
-  padding: 10px 12px;
+.notif-btn {
+  width: 30px;
+  height: 30px;
+  font-size: 16px;
+}
 
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+.notif-btn i {
+  font-size: 16px;
+}
 
-  max-width: 100%;
-  box-sizing: border-box;
+.notif-badge {
+  font-size: 9px;
+  padding: 1px 5px;
+  top: -4px;
+  right: -6px;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.15); }
+  100% { transform: scale(1); }
 }
 
    /* Header */
@@ -2311,8 +2382,6 @@ select[name="amount"]:hover { border-color: #888; }
   .btn-checkout,
   .btn-primary { padding: 9px 14px; font-size: 12px; }
 
-  .notif-dropdown { min-width: calc(100vw - 20px); right: -10px; }
-
   table { font-size: 11px; }
   th, td { padding: 8px 8px; }
 
@@ -2323,23 +2392,27 @@ select[name="amount"]:hover { border-color: #888; }
     position: relative;
   }
 
-  .notif-dropdown {
-    position: absolute;
-    top: calc(100% + 8px);
-    right: 0;
-    left: auto;
+.notif-dropdown {
+  position: absolute;
+  top: calc(100% + 10px);
 
-    width:70vw;
-    max-width: 320px;
-    min-width: unset;
+  left: 50%;
+  right: auto;
 
-    max-height: 60vh;
-    overflow-y: auto;
+  transform: translateX(-50%) translateY(-10px);
 
-    border-radius: 14px;
+  min-width: 260px;
+  max-width: 90vw;
 
-    transform: none;
-  }
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+  z-index: 999999;
+
+  opacity: 0;
+  pointer-events: none;
+  transition: 0.2s ease;
+}
 
   .lihat-semua {
   display: block;
@@ -2354,13 +2427,13 @@ select[name="amount"]:hover { border-color: #888; }
 
 .notif-dropdown a {
   display: block;
-  padding: 10px 12px;
+  width: 100%;
+  max-width: 100%;
 
-  white-space: nowrap;
   overflow: hidden;
+  white-space: nowrap;
   text-overflow: ellipsis;
 
-  max-width: 100%;
   box-sizing: border-box;
 }
 

@@ -82,13 +82,13 @@ header("X-XSS-Protection: 1; mode=block");
     </div>
 
     <div class="notif-wrapper">
-        <button id="notifBtn" class="notif-btn">
-            🔔
-            <?php if ($jumlahNotif > 0): ?>
-                <span class="notif-badge" id="notifCount"><?= $jumlahNotif ?></span>
-            <?php endif; ?>
-        </button>
+    <button id="notifBtn" class="notif-btn">
+        <i class="fa-solid fa-bell"></i>
 
+        <?php if ($jumlahNotif > 0): ?>
+            <span class="notif-badge" id="notifCount"><?= $jumlahNotif ?></span>
+        <?php endif; ?>
+    </button>
     <div id="notifDropdown" class="notif-dropdown">
 
     <?php
