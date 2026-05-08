@@ -63,13 +63,23 @@ header("X-XSS-Protection: 1; mode=block");
 
     <div class="mobile-menu">
         <button id="toggleSidebarHeader" class="toggle-btn">☰</button>
-        <span class="logo-mobile">MYDAILY</span>
+
+        <div class="header-center">
+            <span class="logo-mobile">MYDAILY</span>
+
+            <div class="welcome">
+                Welcome
+                , <strong><?= htmlspecialchars($_SESSION['username'] ?? 'Guest'); ?></strong>
+            </div>
+        </div>
     </div>
 
-    <div class="header-center">
-        <div class="welcome">
-            Welcome, <strong><?= htmlspecialchars($_SESSION['username'] ?? 'Guest'); ?></strong>
-        </div>
+    <div class="header-center-desktop"> 
+            <div class="welcome">
+                Welcome,
+                <strong><?= htmlspecialchars($_SESSION['username'] ?? 'Guest'); ?></strong>
+            </div>
+    </div>
 
     <div class="notif-wrapper">
         <button id="notifBtn" class="notif-btn">

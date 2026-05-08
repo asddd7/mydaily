@@ -1,16 +1,17 @@
 RewriteEngine On
 
-# BYPASS FILE PWA
-RewriteRule ^sw\.js$ - [L]
-RewriteRule ^manifest\.json$ - [L]
+# Jangan rewrite file asli
+RewriteCond %{REQUEST_FILENAME} -f
+RewriteRule ^ - [L]
 
-# WWW redirect
-RewriteCond %{HTTP_HOST} ^www\.(.*)$ [NC]
-RewriteRule ^(.*)$ https://%1/$1 [L,R=301]
+# Jangan rewrite folder asli
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
 
-# HTTPS redirect
-RewriteCond %{HTTPS} off
-RewriteRule ^(.*)$ https://%{HTTP_HOST}/$1 [L,R=301]
-
+# MIME TYPES
 AddType application/javascript .js
 AddType application/manifest+json .json
+
+# FORCE HTTPS
+RewriteCond %{HTTPS} off
+RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
