@@ -2326,39 +2326,200 @@ select[name="amount"]:hover { border-color: #888; }
   .social-icons i { width: 38px; height: 38px; font-size: 16px; }
 
   /* ── Login ── */
-  body.login-page {
-    padding: 16px;
-    align-items: flex-start;
-    min-height: 100dvh;
-  }
+body.login-page{
+    padding: 20px;
+    align-items: center;
+}
 
-  .login-container {
+.login-container{
     width: 100%;
-    max-width: 100%;
-    margin: 0;
-    padding: 24px 18px;
+    padding: 25px 20px;
     border-radius: 18px;
-  }
+}
 
-  .login-container .logo { font-size: 22px; }
-  .login-container h2    { font-size: 14px; margin-bottom: 16px; }
-  .login-container p     { font-size: 13px; }
+.login-container h2{
+    font-size: 24px;
+}
 
-  .login-form {
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-  }
+.input-group input{
+    font-size: 15px;
+    padding: 13px 14px;
+}
 
-  .login-footer { margin-top: 18px; font-size: 13px; }
+.login-form button{
+    padding: 13px;
+    font-size: 15px;
+}
 
-  /* ── Notification on mobile ── */
-  .notif-badge { font-size: 10px; padding: 1px 5px; }
+.toggle-password{
+    font-size: 17px;
+    right: 14px;
+}
 
-  /* ── Toggle btn ── */
-  .toggle-btn { width: 100%; justify-content: center; }
+.login-footer{
+    font-size: 13px;
+}
 
-  h3 { font-size: 16px; }
+/* =========================
+   ANIMASI LOGIN
+========================= */
+
+/* Background gradient bergerak */
+body.login-page{
+    background:    radial-gradient(ellipse 60% 50% at 15% 25%, rgba(79, 142, 247, 0.15) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 60% at 85% 75%, rgba(124, 58, 237, 0.12) 0%, transparent 55%),
+    var(--clr-bg-2);
+    background-size: 400% 400%;
+    animation: gradientBG 12s ease infinite;
+    overflow: hidden;
+}
+
+/* Animasi background */
+@keyframes gradientBG{
+    0%{
+        background-position: 0% 50%;
+    }
+    50%{
+        background-position: 100% 50%;
+    }
+    100%{
+        background-position: 0% 50%;
+    }
+}
+
+/* Animasi box login muncul */
+.login-container{
+    animation: fadeZoom 0.8s ease;
+    position: relative;
+    z-index: 2;
+}
+
+/* Efek glow */
+.login-container::before{
+    content: "";
+    position: absolute;
+    inset: -2px;
+    border-radius: 22px;
+    background: linear-gradient(45deg, #0062ff, #60a5fa, #2563eb);
+    z-index: -1;
+    filter: blur(15px);
+    opacity: 0.5;
+}
+
+/* Animasi box */
+@keyframes fadeZoom{
+    from{
+        opacity: 0;
+        transform: scale(0.9) translateY(30px);
+    }
+    to{
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+/* Animasi input */
+.input-group input{
+    transition: all 0.3s ease;
+}
+
+.input-group input:focus{
+    transform: scale(1.02);
+}
+
+/* Animasi tombol */
+.login-form button{
+    position: relative;
+    overflow: hidden;
+}
+
+/* Efek shine tombol */
+.login-form button::before{
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: rgba(255,255,255,0.2);
+    transform: skewX(-25deg);
+    transition: 0.6s;
+}
+
+.login-form button:hover::before{
+    left: 120%;
+}
+
+/* Hover tombol */
+.login-form button:hover{
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(37,99,235,0.3);
+}
+
+/* Floating bubble background */
+body.login-page::before,
+body.login-page::after{
+    content: "";
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.08);
+    animation: floatBubble 10s infinite ease-in-out;
+}
+
+/* Bubble 1 */
+body.login-page::before{
+    width: 250px;
+    height: 250px;
+    top: -80px;
+    left: -80px;
+}
+
+/* Bubble 2 */
+body.login-page::after{
+    width: 300px;
+    height: 300px;
+    bottom: -120px;
+    right: -100px;
+    animation-delay: 3s;
+}
+
+/* Bubble animation */
+@keyframes floatBubble{
+    0%{
+        transform: translateY(0px);
+    }
+    50%{
+        transform: translateY(25px);
+    }
+    100%{
+        transform: translateY(0px);
+    }
+}
+
+/* Animasi alert */
+.alert-timeout{
+    animation: shakeFade 0.5s ease;
+}
+
+@keyframes shakeFade{
+    0%{
+        opacity: 0;
+        transform: translateX(-10px);
+    }
+    25%{
+        transform: translateX(10px);
+    }
+    50%{
+        transform: translateX(-5px);
+    }
+    75%{
+        transform: translateX(5px);
+    }
+    100%{
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
 }
 
 /* ══════════════════════════════════════════════════════════
