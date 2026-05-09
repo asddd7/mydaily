@@ -684,6 +684,8 @@ header .nav {
   display: flex;
   align-items: center;
   gap: 10px;
+  margin-top: 10px;
+  margin-bottom: 10px;
 }
 
 .card h3 i {
@@ -709,7 +711,8 @@ header .nav {
   border-radius: 100px;
   color: var(--clr-accent);
   display: inline-block;
-  margin-bottom: 14px;
+  margin-bottom: 10px;
+  margin-top: 10px;
 }
 
 .card ul { list-style: none; padding: 0; margin-top: 10px; }
@@ -730,15 +733,6 @@ header .nav {
   background: rgba(79, 142, 247, 0.07);
   border-color: rgba(79, 142, 247, 0.15);
   transform: translateX(3px);
-}
-
-.card input[type=checkbox] {
-  width: 18px;
-  height: 18px;
-  cursor: pointer;
-  accent-color: var(--clr-accent);
-  border-radius: 5px;
-  flex-shrink: 0;
 }
 
 /* Card grid */
@@ -932,6 +926,34 @@ tr[draggable="true"]:active { cursor: grabbing; }
 td.income  { background-color: #2ecc71 !important; color: white; font-weight: 600; text-align: center; }
 td.expense { background-color: #e74c3c !important; color: white; font-weight: 600; text-align: center; }
 
+input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    accent-color: var(--clr-accent);
+    flex-shrink: 0;
+
+    /* smooth interaction */
+    transition: all 0.18s ease;
+}
+
+/* hover effect */
+input[type="checkbox"]:hover {
+    transform: scale(1.15);
+    box-shadow: 0 0 0 4px rgba(0,0,0,0.05);
+}
+
+/* active click effect */
+input[type="checkbox"]:active {
+    transform: scale(0.95);
+}
+
+/* focus accessibility */
+input[type="checkbox"]:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--clr-accent), transparent 70%);
+}
+
 /* ══════════════════════════════════════════════════════════
    DATABASE SEARCH
 ══════════════════════════════════════════════════════════ */
@@ -1115,6 +1137,7 @@ button:disabled {
   padding: 6px 12px;
   border-radius: var(--radius-sm);
   font-size: 12px;
+  margin-bottom: 7px;
 }
 
 .btn-action:hover { background: rgba(79, 142, 247, 0.22); transform: scale(1.04); }
@@ -1691,7 +1714,7 @@ select[name="amount"]:hover { border-color: #888; }
 /* ══════════════════════════════════════════════════════════
    CALENDAR
 ══════════════════════════════════════════════════════════ */
-.calendar-card { margin-top: 20px; }
+.calendar-card { margin-top: 20px !important; }
 
 #calendarSection{
   margin-top: 20px;
@@ -2537,51 +2560,73 @@ select[name="amount"]:hover { border-color: #888; }
     box-sizing:border-box;
 }
 
+.import-excel {
+  background: rgba(0, 255, 0, 0.12);
+  border: 1px solid rgba(113, 248, 142, 0.3);
+  color: var(--clr-success);
+  margin-top: 8px;
+  box-shadow: none;
+  font-family: 'Poppins', sans-serif;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  margin-bottom: 7px;
+  padding: 6px 12px;
+}
+
+.import-excel:hover {
+  background: rgba(113, 248, 142, 0.2);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(113, 248, 158, 0.2);
+}
+
 /*===========================/
    CALENDAR
 /===========================*/
   .calendar-card,
   #calendarSection{
-    padding: 14px;
-    border-radius: 18px;
+    padding: 14px !important; 
+    border-radius: 18px !important;
   }
 
   .calendar-header h4{
-    font-size: 15px;
+    font-size: 15px !important;
   }
 
-  .calendar-table{
-    border-spacing: 4px;
-  }
+  .calendar-table {
+  width: 100%;
+  border-spacing: 4px;
+  table-layout: fixed;
+}
 
-  .calendar-table td{
-    height: 52px;
-    padding: 6px;
-    font-size: 12px;
-    border-radius: 14px;
-  }
+.calendar-table thead th {
+  font-size: 10px;
+  padding: 6px 0;
+}
 
-  .calendar-table thead th{
-    font-size: 9px;
-  }
+.calendar-table td {
+  height: 50px;
+  font-size: 12px;
+  padding: 6px;
+  border-radius: 12px;
+}
 
   .calendar-marks li{
-    flex-direction: column;
-    align-items: flex-start;
+    flex-direction: column !important;
+    align-items: flex-start !important;
   }
 
   .mark-actions{
-    width: 100%;
+    width: 100% !important; 
   }
 
   .mark-actions button{
-    flex: 1;
+    flex: 1 !important;
   }
 
   .modal-content{
-    width: calc(100% - 24px);
-    padding: 18px;
-    border-radius: 20px;
+    width: calc(100% - 24px) !important;
+    padding: 18px !important;
+    border-radius: 20px !important;
   }
 
   .form-title,
@@ -2859,6 +2904,72 @@ body.login-page::after{
     border-radius: 12px;
     font-size: 14px;
   }
+
+  th {
+      display: none; /* header tabel disembunyikan di mobile */
+  }
+
+  /* =========================
+      ACTION BUTTON AREA FIX
+      ========================= */
+  td:last-child {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      justify-content: flex-end;
+  }
+
+  .btn-action {
+      padding: 6px 8px;
+      font-size: 12px;
+      border-radius: 6px;
+      flex: 0 0 auto;
+  }
+
+  /* checkbox biar tidak terlalu besar */
+  input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+      accent-color: var(--clr-accent);
+      flex-shrink: 0;
+
+      /* smooth interaction */
+      transition: all 0.18s ease;
+  }
+
+  /* hover effect */
+  input[type="checkbox"]:hover {
+      transform: scale(1.15);
+      box-shadow: 0 0 0 4px rgba(0,0,0,0.05);
+  }
+
+  /* active click effect */
+  input[type="checkbox"]:active {
+      transform: scale(0.95);
+  }
+
+  /* focus accessibility */
+  input[type="checkbox"]:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--clr-accent), transparent 70%);
+  }
+
+  /* task text lebih fleksibel */
+  .task-text {
+      max-width: 70%;
+      flex: 1;
+      min-width: 0; /* penting untuk flex agar ellipsis bekerja */
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+  }
+
+  /* subtask indent tetap aman */
+  .subtask td {
+      padding-left: 15px !important;
+  }
+
 
 }
 
