@@ -332,12 +332,18 @@ function loadMarks(year,month){
             data.forEach(mark=>{
                 
             document.querySelectorAll(".calendar-table td").forEach(td=>{
-                if(td.getAttribute("data-date") === mark.tanggal){
+            if(td.getAttribute("data-date") === mark.tanggal){
+
+                // Jika bukan today → kasih warna mark
+                if(!td.classList.contains("today")){
                     td.classList.add("marked-date");
+
                     if(mark.selesai == 1){
                         td.classList.add("done-date");
                     }
                 }
+
+            }
             });
 
                 // === List penanda seperti biasa ===

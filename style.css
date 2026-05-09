@@ -1209,6 +1209,26 @@ button:disabled {
 
 .install-btn:hover { opacity: 0.9; }
 
+/* EXPORT AND IMPORT */
+.import-excel {
+  background: rgba(0, 255, 0, 0.12);
+  border: 1px solid rgba(113, 248, 142, 0.3);
+  color: var(--clr-success);
+  margin-top: 8px;
+  box-shadow: none;
+  font-family: 'Poppins', sans-serif;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  margin-bottom: 7px;
+  padding: 6px 12px;
+}
+
+.import-excel:hover {
+  background: rgba(113, 248, 142, 0.2);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(113, 248, 158, 0.2);
+}
+
 /* ══════════════════════════════════════════════════════════
    ABSEN FORM
 ══════════════════════════════════════════════════════════ */
@@ -1807,9 +1827,10 @@ select[name="amount"]:hover { border-color: #888; }
 /* TANGGAL HARI INI */
 .calendar-table td.today{
   background: #2563eb;
-  color: white;
+  color: var(--clr-text2);
   border-color: #2563eb;
   box-shadow: 0 10px 25px rgba(37,99,235,0.25);
+  text-align: left;
 }
 
 /* ADA EVENT */
@@ -3087,9 +3108,33 @@ body.login-page::after{
    CALENDAR
 ============================*/
 .calendar-table td{
-    height: 36px;
-    font-size: 12px;
-  }
+    width:40px;
+    height:40px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    padding:0;
+    cursor:pointer;
+
+    border:1px solid #e5e7eb;
+    border-radius:12px;
+
+    font-weight:600;
+    box-sizing:border-box;
+}
+
+.calendar-table tr{
+    display:flex;
+    gap:6px;
+    margin-bottom:6px;
+}
+
+.calendar-table tbody{
+    display:flex;
+    flex-direction:column;
+}
 
   .calendar-table th{
     font-size: 9px;
@@ -3102,6 +3147,13 @@ body.login-page::after{
   .calendar-header button{
     padding: 5px 8px;
     font-size: 11px;
+  }
+
+  .calendar-table td.today{
+    background: #2563eb;
+    color: var(--clr-text2);
+    border-color: #2563eb;
+    box-shadow: 0 10px 25px rgba(37,99,235,0.25);
   }
 
   .mark-actions{
