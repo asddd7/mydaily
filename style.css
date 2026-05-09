@@ -1253,6 +1253,7 @@ button:disabled {
   align-items: center;
   z-index: 999;
   padding: 16px;
+  overflow-y: auto;
 }
 
 .modal.show { display: flex; }
@@ -1261,13 +1262,15 @@ button:disabled {
   background: var(--clr-bg-2);
   border: 1px solid var(--clr-border);
   width: 100%;
-  max-width: 460px;
-  padding: 28px;
-  border-radius: var(--radius-xl);
+  max-width: 520px;
+  padding: 20px;
+  max-height: 90vh;
+  border-radius: 12px;
   box-shadow: 0 24px 64px rgba(0, 0, 0, 0.5);
   animation: modalIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
   position: relative;
   overflow: hidden;
+  overflow-y: auto;
 }
 
 .modal-content::before {
@@ -1291,7 +1294,7 @@ button:disabled {
   font-family: 'Poppins', sans-serif;
   font-size: 18px;
   font-weight: 700;
-  color: var(--clr-text2);
+  color: var(--clr-text);
 }
 
 .modal button {
@@ -1369,6 +1372,7 @@ label {
   font-weight: 500;
   color: var(--clr-text2);
   opacity: 0.8;
+  border-color:var(--clr-text);
 }
 
 .form-text {
@@ -1376,6 +1380,7 @@ label {
   color: var(--clr-text2) !important;
   margin-top: -8px;
   margin-bottom: 8px;
+  border-color: #ccc !important;
 }
 
 .post-form {
@@ -1406,19 +1411,32 @@ label {
   grid-template-columns: 1fr 1fr;
   gap: 16px;
   padding: 20px;
+  color: var(--clr-text) !important;
 }
 
 .form-group.full {
   grid-column: span 2;
-  color: var(--clr-text2) !important;
+  color: var(--clr-text) !important;
 }
 
 .form-group label {
   display: block;
   margin-bottom: 6px;
-  color: #ffffff !important;
+  color: var(--clr-text) !important;
   font-weight: 600;
   font-size: 14px;
+}
+
+.form-select {
+  background-color: #fff;
+  color: var(--clr-text) !important;;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+}
+
+.form-select:focus {
+  border-color: #4a90e2;
+  box-shadow: 0 0 5px rgba(74, 144, 226, 0.4);
 }
 
 /* Placeholder styles */
@@ -1441,7 +1459,7 @@ input[type="date"]:focus {
 .flatpickr-input{
   width:100%;
   padding:12px;
-  border:1px solid #ddd;
+  border-color: #ccc !important;
   border-radius:8px;
   font-size:16px;
   box-sizing:border-box;
@@ -1460,7 +1478,7 @@ textarea {
   border-radius: var(--radius);
   border: 1px solid var(--clr-border);
   background: rgba(255, 255, 255, 0.04);
-  color: var(--clr-text);
+  color: var(--clr-text) !important;
   font-family: 'Poppins', sans-serif;
   font-size: 14px;
   transition: var(--t);
@@ -1510,13 +1528,14 @@ select {
   cursor: pointer;
   border: 1px solid var(--clr-border);
   -moz-appearance: none;
+  color: var(--clr-text) !important;
 }
 
 select[name="type"],
 select[name="category"],
 select[name="amount"] {
   background-color: #fff;
-  color: #333;
+  color:var(--clr-text);
   border: 1px solid #ccc;
   border-radius: 8px;
 }
@@ -1531,9 +1550,6 @@ select[name="amount"]:focus {
 select[name="type"]:hover,
 select[name="category"]:hover,
 select[name="amount"]:hover { border-color: #888; }
-
-#category_select,
-#amount_select { color: #ffffff !important; margin-bottom: 8px; }
 
 #category_input,
 #amount_input { margin-top: 4px; }
@@ -2309,6 +2325,7 @@ select[name="amount"]:hover { border-color: #888; }
     --sidebar-w: 260px;
     --header-h: 60px;
   }
+  #modalInputs input::placeholder { color: rgba(255, 255, 255, 0.4); }
 
   /* ── Header ── */
   header .nav { padding: 0 14px; gap: 10px; }
@@ -2534,13 +2551,16 @@ select[name="amount"]:hover { border-color: #888; }
   .absen-form { flex-direction: column; }
   .absen-form button { min-width: unset; width: 100%; }
 
-  /* ── Modal ── */
-  .modal { padding: 12px; align-items: flex-end; }
+
+  .modal {
+    align-items: flex-start;
+    padding-top: 80px; /* kasih ruang dari header */
+  }
 
   .modal-content {
-    max-width: 100%;
-    padding: 20px 16px;
-    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    width: 100%;
+    max-height: 85vh;
+    border-radius: 12px;
   }
 
   .modal-content h3 { font-size: 16px; }
@@ -2552,9 +2572,43 @@ select[name="amount"]:hover { border-color: #888; }
   }
 
   /* ── Forms ── */
-  .form-grid { grid-template-columns: 1fr; padding: 12px; gap: 12px; }
 
-  .form-group.full { grid-column: span 1; }
+  .form-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    padding: 16px;
+  }
+
+  .form-grid > * {
+    min-width: 0;
+  }
+
+
+
+.form-group.full {
+  grid-column: span 1;
+  color: var(--clr-text) !important;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--clr-text) !important;
+  font-weight: 600;
+  font-size: 10px;
+}
+
+.form-select {
+  background-color: #fff;
+  color:var(--clr-text);
+  border: 1px solid #ccc;
+  border-radius: 8px;
+}
+
+.form-select:focus {
+  border-color: #4a90e2;
+  box-shadow: 0 0 5px rgba(74, 144, 226, 0.4);
+}
 
   input[type=text],
   input[type=number],
@@ -2572,13 +2626,13 @@ select[name="amount"]:hover { border-color: #888; }
 
   .search-wrapper { width: 100%; }
 
-  .flatpickr-input{
-    width:100%;
-    padding:12px;
-    border:1px solid #ddd;
-    border-radius:8px;
-    font-size:16px;
-    box-sizing:border-box;
+.flatpickr-input{
+  width:100%;
+  padding:12px;
+  border-color: #ccc !important;
+  border-radius:8px;
+  font-size:16px;
+  box-sizing:border-box;
 }
 
 .import-excel {
