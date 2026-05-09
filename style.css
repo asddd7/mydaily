@@ -1352,6 +1352,57 @@ button:disabled {
   margin-top: 10px;
 }
 
+/* Container tombol */
+.modal-footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+/* Style umum tombol */
+.modal-footer button {
+  flex: 1;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: none;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+/* Tombol SIMPAN */
+#modalSubmit {
+  background: #2563eb;
+  color: #fff;
+}
+
+#modalSubmit:hover {
+  background: #1d4ed8;
+  transform: translateY(-1px);
+}
+
+/* Tombol BATAL / CLOSE */
+.modal-footer .close {
+  background: #e5e7eb;
+  color: #111827;
+}
+
+.modal-footer .close:hover {
+  background: #d1d5db;
+  transform: translateY(-1px);
+}
+
+/* Efek klik */
+.modal-footer button:active {
+  transform: scale(0.97);
+}
+
 /* ══════════════════════════════════════════════════════════
    FORMS
 ══════════════════════════════════════════════════════════ */
@@ -2325,6 +2376,43 @@ select[name="amount"]:hover { border-color: #888; }
     --sidebar-w: 260px;
     --header-h: 60px;
   }
+
+  table, thead, tbody, th, td, tr {
+    display: block;
+  }
+
+  thead {
+    display: none;
+  }
+
+  table tr {
+    margin-bottom: 15px;
+    background: #fff;
+    border-radius: 10px;
+    padding: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  }
+
+  table td {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 5px;
+    border: none;
+    border-bottom: 1px solid #eee;
+    font-size: 14px;
+  }
+
+  table td:last-child {
+    border-bottom: none;
+  }
+
+  table td::before {
+    content: attr(data-label);
+    font-weight: 600;
+    color: #555;
+  }
+
+
   #modalInputs input::placeholder { color: rgba(255, 255, 255, 0.4); }
 
   /* ── Header ── */
@@ -2552,16 +2640,22 @@ select[name="amount"]:hover { border-color: #888; }
   .absen-form button { min-width: unset; width: 100%; }
 
 
-  .modal {
-    align-items: flex-start;
-    padding-top: 80px; /* kasih ruang dari header */
-  }
+.modal {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding-top: 0; /* hapus padding biar tidak dobel */
+  overflow-y: auto;
+}
 
-  .modal-content {
-    width: 100%;
-    max-height: 85vh;
-    border-radius: 12px;
-  }
+.modal-content {
+  margin-top: 100px; /* ini yang ngedorong ke bawah */
+  width: 100%;
+  max-height: 85vh;
+  border-radius: 12px;
+}
+
+
 
   .modal-content h3 { font-size: 16px; }
 
@@ -3043,6 +3137,14 @@ body.login-page::after{
   /* subtask indent tetap aman */
   .subtask td {
       padding-left: 15px !important;
+  }
+
+    .modal-footer {
+    flex-direction: column;
+  }
+
+  .modal-footer button {
+    width: 100%;
   }
 
 

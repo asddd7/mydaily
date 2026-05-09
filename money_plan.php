@@ -197,13 +197,13 @@ for($y=$start_year;$y<=$current_year;$y++): ?>
 
 <?php while($row = mysqli_fetch_assoc($data)) : ?>
 <tr>
-<td><?= date('d M Y', strtotime($row['tanggal'])); ?></td>
-<td class="<?= $row['type']; ?>">
+<td data-label="Tanggal"><?= date('d M Y', strtotime($row['tanggal'])); ?></td>
+<td data-label="Jenis" class="<?= $row['type']; ?>">
     <?= $row['type']=='income' ? 'Pemasukan' : 'Pengeluaran'; ?>
 </td>
-<td><?= htmlspecialchars($row['category']); ?></td>
-<td>Rp <?= number_format($row['amount'],0,',','.'); ?></td>
-<td>
+<td data-label="Kategori"><?= htmlspecialchars($row['category']); ?></td>
+<td data-label="Jumlah">Rp <?= number_format($row['amount'],0,',','.'); ?></td>
+<td data-label="Aksi">
 <a href="?delete=<?= $row['id']; ?>" class="delete-mark" onclick="return confirm('Hapus transaksi?')">Hapus</a>
 </td>
 </tr>
@@ -298,7 +298,7 @@ for($y=$start_year;$y<=$current_year;$y++): ?>
             </select>
         </div>
 
-      <div style="display:flex; justify-content:space-between; margin-top:12px;">
+      <div class="modal-footer">
         <button type="submit" name="add_money" id="modalSubmit">
             <i class="fa-solid fa-floppy-disk"></i> Simpan
         </button>
