@@ -336,6 +336,7 @@ if (isset($_POST['import_excel'])) {
 <link rel="stylesheet" href="style.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body>
@@ -480,12 +481,14 @@ if (isset($_POST['import_excel'])) {
 <form method="post" id="modalForm">
     <input type="hidden" name="parent_id" id="modalParentId">
     <div id="modalInputs"></div>
-    <div style="display:flex; justify-content:space-between; margin-top:12px;">
-        <button type="submit" id="modalSubmit" style="flex:1; margin-right:5px;">Simpan</button>
-        <button type="button" onclick="closeModal()" style="flex:1;">
+      <div style="display:flex; justify-content:space-between; margin-top:12px;">
+        <button type="submit" id="modalSubmit">
+            <i class="fa-solid fa-floppy-disk"></i> Simpan
+        </button>
+        <button type="button" class="close" onclick="closeModal()">
             <i class="fa-solid fa-xmark"></i> Batal
         </button>
-    </div>
+      </div>
 </form>
 
 <div id="subtaskList"></div>
@@ -507,19 +510,38 @@ function openModal(type, id = null, title = 'Tambah Tugas') {
     subtaskList.innerHTML = '';
 
     if(type === 'utama') {
+
         modalParentId.value = '';
+
         modalInputs.innerHTML = `
-            <input type="text" name="nama_tugas" placeholder="Nama Tugas" required>
-            <input type="date" name="deadline" required>
+            <input type="text" 
+                name="nama_tugas" 
+                class="form-title" 
+                placeholder="Nama Tugas" 
+                required>
+
+            <input type="text" 
+                name="deadline" 
+                class="flatpickr"
+                placeholder="Pilih tanggal"
+                required>
         `;
-        modalSubmit.innerText = 'Simpan Tugas';
+
+        // INIT FLATPICKR
+        flatpickr(".flatpickr", {
+            dateFormat: "Y-m-d",
+            allowInput: true,
+            disableMobile: true
+        });
+
+        modalSubmit.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Simpan Tugas';
         modalSubmit.setAttribute('name', 'submit');
     } else if(type === 'tugas') {
         modalParentId.value = id;
         modalInputs.innerHTML = `
-            <input type="text" name="nama_subtask" placeholder="Nama Subtask" required>
+            <input type="text" name="nama_subtask" class="form-title" placeholder="Nama Subtask" required>
         `;
-        modalSubmit.innerText = 'Simpan Subtask';
+        modalSubmit.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Simpan ';
     
         fetch("sub/load_subtask.php?parent_id=" + id)
             .then(res => res.text())
@@ -665,23 +687,39 @@ function copyTask(id){
     .then(()=> location.reload());
 }
 
-function openEditTask(id, nama, deadline){
-    const modal = document.getElementById("taskModal");
-    const modalTitle = document.getElementById("modalTitle");
-    const modalInputs = document.getElementById("modalInputs");
-    const modalParentId = document.getElementById("modalParentId");
+    function openEditTask(id, nama, deadline){
 
-    modal.classList.add("show");
-    modalTitle.innerText = "Edit Tugas";
+        const modal = document.getElementById("taskModal");
+        const modalTitle = document.getElementById("modalTitle");
+        const modalInputs = document.getElementById("modalInputs");
+        const modalParentId = document.getElementById("modalParentId");
 
-    modalParentId.value = '';
+        modal.classList.add("show");
+        modalTitle.innerText = "Edit Tugas";
 
-    modalInputs.innerHTML = `
-        <input type="hidden" name="edit_task_id" value="${id}">
-        <input type="text" name="edit_nama_tugas" value="${nama}" required>
-        <input type="date" name="edit_deadline" value="${deadline}" required>
-    `;
-}
+        modalParentId.value = '';
+
+        modalInputs.innerHTML = `
+            <input type="hidden" name="edit_task_id" value="${id}">
+
+            <input type="text" 
+                name="edit_nama_tugas" 
+                value="${nama}" 
+                required>
+
+            <input type="text" 
+                name="edit_deadline" 
+                class="flatpickr"
+                value="${deadline}" 
+                required>
+        `;
+
+        flatpickr(".flatpickr", {
+            dateFormat: "Y-m-d",
+            allowInput: true,
+            disableMobile: true
+        });
+    }
 function deleteSubtask(id){
     if(confirm("Hapus subtask ini?")){
         const formData = new FormData();
@@ -890,6 +928,6 @@ function handleRowClick(event, id) {
 }
 
 </script>
-
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 </body>
 </html>

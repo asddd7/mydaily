@@ -1395,6 +1395,15 @@ input[type="date"]:focus {
   box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
 }
 
+.flatpickr-input{
+  width:100%;
+  padding:12px;
+  border:1px solid #ddd;
+  border-radius:8px;
+  font-size:16px;
+  box-sizing:border-box;
+}
+
 /* Shared input styles */
 input[type=text],
 input[type=number],
@@ -1419,7 +1428,7 @@ textarea {
 input[type=email],
 input[type=password] { color: var(--clr-text2); }
 
-input[type=date] { color: var(--clr-text2); color-scheme: dark; }
+input[type=date] { color: var(--clr-text); color-scheme: dark; }
 
 input[type=text]:focus,
 input[type=number]:focus,
@@ -1489,7 +1498,7 @@ select[name="amount"]:hover { border-color: #888; }
 /* Modal inputs */
 #modalInputs input[type="text"],
 #modalInputs input[type="date"] {
-  color: var(--clr-text2);
+  color: var(--clr-text);
   background: rgba(255, 255, 255, 0.04);
 }
 
@@ -2518,6 +2527,15 @@ select[name="amount"]:hover { border-color: #888; }
   select[name="tahun"] { font-size: 13px; padding: 7px 10px; }
 
   .search-wrapper { width: 100%; }
+
+  .flatpickr-input{
+    width:100%;
+    padding:12px;
+    border:1px solid #ddd;
+    border-radius:8px;
+    font-size:16px;
+    box-sizing:border-box;
+}
 
 /*===========================/
    CALENDAR
