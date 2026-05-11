@@ -140,11 +140,6 @@ header("X-XSS-Protection: 1; mode=block");
         <span class="menu-text">Tugas</span>
     </a>
 
-    <a href="<?= $base_url ?>backup_data.php" class="<?= $current_page == 'backup_data.php' ? 'active' : '' ?>">
-        <i class="menu-icon fa-solid fa-database"></i>
-        <span class="menu-text">BackUp Data</span>
-    </a>
-
     <a href="<?= $base_url ?>money_plan.php" class="<?= $current_page == 'money_plan.php' ? 'active' : '' ?>">
         <i class="menu-icon fa-solid fa-wallet"></i>
         <span class="menu-text">Pengatur Keuangan</span>
@@ -158,6 +153,11 @@ header("X-XSS-Protection: 1; mode=block");
     <a href="<?= $base_url ?>profile.php" class="<?= $current_page == 'profile.php' ? 'active' : '' ?>">
         <i class="menu-icon fa-solid fa-user"></i>
         <span class="menu-text">Profil</span>
+    </a>
+
+    <a href="<?= $base_url ?>file_manager.php" class="<?= $current_page == 'file_manager.php' ? 'active' : '' ?>">
+        <i class="menu-icon fa-solid fa-folder"></i>
+        <span class="menu-text">File Manager</span>
     </a>
 
     <?php if (($_SESSION['role'] ?? '') === 'admin'): ?>
