@@ -1,6 +1,6 @@
 <?php
 include 'koneksi/koneksi.php';
-session_start();
+
 require 'vendor/autoload.php';
 
 use PhpOffice\PhpSpreadsheet\IOFactory;
@@ -482,7 +482,7 @@ if (isset($_POST['import_excel'])) {
 <form method="post" id="modalForm">
     <input type="hidden" name="parent_id" id="modalParentId">
     <div id="modalInputs"></div>
-      <div style="display:flex; justify-content:space-between; margin-top:12px;">
+      <div class="modal-footer">
         <button type="submit" id="modalSubmit">
             <i class="fa-solid fa-floppy-disk"></i> Simpan
         </button>

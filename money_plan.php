@@ -125,6 +125,7 @@ $months = [
 <link rel="stylesheet" href="style.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 </head>
 <body>
 
@@ -196,13 +197,13 @@ for($y=$start_year;$y<=$current_year;$y++): ?>
 
 <?php while($row = mysqli_fetch_assoc($data)) : ?>
 <tr>
-<td><?= date('d M Y', strtotime($row['tanggal'])); ?></td>
-<td class="<?= $row['type']; ?>">
+<td data-label="Tanggal"><?= date('d M Y', strtotime($row['tanggal'])); ?></td>
+<td data-label="Jenis" class="<?= $row['type']; ?>">
     <?= $row['type']=='income' ? 'Pemasukan' : 'Pengeluaran'; ?>
 </td>
-<td><?= htmlspecialchars($row['category']); ?></td>
-<td>Rp <?= number_format($row['amount'],0,',','.'); ?></td>
-<td>
+<td data-label="Kategori"><?= htmlspecialchars($row['category']); ?></td>
+<td data-label="Jumlah">Rp <?= number_format($row['amount'],0,',','.'); ?></td>
+<td data-label="Aksi">
 <a href="?delete=<?= $row['id']; ?>" class="delete-mark" onclick="return confirm('Hapus transaksi?')">Hapus</a>
 </td>
 </tr>
@@ -218,7 +219,7 @@ for($y=$start_year;$y<=$current_year;$y++): ?>
 <div class="modal" id="moneyModal">
   <div class="modal-content">
 
-    <h3 style="margin-bottom:15px;">➕ Tambah Transaksi</h3>
+    <h3">➕ Tambah Transaksi</h3>
 
     <form method="post" class="form-grid">
 
@@ -231,10 +232,20 @@ for($y=$start_year;$y<=$current_year;$y++): ?>
         </div>
 
         <div class="form-group">
+            <label>Tanggal</label>
+            <input type="text" 
+            name="tanggal" 
+            class="flatpickr"
+            value="<?= date('Y-m-d'); ?>" 
+            placeholder="Pilih tanggal"
+            required>
+        </div>
+
+        <div class="form-group">
             <label>Kategori</label>
 
             <!-- Dropdown -->
-            <select id="category_select" onchange="syncCategory()" required>
+            <select id="category_select" class="form-select" onchange="syncCategory()" required>
                 <option value="">-- Pilih Kategori --</option>
                 <option value="Gaji">Gaji</option>
                 <option value="Makan">Makan</option>
@@ -256,7 +267,7 @@ for($y=$start_year;$y<=$current_year;$y++): ?>
             <label>Nominal</label>
 
             <!-- Dropdown -->
-            <select id="amount_select" onchange="syncAmount()">
+            <select id="amount_select" class="form-select" onchange="syncAmount()">
                 <option value="">-- Pilih Nominal --</option>
                 <option value="10000">Rp 10.000</option>
                 <option value="20000">Rp 20.000</option>
@@ -274,11 +285,6 @@ for($y=$start_year;$y<=$current_year;$y++): ?>
                 class="form-text" required>
         </div>
 
-        <div class="form-group">
-            <label>Tanggal</label>
-            <input type="date" name="tanggal" value="<?= date('Y-m-d'); ?>" required>
-        </div>
-
         <div class="form-group full">
             <label>Keterangan (opsional)</label>
             <input type="text" class="form-text" name="description" placeholder="Catatan tambahan">
@@ -286,18 +292,18 @@ for($y=$start_year;$y<=$current_year;$y++): ?>
 
         <div class="form-group">
             <label>Metode Pembayaran</label>
-            <select name="payment_method" required>
+            <select name="payment_method" class="form-select" required>
                 <option value="cash">💵 Cash</option>
                 <option value="online">📱 Saldo Online</option>
             </select>
         </div>
 
-      <div class="modal-action">
-        <button type="submit" name="add_money" class="btn-save">
-          💾 Simpan
+      <div class="modal-footer">
+        <button type="submit" name="add_money" id="modalSubmit">
+            <i class="fa-solid fa-floppy-disk"></i> Simpan
         </button>
-        <button type="button" onclick="closeModal()" class="btn-cancel">
-          ✖ Tutup
+        <button type="button" class="close" onclick="closeModal()">
+            <i class="fa-solid fa-xmark"></i> Batal
         </button>
       </div>
 
@@ -361,6 +367,14 @@ document.getElementById("amount_input").addEventListener("input", function(){
     document.getElementById("amount_select").value = "custom";
 });
 </script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
+<script>
+flatpickr(".flatpickr", {
+    dateFormat: "Y-m-d",
+    allowInput: true,
+    disableMobile: true
+});
+</script>
 </body>
 </html>

@@ -1,6 +1,5 @@
 <?php
 include 'koneksi/koneksi.php';
-session_start();
 
 // Generate CSRF token (hanya jika belum ada)
 if (empty($_SESSION['csrf'])) {
@@ -234,7 +233,7 @@ $stmt->bind_param("ss", $username, $tanggal_hari_ini);
         <label class="form-label">Catatan</label>
         <textarea name="description" class="form-desc" rows="3" placeholder="Tambahkan catatan..."></textarea>
 
-      <div style="display:flex; justify-content:space-between; margin-top:12px;">
+      <div class="modal-footer">
         <button type="submit">
             <i class="fa-solid fa-floppy-disk"></i> Simpan
         </button>
