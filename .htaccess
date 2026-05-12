@@ -1,17 +1,16 @@
 RewriteEngine On
 
-# Jangan rewrite file asli
-RewriteCond %{REQUEST_FILENAME} -f
-RewriteRule ^ - [L]
+# HTTPS
+RewriteCond %{HTTPS} off
+RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 
-# Jangan rewrite folder asli
+# Jangan rewrite file/folder asli
+RewriteCond %{REQUEST_FILENAME} -f [OR]
 RewriteCond %{REQUEST_FILENAME} -d
 RewriteRule ^ - [L]
 
-# MIME TYPES
-AddType application/javascript .js
-AddType application/manifest+json .json
-
-# FORCE HTTPS
-RewriteCond %{HTTPS} off
-RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+# PAKSA JSON DI /app/
+<FilesMatch "manifest\.json$">
+    ForceType application/json
+    Header set Content-Type "application/json"
+</FilesMatch>

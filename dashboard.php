@@ -1,6 +1,5 @@
 <?php
 include 'koneksi/koneksi.php';
-session_start();
 
 // Generate CSRF token (hanya jika belum ada)
 if (empty($_SESSION['csrf'])) {
