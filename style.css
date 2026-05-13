@@ -1441,6 +1441,82 @@ button:disabled {
   margin-top: 10px;
 }
 
+/* ══════════════════════════════════════════════════════════
+   DASHBOARD
+══════════════════════════════════════════════════════════ */
+
+.daily-summary-card{
+    background: #ffffff;
+    border-radius: 18px;
+    padding: 24px;
+    box-shadow: 0 4px 18px rgba(0,0,0,0.06);
+    border: 1px solid #e5e7eb;
+    margin-top: 20px;
+    transition: 0.3s ease;
+}
+
+.daily-summary-card:hover{
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+}
+
+.summary-title{
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 20px;
+    color: #111827;
+}
+
+.summary-content{
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.summary-item .label{
+    display: block;
+    font-size: 14px;
+    color: #6b7280;
+    margin-bottom: 8px;
+}
+
+.summary-item h2{
+    font-size: 30px;
+    font-weight: 700;
+    color: #10b981;
+    margin: 0;
+}
+
+.summary-divider{
+    height: 1px;
+    background: #e5e7eb;
+}
+
+.latest-note{
+    background: #f8fafc;
+    padding: 14px;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    margin-top: 10px;
+}
+
+.latest-note strong{
+    display: block;
+    font-size: 16px;
+    color: #111827;
+    margin-bottom: 6px;
+}
+
+.latest-note small{
+    color: #64748b;
+    font-size: 13px;
+}
+
+.empty-note{
+    color: #9ca3af;
+    font-style: italic;
+    margin-top: 10px;
+}
 
 /* ══════════════════════════════════════════════════════════
    FORMS
@@ -2961,6 +3037,19 @@ body.login-page{
 
 .login-footer{
     font-size: 13px;
+}
+
+.daily-summary-card{
+    padding: 18px;
+    border-radius: 14px;
+}
+
+.summary-title{
+    font-size: 18px;
+}
+
+.summary-item h2{
+    font-size: 24px;
 }
 
 /* =========================
