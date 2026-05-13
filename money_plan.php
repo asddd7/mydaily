@@ -216,21 +216,22 @@ for($y=$start_year;$y<=$current_year;$y++): ?>
 </div>
 
 <!-- Modal Tambah Data -->
-<div class="modal" id="moneyModal">
-  <div class="modal-content">
+<div class="modal money-modal" id="moneyModal">
+  <div class="modal-content money-modal-content">
 
-    <h3">➕ Tambah Transaksi</h3>
+    <h3 id="modalTitle">➕ Tambah Transaksi</h3>
 
     <form method="post" class="form-grid">
 
         <div class="form-group">
             <label>Jenis Transaksi</label>
-            <select name="type" required>
+            <select name="type" class="form-select" required>
             <option value="income">🟢 Pemasukan</option>
             <option value="expense">🔴 Pengeluaran</option>
             </select>
         </div>
 
+        
         <div class="form-group">
             <label>Tanggal</label>
             <input type="text" 
@@ -315,12 +316,14 @@ for($y=$start_year;$y<=$current_year;$y++): ?>
 <script>
 const modal = document.getElementById("moneyModal");
 
-function openModal(){
-    modal.classList.add("show");
+function openModal() {
+    document.getElementById("moneyModal").classList.add("show");
+    document.body.classList.add("modal-open");
 }
 
-function closeModal(){
-    modal.classList.remove("show");
+function closeModal() {
+    document.getElementById("moneyModal").classList.remove("show");
+    document.body.classList.remove("modal-open");
 }
 
 window.addEventListener("click", function(e){
