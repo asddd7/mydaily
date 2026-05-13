@@ -1,6 +1,5 @@
 <?php
 include '../koneksi/koneksi.php';
-session_start();
 
 $user_id = $_SESSION['id'];
 $month = $_GET['month'];

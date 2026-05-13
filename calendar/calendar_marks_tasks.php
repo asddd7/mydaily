@@ -1,7 +1,5 @@
 <?php
 include '../koneksi/koneksi.php';
-session_start();
-
 $user_id = $_SESSION['id'] ?? 0;
 
 $stmt = $conn->prepare("SELECT id, nama_tugas AS title, deadline AS tanggal 
