@@ -20,6 +20,7 @@
   --clr-success:        #22d3a3;
   --clr-danger:         #f87171;
   --clr-warning:        #fbbf24;
+  --clr-back:           #000000;
 
   /* Text */
   --clr-text:           #000000;
@@ -1041,7 +1042,7 @@ button:disabled {
 
 .btn-checkin:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(34, 211, 163, 0.4);
+  box-shadow: 0 8px 24px rgba(34, 211, 164, 0.13);
 }
 
 /* Check-out */
@@ -1091,16 +1092,16 @@ button:disabled {
 
 /* Back */
 .btn-back {
-  background: rgba(34, 211, 163, 0.12);
-  border: 1px solid rgba(34, 211, 163, 0.3);
-  color: var(--clr-success);
+  background-color: var(--clr-back)!important;
+  border: 1px solid rgb(0, 0, 0);
+  color: var(--clr-text2);
   padding: 10px 20px;
   border-radius: var(--radius);
 }
 
 .btn-back:hover {
-  background: rgba(34, 211, 163, 0.2);
-  border-color: var(--clr-success);
+  background: rgb(0, 0, 0);
+  border-color: var(--clr-back);
   transform: translateY(-1px);
 }
 
@@ -1119,6 +1120,7 @@ button:disabled {
 /* Edit */
 .btn-edit,
 .download-btn,
+.back-btn,
 .delete-btn {
   display: inline-flex;
   align-items: center;
@@ -1127,6 +1129,7 @@ button:disabled {
 
   padding: 8px 12px;
   margin-top: 10px;
+  margin-bottom: 10px;
 
   border: 1px solid transparent;
   border-radius: 8px;
@@ -1149,7 +1152,8 @@ button:disabled {
 }
 
 .btn-edit:hover {
-  background: rgba(251, 190, 36, 0.15);
+  background: rgba(251, 190, 36, 0.541);
+  color: var(--clr-text2);
 }
 
 /* DOWNLOAD */
@@ -1160,7 +1164,8 @@ button:disabled {
 }
 
 .download-btn:hover {
-  background: rgba(36, 251, 47, 0.15);
+  background: rgba(48, 241, 9, 0.5)!important;
+  color: var(--clr-text2);
 }
 
 /* DELETE */
@@ -1171,7 +1176,42 @@ button:disabled {
 }
 
 .delete-btn:hover {
-  background: rgba(248, 113, 113, 0.15);
+  background: rgba(255, 0, 0, 0.281);
+  color: var(--clr-text2);
+}
+
+/* Back */
+.btn-back {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+
+  padding: 8px 12px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+
+  border: 1px solid var(--clr-back);
+  border-radius: 8px;
+
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1;
+
+  text-decoration: none;
+  cursor: pointer;
+
+  color: var(--clr-text2);
+  background-color: var(--clr-back);
+
+  transition: 0.2s ease;
+}
+
+.btn-back:hover {
+  background: rgba(0, 0, 0, 0.281);
+  color: var(--clr-text2);
+
+  transform: translateY(-1px);
 }
 
 /* Action */
@@ -1340,48 +1380,55 @@ button:disabled {
 }
 
 .modal button {
+  display: inline-flex;
   width: 100%;
-  padding: 12px;
-  border-radius: var(--radius);
-  background: linear-gradient(135deg, var(--clr-accent), var(--clr-accent-2));
+  padding: 8px 12px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  border: 1px solid transparent;
+  border-radius: 8px;
   color: #fff;
-  font-weight: 700;
-  font-size: 15px;
-  margin-top: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1;
   box-shadow: 0 4px 16px rgba(79, 142, 247, 0.3);
-}
-
-.modal button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(79, 142, 247, 0.45);
+  text-decoration: none;
+  cursor: pointer;
+  transition: 0.2s ease;
 }
 
 .modal button.close {
-  background: rgba(248, 113, 113, 0.12);
-  border: 1px solid rgba(248, 113, 113, 0.3);
-  color: var(--clr-danger);
+  background-color: var(--clr-danger);
+  border-color: var(--clr-danger);
+  color: var(--clr-text2);
   margin-top: 8px;
   box-shadow: none;
   font-family: 'Poppins', sans-serif;
 }
 
 .modal button.close:hover {
-  background: rgba(248, 113, 113, 0.2);
+  background: rgba(255, 0, 0, 0.281);
+  color: var(--clr-text2);
   transform: translateY(-1px);
   box-shadow: 0 6px 20px rgba(248, 113, 113, 0.2);
 }
 
+
 .modal button[type="submit"] {
-  background: rgba(0, 255, 0, 0.12);
-  border: 1px solid rgba(113, 248, 142, 0.3);
-  color: var(--clr-success);
+  color: var(--clr-text2);
+  background-color: var(--clr-success);
+  border-color: var(--clr-success);
   margin-top: 8px;
   box-shadow: none;
   font-family: 'Poppins', sans-serif;
 }
 
 .modal button[type="submit"]:hover {
-  background: rgba(113, 248, 142, 0.2);
+  background: rgba(255, 0, 0, 0);
+  color: var(--clr-text2);
   transform: translateY(-1px);
   box-shadow: 0 6px 20px rgba(113, 248, 142, 0.2);
 }
@@ -1393,6 +1440,7 @@ button:disabled {
   gap: 10px;
   margin-top: 10px;
 }
+
 
 /* ══════════════════════════════════════════════════════════
    FORMS
@@ -1428,21 +1476,6 @@ label {
   flex-direction: column;
   gap: 14px;
   margin-top: 16px;
-}
-
-.post-form button[name=submit] {
-  padding: 13px;
-  background: linear-gradient(135deg, var(--clr-accent), var(--clr-accent-2));
-  color: #fff;
-  font-weight: 700;
-  font-size: 15px;
-  border-radius: var(--radius);
-  box-shadow: 0 4px 16px rgba(79, 142, 247, 0.3);
-}
-
-.post-form button[name=submit]:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(79, 142, 247, 0.45);
 }
 
 /* Grid form */
@@ -2782,6 +2815,21 @@ video{
   box-shadow: 0 6px 20px rgba(113, 248, 158, 0.2);
 }
 
+.btn-add-task {
+  background: linear-gradient(135deg, var(--clr-accent), var(--clr-accent-2));
+  color: #fff;
+  padding: 10px 10px;
+  border-radius: var(--radius);
+  box-shadow: 0 4px 16px rgba(79, 142, 247, 0.3);
+  margin-top: 12px;
+  margin-bottom: 10px;
+}
+
+.btn-add-task:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(79, 142, 247, 0.45);
+}
+
 /*===========================/
    CALENDAR
 /===========================*/
@@ -2844,35 +2892,34 @@ video{
   }
 
 .modal button.close {
-  background: rgba(248, 113, 113, 0.12);
-  border: 1px solid rgba(248, 113, 113, 0.3);
-  color: var(--clr-danger);
+  background-color: var(--clr-danger);
+  border-color: var(--clr-danger);
+  color: var(--clr-text2);
   margin-top: 8px;
   box-shadow: none;
   font-family: 'Poppins', sans-serif;
 }
 
 .modal button.close:hover {
-  background: rgba(245, 0, 0, 0.932);
+  background: rgba(255, 0, 0, 0.281);
   transform: translateY(-1px);
   box-shadow: 0 6px 20px rgba(248, 113, 113, 0.2);
 }
 
 .modal button[type="submit"] {
-  background: rgba(0, 255, 0, 0.12);
-  border: 1px solid rgba(113, 248, 142, 0.3);
-  color: var(--clr-success);
+  background-color: var(--clr-success);
+  border-color: var(--clr-success);
+  color: var(--clr-text2);
   margin-top: 8px;
   box-shadow: none;
   font-family: 'Poppins', sans-serif;
 }
 
 .modal button[type="submit"]:hover {
-  background: rgba(113, 248, 142, 0.2);
+  background: rgba(0, 255, 55, 0.164);
   transform: translateY(-1px);
   box-shadow: 0 6px 20px rgba(113, 248, 158, 0.2);
 }
-
 
   /* ── Notes ── */
   .note-detail-img { width: 100%; max-width: 100%; border-radius: 8px; }

@@ -204,7 +204,7 @@ for($y=$start_year;$y<=$current_year;$y++): ?>
 <td data-label="Kategori"><?= htmlspecialchars($row['category']); ?></td>
 <td data-label="Jumlah">Rp <?= number_format($row['amount'],0,',','.'); ?></td>
 <td data-label="Aksi">
-<a href="?delete=<?= $row['id']; ?>" class="delete-mark" onclick="return confirm('Hapus transaksi?')">Hapus</a>
+<a href="?delete=<?= $row['id']; ?>" class="delete-btn" onclick="return confirm('Hapus transaksi?')">Hapus</a>
 </td>
 </tr>
 <?php endwhile; ?>

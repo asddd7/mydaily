@@ -234,7 +234,7 @@ $stmt->bind_param("ss", $username, $tanggal_hari_ini);
         <textarea name="description" class="form-desc" rows="3" placeholder="Tambahkan catatan..."></textarea>
 
       <div class="modal-footer">
-        <button type="submit">
+        <button type="submit" class="download-btn">
             <i class="fa-solid fa-floppy-disk"></i> Simpan
         </button>
         <button type="button" class="close" onclick="closeModal()">
@@ -357,13 +357,13 @@ function loadMarks(year,month){
                     <div class="mark-actions">
                         <button 
                             onclick="${mark.selesai == 0 ? `toggleMark(${mark.id},0)` : ''}"
-                            class="btn-done"
+                            class="download-btn"
                             ${mark.selesai == 1 ? 'disabled' : ''}
                         >
                             Selesai
                         </button>
 
-                        <button onclick="deleteMark(${mark.id})" class="delete-mark">
+                        <button onclick="deleteMark(${mark.id})" class="delete-btn">
                             Hapus
                         </button>
                     </div>

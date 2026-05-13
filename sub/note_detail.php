@@ -105,8 +105,8 @@ if (!$note) {
 
     <br><br>
 
-    <button type="submit" name="update_note">Update</button>
-    <a href="note_detail.php?id=<?= $id; ?>" class="btn-back">Batal</a>
+    <button type="submit" name="update_note" class="download-btn">Update</button>
+    <a href="note_detail.php?id=<?= $id; ?>" class="delete-btn">Batal</a>
 
 </form>
 
@@ -135,7 +135,9 @@ if (!$note) {
 <?php endif; ?>
 
 <br><br>
+<div class="modal-footer">
 <a href="../notes.php" class="btn-back">← Kembali</a>
+</div>
 
 </div>
 </div>

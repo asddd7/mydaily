@@ -349,12 +349,12 @@ if (isset($_POST['import_excel'])) {
 <div class="card">
 <h3>📌 Daftar Tugas</h3>
 
-<button class="btn-action" onclick="openModal('utama')">Tambah Tugas</button>
-<a href="template_import.xlsx" class="import-excel">Download Template Excel</a>
+<button class="btn-add-task" onclick="openModal('utama')">Tambah Tugas</button>
+<a href="template_import.xlsx" class="download-btn">Download Template Excel</a>
 
 <form id="formAddTask" method="post" enctype="multipart/form-data">
     <input type="file" name="file_excel" accept=".xlsx" required>
-    <button class="import-excel" type="submit" name="import_excel">Import Excel</button>
+    <button class="download-btn" type="submit" name="import_excel">Import Excel</button>
 </form>
 <?php if (!empty($tugas_per_tanggal)): ?>
     <?php foreach ($tugas_per_tanggal as $tanggal => $tugas_tgl): ?>

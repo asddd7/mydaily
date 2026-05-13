@@ -128,7 +128,7 @@ $notes = mysqli_query($conn, "SELECT * FROM notes
 
                     <a href="?delete=<?= $row['id']; ?>" 
                        onclick="return confirm('Hapus catatan ini?')"
-                       class="delete-mark">Hapus</a>
+                       class="delete-btn">Hapus</a>
                 </div>
             </div>
             <hr>
