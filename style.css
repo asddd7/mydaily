@@ -1681,6 +1681,7 @@ select {
   padding-right: 40px;
   cursor: pointer;
   border: 1px solid var(--clr-border);
+  appearance: none;
   -moz-appearance: none;
 }
 
@@ -2148,7 +2149,7 @@ select[name="amount"]:hover   { border-color: #888; }
    LOGIN PAGE
 ═══════════════════════════════════════════════ */
 .login-container {
-  background: var(--clr-surface);
+  background: var(--clr-bg-2)!important;
   backdrop-filter: blur(24px);
   border: 1px solid var(--clr-border);
   width: 100%;
@@ -2170,7 +2171,6 @@ select[name="amount"]:hover   { border-color: #888; }
   position: absolute;
   inset: -2px;
   border-radius: 22px;
-  background: linear-gradient(45deg, #0062ff, #60a5fa, #2563eb);
   z-index: -1;
   filter: blur(15px);
   opacity: 0.5;
@@ -2261,6 +2261,47 @@ select[name="amount"]:hover   { border-color: #888; }
   border-radius: var(--radius);
   font-size: 13px;
   text-align: left;
+}
+
+.alert-error{
+    background:#fee2e2;
+    color:#b91c1c;
+    padding:12px;
+    border-radius:10px;
+    margin-bottom:15px;
+    font-size:14px;
+    text-align:center;
+    border:1px solid #fecaca;
+}
+
+.login-footer {
+    margin-top: 24px;
+    text-align: center;
+    font-size: 14px;
+    color: #8b98b1;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.login-footer p {
+    margin: 0;
+}
+
+.login-footer a {
+    color: #4f8cff;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.login-footer a:hover {
+    color: #2563eb;
+    text-decoration: underline;
+}
+
+.login-footer a:active {
+    transform: scale(0.98);
 }
 
 /* ═══════════════════════════════════════════════
@@ -2663,7 +2704,10 @@ body.modal-open {
 
   .login-container    { width: 100%; padding: 25px 20px; border-radius: 18px; }
   .login-container h2 { font-size: 24px; }
-  .login-footer       { font-size: 13px; }
+  .login-footer {
+    font-size: 13px;
+    gap: 8px;
+  }
   .toggle-password    { font-size: 17px; right: 14px; }
 
   /* File Upload */

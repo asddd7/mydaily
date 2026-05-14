@@ -2,12 +2,67 @@
 session_start();
 include 'koneksi.php';
 
+/*
+|--------------------------------------------------------------------------
+| CSRF TOKEN
+|--------------------------------------------------------------------------
+*/
 if (empty($_SESSION['token'])) {
     $_SESSION['token'] = bin2hex(random_bytes(32));
 }
 
-if (isset($_POST['login'])) {
+/*
+|--------------------------------------------------------------------------
+| RATE LIMIT CONFIG
+|--------------------------------------------------------------------------
+*/
+$max_attempts = 5; // maksimal percobaan login
+$lock_time    = 300; // 300 detik = 5 menit
 
+/*
+|--------------------------------------------------------------------------
+| INIT SESSION LOGIN ATTEMPT
+|--------------------------------------------------------------------------
+*/
+if (!isset($_SESSION['login_attempt'])) {
+    $_SESSION['login_attempt'] = 0;
+}
+
+if (!isset($_SESSION['last_attempt_time'])) {
+    $_SESSION['last_attempt_time'] = 0;
+}
+
+$error = "";
+
+/*
+|--------------------------------------------------------------------------
+| CHECK LOCK
+|--------------------------------------------------------------------------
+*/
+if (
+    $_SESSION['login_attempt'] >= $max_attempts &&
+    (time() - $_SESSION['last_attempt_time']) < $lock_time
+) {
+
+    $remaining = $lock_time - (time() - $_SESSION['last_attempt_time']);
+
+    $minutes = ceil($remaining / 60);
+
+    $error = "Terlalu banyak percobaan login. Coba lagi dalam {$minutes} menit.";
+}
+
+/*
+|--------------------------------------------------------------------------
+| LOGIN PROCESS
+|--------------------------------------------------------------------------
+*/
+if (isset($_POST['login']) && empty($error)) {
+
+    /*
+    |--------------------------------------------------------------------------
+    | VALIDASI CSRF TOKEN
+    |--------------------------------------------------------------------------
+    */
     if (!isset($_POST['token']) || $_POST['token'] !== $_SESSION['token']) {
         die("Token tidak valid!");
     }
@@ -15,44 +70,114 @@ if (isset($_POST['login'])) {
     $email    = trim($_POST['email']);
     $password = $_POST['password'];
 
-    $stmt = $conn->prepare("SELECT * FROM users WHERE email=? LIMIT 1");
-    $stmt->bind_param("s", $email);
-    $stmt->execute();
-    $result = $stmt->get_result();
+    /*
+    |--------------------------------------------------------------------------
+    | VALIDASI EMAIL
+    |--------------------------------------------------------------------------
+    */
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $error = "Format email tidak valid.";
+    } else {
 
-    if ($result->num_rows === 1) {
+        /*
+        |--------------------------------------------------------------------------
+        | CHECK USER
+        |--------------------------------------------------------------------------
+        */
+        $stmt = $conn->prepare("
+            SELECT id, email, username, password, role
+            FROM users
+            WHERE email = ?
+            LIMIT 1
+        ");
 
-        $user = $result->fetch_assoc();
+        $stmt->bind_param("s", $email);
+        $stmt->execute();
 
-        if (password_verify($password, $user['password'])) {
+        $result = $stmt->get_result();
 
-            session_regenerate_id(true);
+        if ($result->num_rows === 1) {
 
-            $_SESSION['login']    = true;
-            $_SESSION['id']       = $user['id'];
-            $_SESSION['email']    = $user['email'];
-            $_SESSION['username'] = $user['username'];
-            $_SESSION['role'] = $user['role'];
-            $_SESSION['LAST_ACTIVITY'] = time();
-            $_SESSION['EXPIRE_TIME']   = 1800;
+            $user = $result->fetch_assoc();
 
-            $_SESSION['token'] = bin2hex(random_bytes(32));
+            /*
+            |--------------------------------------------------------------------------
+            | VERIFY PASSWORD
+            |--------------------------------------------------------------------------
+            */
+            if (password_verify($password, $user['password'])) {
 
-            header("Location: ../dashboard.php");
-            exit;
+                /*
+                |--------------------------------------------------------------------------
+                | RESET RATE LIMIT
+                |--------------------------------------------------------------------------
+                */
+                $_SESSION['login_attempt'] = 0;
+                $_SESSION['last_attempt_time'] = 0;
+
+                /*
+                |--------------------------------------------------------------------------
+                | LOGIN SUCCESS
+                |--------------------------------------------------------------------------
+                */
+                session_regenerate_id(true);
+
+                $_SESSION['login']    = true;
+                $_SESSION['id']       = $user['id'];
+                $_SESSION['email']    = $user['email'];
+                $_SESSION['username'] = $user['username'];
+                $_SESSION['role']     = $user['role'];
+
+                $_SESSION['LAST_ACTIVITY'] = time();
+                $_SESSION['EXPIRE_TIME']   = 1800;
+
+                $_SESSION['token'] = bin2hex(random_bytes(32));
+
+                header("Location: ../dashboard.php");
+                exit;
+
+            } else {
+
+                /*
+                |--------------------------------------------------------------------------
+                | PASSWORD SALAH
+                |--------------------------------------------------------------------------
+                */
+                $_SESSION['login_attempt']++;
+                $_SESSION['last_attempt_time'] = time();
+
+                $sisa = $max_attempts - $_SESSION['login_attempt'];
+
+                if ($sisa > 0) {
+                    $error = "Password salah. Sisa percobaan: {$sisa}";
+                } else {
+                    $error = "Terlalu banyak percobaan login. Tunggu 5 menit.";
+                }
+            }
 
         } else {
-            echo "<script>alert('Password salah');</script>";
+
+            /*
+            |--------------------------------------------------------------------------
+            | EMAIL TIDAK DITEMUKAN
+            |--------------------------------------------------------------------------
+            */
+            $_SESSION['login_attempt']++;
+            $_SESSION['last_attempt_time'] = time();
+
+            $sisa = $max_attempts - $_SESSION['login_attempt'];
+
+            if ($sisa > 0) {
+                $error = "Email tidak terdaftar. Sisa percobaan: {$sisa}";
+            } else {
+                $error = "Terlalu banyak percobaan login. Tunggu 5 menit.";
+            }
         }
 
-    } else {
-        echo "<script>alert('Email tidak terdaftar');</script>";
+        $stmt->close();
     }
-
-    $stmt->close();
 }
 ?>
-
 <!DOCTYPE html>
 <html>
 <head>
@@ -70,16 +195,11 @@ if (isset($_POST['login'])) {
 
 <div class="login-container">
     <h2>Login</h2>
-
-<?php if(isset($_GET['timeout'])): ?>
-    <div class="alert-timeout">
-        <div class="icon">⏰</div>
-        <div class="text">
-            <strong>Sesi Berakhir</strong>
-            <p>Kamu tidak aktif terlalu lama. Silakan login kembali.</p>
-        </div>
+    <?php if (!empty($error)): ?>
+    <div class="alert-error">
+        <?= htmlspecialchars($error) ?>
     </div>
-<?php endif; ?>
+    <?php endif; ?>
 
 <form method="POST" class="login-form">
     <input type="hidden" name="token" value="<?= $_SESSION['token']; ?>">
@@ -101,9 +221,7 @@ if (isset($_POST['login'])) {
 
 <div class="login-footer">
     <p>Belum punya akun? <a href="register.php">Register</a></p>
-    <hr>
     <p>Lupa password? <a href="forgot_password.php">Reset Password</a></p>
-    <hr>
 </div>
 </div>
 </body>
