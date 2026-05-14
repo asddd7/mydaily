@@ -2263,15 +2263,118 @@ select[name="amount"]:hover   { border-color: #888; }
   text-align: left;
 }
 
-.alert-error{
-    background:#fee2e2;
-    color:#b91c1c;
-    padding:12px;
-    border-radius:10px;
-    margin-bottom:15px;
-    font-size:14px;
-    text-align:center;
-    border:1px solid #fecaca;
+.modern-alert{
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+
+    width: 100%;
+
+    padding: 16px 18px;
+    margin-bottom: 20px;
+
+    border-radius: 16px;
+
+    animation: fadeSlide .35s ease;
+
+    backdrop-filter: blur(10px);
+
+    box-shadow:
+        0 10px 25px rgba(0,0,0,.08);
+
+    overflow: hidden;
+}
+
+/* LEFT BORDER */
+.modern-alert::before{
+    content: "";
+    position: absolute;
+
+    left: 0;
+    top: 0;
+
+    width: 5px;
+    height: 100%;
+}
+
+/* ERROR */
+.modern-alert.error{
+    background: rgba(239,68,68,.08);
+    border: 1px solid rgba(239,68,68,.15);
+}
+
+.modern-alert.error::before{
+    background: #ef4444;
+}
+
+/* ICON */
+.alert-icon{
+    min-width: 42px;
+    height: 42px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 12px;
+
+    font-size: 18px;
+
+    background: rgba(239,68,68,.15);
+    color: #ef4444;
+}
+
+/* CONTENT */
+.alert-content{
+    flex: 1;
+}
+
+.alert-title{
+    font-size: 15px;
+    font-weight: 700;
+    color: #fff;
+
+    margin-bottom: 4px;
+}
+
+.alert-message{
+    font-size: 14px;
+    line-height: 1.5;
+
+    color: rgba(255,255,255,.8);
+}
+
+/* CLOSE BUTTON */
+.alert-close{
+    border: none;
+    background: transparent;
+
+    color: rgba(255,255,255,.5);
+
+    cursor: pointer;
+
+    font-size: 16px;
+
+    transition: .2s;
+}
+
+.alert-close:hover{
+    color: #fff;
+    transform: scale(1.1);
+}
+
+/* ANIMATION */
+@keyframes fadeSlide{
+    from{
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to{
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .login-footer {
@@ -2707,6 +2810,24 @@ body.modal-open {
   .login-footer {
     font-size: 13px;
     gap: 8px;
+  }
+  .modern-alert{
+      padding: 14px;
+      border-radius: 14px;
+  }
+
+  .alert-icon{
+      min-width: 38px;
+      height: 38px;
+      font-size: 16px;
+  }
+
+  .alert-title{
+      font-size: 14px;
+  }
+
+  .alert-message{
+      font-size: 13px;
   }
   .toggle-password    { font-size: 17px; right: 14px; }
 

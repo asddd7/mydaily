@@ -208,11 +208,31 @@ if (isset($_POST['login']) && empty($error)) {
 
 <div class="login-container">
     <h2>Login</h2>
-    <?php if (!empty($error)): ?>
-    <div class="alert-error">
-        <?= htmlspecialchars($error) ?>
+<?php if (!empty($error)): ?>
+
+<div class="modern-alert error show">
+
+    <div class="alert-icon">
+        <i class="fa-solid fa-circle-exclamation"></i>
     </div>
-    <?php endif; ?>
+
+    <div class="alert-content">
+        <div class="alert-title">
+            Login Gagal
+        </div>
+
+        <div class="alert-message">
+            <?= htmlspecialchars($error) ?>
+        </div>
+    </div>
+
+    <button class="alert-close" onclick="closeAlert(this)">
+        <i class="fa-solid fa-xmark"></i>
+    </button>
+
+</div>
+
+<?php endif; ?>
 
 <form method="POST" class="login-form">
     <input type="hidden" name="token" value="<?= $_SESSION['token']; ?>">
@@ -237,8 +257,18 @@ if (isset($_POST['login']) && empty($error)) {
     <p>Lupa password? <a href="forgot_password.php">Reset Password</a></p>
 </div>
 </div>
-</body>
 <script>
+function closeAlert(button) {
+    const alert = button.closest(".modern-alert");
+
+    alert.style.opacity = "0";
+    alert.style.transform = "translateY(-10px)";
+
+    setTimeout(() => {
+        alert.remove();
+    }, 250);
+}
+
 function togglePassword() {
     const password = document.getElementById("password");
     const icon = document.getElementById("toggleIcon");
@@ -253,5 +283,6 @@ function togglePassword() {
         icon.classList.add("fa-eye");
     }
 }
-</script>
+</script>   
+</body>
 </html>
