@@ -7,13 +7,55 @@ ini_set('session.use_strict_mode', 1);
 session_set_cookie_params([
     'lifetime' => 0,
     'path'     => '/',
-    'domain'   => '',
-    'secure'   => isset($_SERVER['HTTPS']),
+    'secure'   => true, // kalau sudah HTTPS -> ubah TRUE
     'httponly' => true,
-    'samesite' => 'Strict'
+    'samesite' => 'Lax'
 ]);
 
 session_start();
+include "koneksi.php";
+
+/*
+|--------------------------------------------------------------------------
+| AUTO LOGIN REMEMBER ME
+|--------------------------------------------------------------------------
+*/
+if (!isset($_SESSION['login']) && isset($_COOKIE['remember_token'])) {
+
+    $token = $_COOKIE['remember_token'];
+    $hash  = hash('sha256', $token);
+
+    $stmt = $conn->prepare("
+        SELECT u.id, u.email, u.username, u.role
+        FROM remember_tokens rt
+        JOIN users u ON u.id = rt.user_id
+        WHERE rt.token_hash = ?
+        AND rt.expires_at > NOW()
+        LIMIT 1
+    ");
+
+    $stmt->bind_param("s", $hash);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $user = $result->fetch_assoc();
+
+    if ($user) {
+
+        session_regenerate_id(true);
+
+        $_SESSION['login']    = true;
+        $_SESSION['id']       = $user['id'];
+        $_SESSION['email']    = $user['email'];
+        $_SESSION['username'] = $user['username'];
+        $_SESSION['role']     = $user['role'];
+
+        $_SESSION['LAST_ACTIVITY'] = time();
+        $_SESSION['EXPIRE_TIME']   = 1800;
+
+        header("Location: ../dashboard.php");
+        exit;
+    }
+}
 
 /*
 |--------------------------------------------------------------------------
@@ -26,168 +68,109 @@ if (empty($_SESSION['token'])) {
 
 /*
 |--------------------------------------------------------------------------
-| RATE LIMIT CONFIG
-|--------------------------------------------------------------------------
-*/
-$max_attempts = 5; // maksimal percobaan login
-$lock_time    = 300; // 300 detik = 5 menit
-
-/*
-|--------------------------------------------------------------------------
-| INIT SESSION LOGIN ATTEMPT
-|--------------------------------------------------------------------------
-*/
-if (!isset($_SESSION['login_attempt'])) {
-    $_SESSION['login_attempt'] = 0;
-}
-
-if (!isset($_SESSION['last_attempt_time'])) {
-    $_SESSION['last_attempt_time'] = 0;
-}
-
-$error = "";
-
-/*
-|--------------------------------------------------------------------------
-| CHECK LOCK
-|--------------------------------------------------------------------------
-*/
-if (
-    $_SESSION['login_attempt'] >= $max_attempts &&
-    (time() - $_SESSION['last_attempt_time']) < $lock_time
-) {
-
-    $remaining = $lock_time - (time() - $_SESSION['last_attempt_time']);
-
-    $minutes = ceil($remaining / 60);
-
-    $error = "Terlalu banyak percobaan login. Coba lagi dalam {$minutes} menit.";
-}
-
-/*
-|--------------------------------------------------------------------------
 | LOGIN PROCESS
 |--------------------------------------------------------------------------
 */
-if (isset($_POST['login']) && empty($error)) {
+$error = "";
 
-    /*
-    |--------------------------------------------------------------------------
-    | VALIDASI CSRF TOKEN
-    |--------------------------------------------------------------------------
-    */
+if (isset($_POST['login'])) {
+
     if (!isset($_POST['token']) || $_POST['token'] !== $_SESSION['token']) {
-        die("Token tidak valid!");
+        die("CSRF token invalid!");
     }
 
     $email    = trim($_POST['email']);
     $password = $_POST['password'];
 
-    /*
-    |--------------------------------------------------------------------------
-    | VALIDASI EMAIL
-    |--------------------------------------------------------------------------
-    */
-    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        $error = "Format email tidak valid.";
-    } else {
+    $stmt = $conn->prepare("
+        SELECT id, email, username, password, role
+        FROM users
+        WHERE email = ?
+        LIMIT 1
+    ");
 
-        /*
-        |--------------------------------------------------------------------------
-        | CHECK USER
-        |--------------------------------------------------------------------------
-        */
-        $stmt = $conn->prepare("
-            SELECT id, email, username, password, role
-            FROM users
-            WHERE email = ?
-            LIMIT 1
-        ");
+    $stmt->bind_param("s", $email);
+    $stmt->execute();
+    $result = $stmt->get_result();
 
-        $stmt->bind_param("s", $email);
-        $stmt->execute();
+    if ($result->num_rows === 1) {
 
-        $result = $stmt->get_result();
+        $user = $result->fetch_assoc();
 
-        if ($result->num_rows === 1) {
-
-            $user = $result->fetch_assoc();
+        if (password_verify($password, $user['password'])) {
 
             /*
             |--------------------------------------------------------------------------
-            | VERIFY PASSWORD
+            | LOGIN SUCCESS
             |--------------------------------------------------------------------------
             */
-            if (password_verify($password, $user['password'])) {
+            session_regenerate_id(true);
 
-                /*
-                |--------------------------------------------------------------------------
-                | RESET RATE LIMIT
-                |--------------------------------------------------------------------------
-                */
-                $_SESSION['login_attempt'] = 0;
-                $_SESSION['last_attempt_time'] = 0;
+            $_SESSION['login']    = true;
+            $_SESSION['id']       = $user['id'];
+            $_SESSION['email']    = $user['email'];
+            $_SESSION['username'] = $user['username'];
+            $_SESSION['role']     = $user['role'];
 
-                /*
-                |--------------------------------------------------------------------------
-                | LOGIN SUCCESS
-                |--------------------------------------------------------------------------
-                */
-                session_regenerate_id(true);
+            $_SESSION['LAST_ACTIVITY'] = time();
+            $_SESSION['EXPIRE_TIME']   = 1800;
+            $conn->query("DELETE FROM remember_tokens WHERE user_id = {$user['id']}");
 
-                $_SESSION['login']    = true;
-                $_SESSION['id']       = $user['id'];
-                $_SESSION['email']    = $user['email'];
-                $_SESSION['username'] = $user['username'];
-                $_SESSION['role']     = $user['role'];
+            if (isset($_POST['remember'])) {
 
-                $_SESSION['LAST_ACTIVITY'] = time();
-                $_SESSION['EXPIRE_TIME']   = 1800;
-
-                $_SESSION['token'] = bin2hex(random_bytes(32));
-
-                header("Location: ../dashboard.php");
-                exit;
+                setcookie("remember_email", $email, [
+                    'expires' => time() + (86400 * 30),
+                    'path' => '/',
+                    'secure' => true,
+                    'httponly' => false,
+                    'samesite' => 'Lax'
+                ]);
 
             } else {
 
-                /*
-                |--------------------------------------------------------------------------
-                | PASSWORD SALAH
-                |--------------------------------------------------------------------------
-                */
-                $_SESSION['login_attempt']++;
-                $_SESSION['last_attempt_time'] = time();
-
-                $sisa = $max_attempts - $_SESSION['login_attempt'];
-
-                if ($sisa > 0) {
-                    $error = "Password salah. Sisa percobaan: {$sisa}";
-                } else {
-                    $error = "Terlalu banyak percobaan login. Tunggu 5 menit.";
-                }
+                setcookie("remember_email", "", time() - 3600, "/");
             }
+
+            /*
+            |--------------------------------------------------------------------------
+            | REMEMBER ME
+            |--------------------------------------------------------------------------
+            */
+            if (isset($_POST['remember'])) {
+
+                $token = bin2hex(random_bytes(64));
+                $hash  = hash('sha256', $token);
+                $expires = date('Y-m-d H:i:s', strtotime('+30 days'));
+
+                // simpan DB
+                $stmt2 = $conn->prepare("
+                    INSERT INTO remember_tokens (user_id, token_hash, expires_at)
+                    VALUES (?, ?, ?)
+                ");
+
+                $stmt2->bind_param("iss", $user['id'], $hash, $expires);
+                $stmt2->execute();
+                $stmt2->close();
+
+                // simpan cookie
+                setcookie("remember_token", $token, [
+                    'expires'  => time() + (86400 * 30),
+                    'path'     => '/',
+                    'secure'   => true, // TRUE kalau HTTPS
+                    'httponly' => true,
+                    'samesite' => 'Lax'
+                ]);
+            }
+
+            header("Location: ../dashboard.php");
+            exit;
 
         } else {
-
-            /*
-            |--------------------------------------------------------------------------
-            | EMAIL TIDAK DITEMUKAN
-            |--------------------------------------------------------------------------
-            */
-            $_SESSION['login_attempt']++;
-            $_SESSION['last_attempt_time'] = time();
-
-            $sisa = $max_attempts - $_SESSION['login_attempt'];
-
-            if ($sisa > 0) {
-                $error = "Email tidak terdaftar. Sisa percobaan: {$sisa}";
-            } else {
-                $error = "Terlalu banyak percobaan login. Tunggu 5 menit.";
-            }
+            $error = "Password salah";
         }
 
-        $stmt->close();
+    } else {
+        $error = "Email tidak ditemukan";
     }
 }
 ?>
@@ -238,7 +221,13 @@ if (isset($_POST['login']) && empty($error)) {
     <input type="hidden" name="token" value="<?= $_SESSION['token']; ?>">
 
     <div class="input-group">
-        <input type="email" name="email" placeholder="Email" required>
+        <input 
+            type="email" 
+            name="email" 
+            placeholder="Email"
+            value="<?= htmlspecialchars($_COOKIE['remember_email'] ?? '') ?>"
+            required
+        >
     </div>
 
     <div class="input-group password-wrapper">
@@ -247,6 +236,12 @@ if (isset($_POST['login']) && empty($error)) {
     <span class="toggle-password" onclick="togglePassword()">
         <i class="fa-solid fa-eye" id="toggleIcon"></i>
     </span>
+    </div>
+    <div class="remember-wrapper">
+        <label>
+            <input type="checkbox" name="remember">
+            Remember Me
+        </label>
     </div>
 
     <button type="submit" name="login">Login</button>

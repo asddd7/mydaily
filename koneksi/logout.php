@@ -1,24 +1,62 @@
 <?php
 session_start();
+include "koneksi.php";
 
-// cek apakah request POST
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    header("Location: login.php");
-    exit;
+/*
+|--------------------------------------------------------------------------
+| DELETE REMEMBER TOKEN
+|--------------------------------------------------------------------------
+*/
+if (isset($_COOKIE['remember_token'])) {
+
+    $token_hash = hash('sha256', $_COOKIE['remember_token']);
+
+    $stmt = $conn->prepare("
+        DELETE FROM remember_tokens
+        WHERE token_hash = ?
+    ");
+
+    $stmt->bind_param("s", $token_hash);
+    $stmt->execute();
+    $stmt->close();
+
+    setcookie("remember_token", "", [
+    'expires' => time() - 3600,
+    'path' => '/',
+    'secure' => false,
+    'httponly' => true,
+    'samesite' => 'Lax'
+]);
 }
 
-// cek csrf token ada atau tidak
-if (
-    !isset($_SESSION['csrf_token']) ||
-    !isset($_POST['csrf_token']) ||
-    !hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])
-) {
-    die("Invalid CSRF token");
+/*
+|--------------------------------------------------------------------------
+| DELETE PHP SESSION COOKIE
+|--------------------------------------------------------------------------
+*/
+if (ini_get("session.use_cookies")) {
+
+    $params = session_get_cookie_params();
+
+    setcookie(
+        session_name(),
+        '',
+        time() - 42000,
+        $params["path"],
+        $params["domain"],
+        $params["secure"],
+        $params["httponly"]
+    );
 }
 
-// destroy session
+/*
+|--------------------------------------------------------------------------
+| DESTROY SESSION
+|--------------------------------------------------------------------------
+*/
 session_unset();
 session_destroy();
 
 header("Location: login.php");
 exit;
+?>
