@@ -80,6 +80,65 @@ $expense = mysqli_fetch_assoc(mysqli_query($conn,
      WHERE username='$username' AND type='expense'"
 ))['total'] ?? 0;
 
+if (isset($_POST['adjust_balance'])) {
+
+    $real_cash   = intval($_POST['real_cash']);
+    $real_online = intval($_POST['real_online']);
+
+    $today = date('Y-m-d');
+
+    /* HITUNG SELISIH CASH */
+    $cash_diff = $real_cash - $cash_balance;
+
+    if ($cash_diff != 0) {
+
+        $type = $cash_diff > 0 ? 'income' : 'expense';
+        $amount = abs($cash_diff);
+
+        mysqli_query($conn, "
+            INSERT INTO money_plan
+            (username, type, category, amount, description, tanggal, payment_method)
+            VALUES
+            (
+                '$username',
+                '$type',
+                'Penyesuaian Saldo',
+                '$amount',
+                'Auto adjust cash balance',
+                '$today',
+                'cash'
+            )
+        ");
+    }
+
+    /* HITUNG SELISIH ONLINE */
+    $online_diff = $real_online - $online_balance;
+
+    if ($online_diff != 0) {
+
+        $type = $online_diff > 0 ? 'income' : 'expense';
+        $amount = abs($online_diff);
+
+        mysqli_query($conn, "
+            INSERT INTO money_plan
+            (username, type, category, amount, description, tanggal, payment_method)
+            VALUES
+            (
+                '$username',
+                '$type',
+                'Penyesuaian Saldo',
+                '$amount',
+                'Auto adjust online balance',
+                '$today',
+                'online'
+            )
+        ");
+    }
+
+    header("Location: money_plan.php");
+    exit;
+}
+
 $saldo = $income - $expense;
 
 /* Total Bulan */
@@ -155,6 +214,9 @@ Rp <?= number_format($saldo,0,',','.'); ?>
   Pemasukan: <span class="income">Rp <?= number_format($online_income,0,',','.') ?></span> |
   Pengeluaran: <span class="expense">Rp <?= number_format($online_expense,0,',','.') ?></span>
 </p>
+<button class="btn-back" onclick="openAdjustModal()">
+⚖️ Sesuaikan Saldo
+</button>
 </div>
 
 
@@ -172,7 +234,6 @@ Rp <?= number_format($saldo,0,',','.'); ?>
 <?php endforeach; ?>
 </select>
 <select name="tahun" required>
-<hr>
 
 <?php 
 $start_year = 2023; 
@@ -186,7 +247,10 @@ for($y=$start_year;$y<=$current_year;$y++): ?>
 </form>
 <h3>📋 Riwayat Transaksi (<?= $months[$selected_month] ?> <?= $selected_year ?>)</h3>
 
-<table width="100%" border="1" cellpadding="8" cellspacing="0">
+<div class="table-responsive">
+<table>
+
+<thead>
 <tr>
 <th>Tanggal</th>
 <th>Jenis</th>
@@ -194,7 +258,9 @@ for($y=$start_year;$y<=$current_year;$y++): ?>
 <th>Jumlah</th>
 <th>Aksi</th>
 </tr>
+</thead>
 
+<tbody>
 <?php while($row = mysqli_fetch_assoc($data)) : ?>
 <tr>
 <td data-label="Tanggal"><?= date('d M Y', strtotime($row['tanggal'])); ?></td>
@@ -204,12 +270,16 @@ for($y=$start_year;$y<=$current_year;$y++): ?>
 <td data-label="Kategori"><?= htmlspecialchars($row['category']); ?></td>
 <td data-label="Jumlah">Rp <?= number_format($row['amount'],0,',','.'); ?></td>
 <td data-label="Aksi">
-<a href="?delete=<?= $row['id']; ?>" class="delete-btn" onclick="return confirm('Hapus transaksi?')">Hapus</a>
+<a href="?delete=<?= $row['id']; ?>" class="delete-btn">
+    <i class="fas fa-trash"></i>
+</a>
 </td>
 </tr>
 <?php endwhile; ?>
+</tbody>
 
 </table>
+</div>
 </div>
 
 </div>
@@ -313,6 +383,39 @@ for($y=$start_year;$y<=$current_year;$y++): ?>
   </div>
 </div>
 
+<!-- Modal Adjust Balance -->
+<div class="modal money-modal" id="adjustModal">
+  <div class="modal-content money-modal-content">
+
+    <h3>⚖️ Sesuaikan Saldo Aktual</h3>
+
+    <form method="post">
+
+        <div class="form-group">
+            <label>Cash Saat Ini</label>
+            <input type="number" name="real_cash" class="form-text" required>
+        </div>
+
+        <div class="form-group">
+            <label>Online Saat Ini</label>
+            <input type="number" name="real_online" class="form-text" required>
+        </div>
+
+        <div class="modal-footer">
+            <button type="submit" name="adjust_balance">
+                Simpan Penyesuaian
+            </button>
+
+            <button type="button" class="close" onclick="closeAdjustModal()">
+                Batal
+            </button>
+        </div>
+
+    </form>
+
+  </div>
+</div>
+
 <script>
 const modal = document.getElementById("moneyModal");
 
@@ -377,6 +480,25 @@ flatpickr(".flatpickr", {
     dateFormat: "Y-m-d",
     allowInput: true,
     disableMobile: true
+});
+</script>
+<script>
+const adjustModal = document.getElementById("adjustModal");
+
+function openAdjustModal() {
+    adjustModal.classList.add("show");
+    document.body.classList.add("modal-open");
+}
+
+function closeAdjustModal() {
+    adjustModal.classList.remove("show");
+    document.body.classList.remove("modal-open");
+}
+
+window.addEventListener("click", function(e){
+    if(e.target === adjustModal){
+        closeAdjustModal();
+    }
 });
 </script>
 </body>
