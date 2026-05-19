@@ -264,112 +264,272 @@ $stmt->bind_param("ss", $username, $tanggal_hari_ini);
 
 <script>
 let currentDate = new Date();
+let nationalHolidays = [];
 
-// Load Calendar
-function renderCalendar(date) {
-    const year = date.getFullYear(), month = date.getMonth();
+// =========================
+// LOAD LIBUR NASIONAL
+// =========================
+async function loadNationalHolidays(year) {
+    try {
+        const response = await fetch(`calendar/get_holidays.php?year=${year}`);
+        nationalHolidays = await response.json();
+    } catch (error) {
+        console.error("Gagal load hari libur:", error);
+        nationalHolidays = [];
+    }
+}
+
+// =========================
+// CEK APAKAH LIBUR
+// =========================
+function getHoliday(fullDate) {
+    return nationalHolidays.find(h => h.tanggal === fullDate);
+}
+
+// =========================
+// RENDER CALENDAR
+// =========================
+async function renderCalendar(date) {
+
+    const year = date.getFullYear();
+    const month = date.getMonth();
+
+    await loadNationalHolidays(year);
+
     const monthYear = document.getElementById("monthYear");
     const calendarBody = document.getElementById("calendarBody");
-    const firstDay = new Date(year, month, 1).getDay();
-    const lastDate = new Date(year, month+1, 0).getDate();
 
-    monthYear.textContent = date.toLocaleString('default',{month:'long', year:'numeric'});
+    const firstDay = new Date(year, month, 1).getDay();
+    const lastDate = new Date(year, month + 1, 0).getDate();
+
+    monthYear.textContent =
+        date.toLocaleString('id-ID', {
+            month: 'long',
+            year: 'numeric'
+        });
+
     calendarBody.innerHTML = "";
+
     let row = document.createElement("tr");
 
-    for(let i=0;i<firstDay;i++) row.innerHTML += "<td></td>";
+    // kosong sebelum tanggal 1
+    for (let i = 0; i < firstDay; i++) {
+        row.innerHTML += "<td></td>";
+    }
 
-    for(let day=1;day<=lastDate;day++){
+    for (let day = 1; day <= lastDate; day++) {
+
         const cell = document.createElement("td");
-        const today = new Date();
 
-        const fullDate = `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+        const fullDate =
+            `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+
         cell.setAttribute("data-date", fullDate);
 
-        if(day===today.getDate() && month===today.getMonth() && year===today.getFullYear()){
+        const today = new Date();
+
+        // tanggal hari ini
+        if (
+            day === today.getDate() &&
+            month === today.getMonth() &&
+            year === today.getFullYear()
+        ) {
             cell.classList.add("today");
         }
 
-        cell.textContent = day;
-        cell.addEventListener("click",()=>openModal(year,month,day));
+        // weekend
+        const currentDay = new Date(year, month, day).getDay();
+
+        if (currentDay === 0) {
+            cell.classList.add("weekend");
+        }
+
+        // hari libur nasional
+        const holiday = getHoliday(fullDate);
+
+        if (holiday) {
+
+            cell.classList.add("holiday");
+
+            cell.innerHTML = `
+                <div class="holiday-date">${day}</div>
+
+                <small class="holiday-label">
+                    ${holiday.keterangan}
+                </small>
+            `;
+
+            cell.title = holiday.keterangan;
+        } else {
+            cell.textContent = day;
+        }
+
+        // klik tanggal
+        cell.addEventListener("click", () => {
+            openModal(year, month, day);
+        });
+
         row.appendChild(cell);
-        if((firstDay+day)%7===0){ calendarBody.appendChild(row); row=document.createElement("tr"); }
+
+        if ((firstDay + day) % 7 === 0) {
+            calendarBody.appendChild(row);
+            row = document.createElement("tr");
+        }
     }
+
     calendarBody.appendChild(row);
+
     loadMarks(year, month);
 }
 
-//Modal
-function openModal(year,month,day){
+// =========================
+// LIST HARI LIBUR
+// =========================
+function renderHolidayList(month, year) {
+
+    const marksList = document.getElementById("marksList");
+    marksList.innerHTML = "";
+
+    const holidayThisMonth = nationalHolidays.filter(h => {
+        const d = new Date(h.tanggal);
+        return d.getMonth() === month &&
+               d.getFullYear() === year;
+    });
+
+    if (holidayThisMonth.length > 0) {
+
+        const divider = document.createElement("li");
+
+        divider.innerHTML = `
+            <hr>
+            <strong>🎌 Hari Libur Nasional</strong>
+        `;
+
+        marksList.appendChild(divider);
+
+        holidayThisMonth.forEach(h => {
+
+            const li = document.createElement("li");
+
+            li.classList.add("holiday-item");
+
+            li.innerHTML = `
+                <div class="mark-text">
+                    <strong>${h.tanggal}</strong>
+                    - ${h.keterangan}
+                </div>
+            `;
+
+            marksList.appendChild(li);
+        });
+    }
+}
+
+// =========================
+// MODAL
+// =========================
+function openModal(year, month, day) {
+
     const modal = document.getElementById("markerModal");
+
     document.getElementById("markerDate").value =
-      `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
-    
+        `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+
     modal.classList.add("show");
 }
-function closeModal(){
+
+function closeModal() {
     document.getElementById("markerModal").classList.remove("show");
 }
 
-// Submit Marks
-document.getElementById("markerForm").addEventListener("submit",function(e){
+// =========================
+// SUBMIT MARK
+// =========================
+document.getElementById("markerForm").addEventListener("submit", function(e) {
+
     e.preventDefault();
+
     const formData = new FormData(this);
-    fetch("calendar/calendar_add.php",{method:"POST",body:formData})
-    .then(res=>res.text()).then(res=>{
-        alert(res); closeModal(); renderCalendar(currentDate);
-    }).catch(err=>console.error(err));
+
+    fetch("calendar/calendar_add.php", {
+        method: "POST",
+        body: formData
+    })
+    .then(res => res.text())
+    .then(res => {
+
+        alert(res);
+
+        closeModal();
+
+        renderCalendar(currentDate);
+
+    }).catch(err => console.error(err));
 });
 
-// Ganti Bulan
-function changeMonth(dir){ currentDate.setMonth(currentDate.getMonth()+dir); renderCalendar(currentDate); }
+// =========================
+// GANTI BULAN
+// =========================
+function changeMonth(dir) {
 
-// Load Marks
-function loadMarks(year,month){
-    const marksList=document.getElementById('marksList');
-    marksList.innerHTML="<li>Loading...</li>";
+    currentDate.setMonth(currentDate.getMonth() + dir);
+
+    renderCalendar(currentDate);
+}
+
+// =========================
+// LOAD MARKS
+// =========================
+function loadMarks(year, month) {
 
     fetch(`calendar/calendar_marks.php?month=${month+1}&year=${year}`)
-    .then(res=>res.json())
-    .then(data=>{
-        marksList.innerHTML="";
-        
-        // RESET semua warna tanggal dulu
-        document.querySelectorAll(".calendar-table td").forEach(td=>{
-            td.classList.remove("marked-date","done-date");
+    .then(res => res.json())
+    .then(data => {
+
+        document.querySelectorAll(".calendar-table td").forEach(td => {
+
+            td.classList.remove("marked-date");
+            td.classList.remove("done-date");
         });
 
-        if(data.length===0){
-            marksList.innerHTML="<li>Tidak ada penanda bulan ini.</li>";
+        const marksList = document.getElementById("marksList");
+
+        marksList.innerHTML = "";
+
+        renderHolidayList(month, year);
+
+        if(data.length === 0){
+
         } else {
-            data.forEach(mark=>{
-                
-            document.querySelectorAll(".calendar-table td").forEach(td=>{
-            if(td.getAttribute("data-date") === mark.tanggal){
 
-                // Jika bukan today → kasih warna mark
-                if(!td.classList.contains("today")){
-                    td.classList.add("marked-date");
+            data.forEach(mark => {
 
-                    if(mark.selesai == 1){
-                        td.classList.add("done-date");
+                document.querySelectorAll(".calendar-table td").forEach(td => {
+
+                    if(td.getAttribute("data-date") === mark.tanggal){
+
+                        td.classList.add("marked-date");
+
+                        if(mark.selesai == 1){
+                            td.classList.add("done-date");
+                        }
                     }
-                }
+                });
 
-            }
-            });
+                const li = document.createElement("li");
 
-                // === List penanda seperti biasa ===
-                const li=document.createElement('li');
                 li.className = mark.selesai == 1 ? "done" : "";
 
                 li.innerHTML = `
                     <div class="mark-text">
-                        <strong>${mark.tanggal}</strong> ${mark.title}
+                        <strong>${mark.tanggal}</strong>
+                        ${mark.title}
                         ${mark.description ? '- ' + mark.description : ''}
                     </div>
+
                     <div class="mark-actions">
-                        <button 
+
+                        <button
                             onclick="${mark.selesai == 0 ? `toggleMark(${mark.id},0)` : ''}"
                             class="download-btn"
                             ${mark.selesai == 1 ? 'disabled' : ''}
@@ -380,21 +540,28 @@ function loadMarks(year,month){
                         <button onclick="deleteMark(${mark.id})" class="delete-btn">
                             Hapus
                         </button>
+
                     </div>
                 `;
+
                 marksList.appendChild(li);
             });
         }
     });
 }
 
-/* Toggle */
+// =========================
+// TOGGLE
+// =========================
 function toggleMark(id, currentStatus){
+
     const newStatus = currentStatus == 1 ? 0 : 1;
 
     fetch("calendar/calendar_toggle.php", {
         method: "POST",
-        headers: {"Content-Type":"application/x-www-form-urlencoded"},
+        headers: {
+            "Content-Type":"application/x-www-form-urlencoded"
+        },
         body: "id="+id+"&selesai="+newStatus
     })
     .then(res=>res.text())
@@ -402,25 +569,36 @@ function toggleMark(id, currentStatus){
         renderCalendar(currentDate);
     });
 }
-renderCalendar(currentDate);
-// hapus mark //
+
+// =========================
+// DELETE
+// =========================
 function deleteMark(id){
+
     if(!confirm("Yakin ingin menghapus penanda ini?")) return;
 
     fetch("calendar/calendar_delete.php", {
         method: "POST",
         headers: {
-            "Content-Type": "application/x-www-form-urlencoded"
+            "Content-Type":"application/x-www-form-urlencoded"
         },
         body: "id=" + id
     })
     .then(res => res.text())
     .then(res => {
+
         alert(res);
+
         renderCalendar(currentDate);
+
     })
     .catch(err => console.error(err));
 }
+
+// =========================
+// INIT
+// =========================
+renderCalendar(currentDate);
 
 </script>
 
