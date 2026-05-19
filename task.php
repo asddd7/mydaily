@@ -348,6 +348,7 @@ if (isset($_POST['import_excel'])) {
 
 <div class="card">
 <h3>📌 Daftar Tugas</h3>
+<input type="text" id="searchTask" placeholder="Cari tugas...">
 
 <button class="btn-add-task" onclick="openModal('utama')">Tambah Tugas</button>
 <a href="template_import.xlsx" class="download-btn">Download Template Excel</a>
@@ -357,10 +358,16 @@ if (isset($_POST['import_excel'])) {
     <button class="download-btn" type="submit" name="import_excel">Import Excel</button>
 </form>
 <?php if (!empty($tugas_per_tanggal)): ?>
-    <?php foreach ($tugas_per_tanggal as $tanggal => $tugas_tgl): ?>
-        <hr>
-        <h4><?= date('d M Y', strtotime($tanggal)); ?></h4>
-        <table>
+<?php foreach ($tugas_per_tanggal as $tanggal => $tugas_tgl): ?>
+<div class="task-group">
+
+    <hr>
+
+    <h4 class="task-date">
+        <?= date('d M Y', strtotime($tanggal)); ?>
+    </h4>
+
+    <table>
             <tr>
                 <th>Tugas</th>
                 <th>Status</th>
@@ -463,8 +470,10 @@ if (isset($_POST['import_excel'])) {
             </tr>
             <?php endwhile; ?>
             <?php endforeach; ?>
-        </table>
-    <?php endforeach; ?>
+    </table>
+
+</div>
+<?php endforeach; ?>
 <?php else: ?>
 <p style="text-align:center;">Belum ada tugas.</p>
 <?php endif; ?>
@@ -927,6 +936,36 @@ function handleRowClick(event, id) {
 
     toggleSubTask(id);
 }
+
+document.getElementById("searchTask").addEventListener("keyup", function () {
+
+    const value = this.value.toLowerCase();
+
+    document.querySelectorAll(".task-group").forEach(group => {
+
+        let hasVisibleTask = false;
+
+        group.querySelectorAll("tr.main-task").forEach(row => {
+
+        let text = row.innerText.toLowerCase();
+
+        document.querySelectorAll(".subtask-" + row.dataset.id).forEach(sub => {
+            text += " " + sub.innerText.toLowerCase();
+        });
+
+            if (text.includes(value)) {
+                row.style.display = "";
+                hasVisibleTask = true;
+            } else {
+                row.style.display = "none";
+            }
+        });
+
+        // tampil/sembunyikan group tanggal
+        group.style.display = hasVisibleTask ? "" : "none";
+    });
+
+});
 
 </script>
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
