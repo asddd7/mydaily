@@ -78,11 +78,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 
-        if (isset($_POST['sub_task_id'])) {
+    if (isset($_POST['sub_task_id'])) {
 
         $task_id = intval($_POST['sub_task_id']);
         $selesai = intval($_POST['selesai']);
 
+        // =========================
+        // UPDATE SUBTASK
+        // =========================
         if ($selesai) {
             $stmt = $conn->prepare("
                 UPDATE tugas 
@@ -100,6 +103,83 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->bind_param("ii", $task_id, $user_id);
         $stmt->execute();
         $stmt->close();
+
+        // =========================
+        // AMBIL PARENT ID
+        // =========================
+        $stmt = $conn->prepare("
+            SELECT parent_id 
+            FROM tugas 
+            WHERE id=? AND user_id=?
+        ");
+        $stmt->bind_param("ii", $task_id, $user_id);
+        $stmt->execute();
+
+        $result = $stmt->get_result();
+        $task = $result->fetch_assoc();
+
+        $parent_id = $task['parent_id'] ?? null;
+
+        $stmt->close();
+
+        // =========================
+        // AUTO COMPLETE PARENT
+        // =========================
+        if ($parent_id) {
+
+            $stmt = $conn->prepare("
+                SELECT 
+                    COUNT(*) as total,
+                    SUM(selesai = 1) as done_count
+                FROM tugas
+                WHERE parent_id=? AND user_id=?
+            ");
+
+            $stmt->bind_param("ii", $parent_id, $user_id);
+            $stmt->execute();
+
+            $result = $stmt->get_result();
+            $data = $result->fetch_assoc();
+
+            $stmt->close();
+
+            $total = intval($data['total']);
+            $done  = intval($data['done_count']);
+
+            // =========================
+            // JIKA SEMUA SUBTASK SELESAI
+            // =========================
+            if ($total > 0 && $total == $done) {
+
+                $stmt = $conn->prepare("
+                    UPDATE tugas
+                    SET selesai=1,
+                        selesai_at=NOW()
+                    WHERE id=? AND user_id=?
+                ");
+
+                $stmt->bind_param("ii", $parent_id, $user_id);
+                $stmt->execute();
+                $stmt->close();
+
+            } else {
+
+                // =========================
+                // JIKA ADA YANG BELUM
+                // =========================
+                $stmt = $conn->prepare("
+                    UPDATE tugas
+                    SET selesai=0,
+                        selesai_at=NULL
+                    WHERE id=? AND user_id=?
+                ");
+
+                $stmt->bind_param("ii", $parent_id, $user_id);
+                $stmt->execute();
+                $stmt->close();
+            }
+        }
+
         exit;
     }
 
@@ -615,6 +695,7 @@ function toggleSubTaskStatus(taskId, checkbox) {
 
     fetch('', { method: 'POST', body: formData })
     .then(() => {
+    location.reload();
         setTimeout(() => {
             updateSubtaskUI(taskId, checkbox.checked ? "done" : "undone");
         }, 50);
