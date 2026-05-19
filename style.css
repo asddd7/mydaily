@@ -1877,6 +1877,31 @@ select[name="amount"]:hover   { border-color: #888; }
   font-size: 14px;
 }
 
+.task-filters{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    margin:15px 0;
+}
+
+.filter-btn{
+    border:none;
+    padding:8px 14px;
+    border-radius:8px;
+    cursor:pointer;
+    background:#e5e7eb;
+    transition:0.2s;
+}
+
+.filter-btn:hover{
+    background:#d1d5db;
+}
+
+.filter-btn.active{
+    background:#111827;
+    color:#fff;
+}
+
 /* ═══════════════════════════════════════════════
    SOCIAL ICONS
 ═══════════════════════════════════════════════ */

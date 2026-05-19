@@ -350,6 +350,14 @@ if (isset($_POST['import_excel'])) {
 <h3>📌 Daftar Tugas</h3>
 <input type="text" id="searchTask" placeholder="Cari tugas...">
 
+<div class="task-filters">
+    <button class="filter-btn active" data-filter="all">Semua</button>
+    <button class="filter-btn" data-filter="pending">Belum Selesai</button>
+    <button class="filter-btn" data-filter="done">Selesai</button>
+    <button class="filter-btn" data-filter="today">Hari Ini</button>
+    <button class="filter-btn" data-filter="overdue">Terlambat</button>
+</div>
+
 <button class="btn-add-task" onclick="openModal('utama')">Tambah Tugas</button>
 <a href="template_import.xlsx" class="download-btn">Download Template Excel</a>
 
@@ -387,7 +395,12 @@ if (isset($_POST['import_excel'])) {
                 $checked = $tugas['selesai'] ? "checked" : "";
                 $style   = $tugas['selesai'] ? "text-decoration:line-through;color:gray;" : "";
             ?>
-            <tr class="main-task" data-id="<?= $tugas['id']; ?>" onclick="handleRowClick(event, <?= $tugas['id']; ?>)">
+            <tr 
+                class="main-task" 
+                data-id="<?= $tugas['id']; ?>"
+                data-status="<?= $tugas['selesai'] ? 'done' : 'pending'; ?>"
+                data-deadline="<?= $tugas['deadline']; ?>"
+                onclick="handleRowClick(event, <?= $tugas['id']; ?>)">
                 <td>
                     <span class="task-text" 
                         title="<?= htmlspecialchars($tugas['nama_tugas']); ?>"
@@ -963,6 +976,80 @@ document.getElementById("searchTask").addEventListener("keyup", function () {
 
         // tampil/sembunyikan group tanggal
         group.style.display = hasVisibleTask ? "" : "none";
+    });
+
+});
+
+const filterButtons = document.querySelectorAll(".filter-btn");
+
+filterButtons.forEach(btn => {
+
+    btn.addEventListener("click", function () {
+
+        // ACTIVE BUTTON
+        filterButtons.forEach(b => b.classList.remove("active"));
+        this.classList.add("active");
+
+        const filter = this.dataset.filter;
+        const today = new Date().toISOString().split("T")[0];
+
+        document.querySelectorAll(".task-group").forEach(group => {
+
+            let hasVisibleTask = false;
+
+            group.querySelectorAll("tr.main-task").forEach(row => {
+
+                const status = row.dataset.status;
+                const deadline = row.dataset.deadline;
+
+                let show = false;
+
+                switch(filter){
+
+                    case "all":
+                        show = true;
+                        break;
+
+                    case "pending":
+                        show = status === "pending";
+                        break;
+
+                    case "done":
+                        show = status === "done";
+                        break;
+
+                    case "today":
+                        show = deadline === today;
+                        break;
+
+                    case "overdue":
+                        show = (
+                            status === "pending" &&
+                            deadline < today
+                        );
+                        break;
+                }
+
+                row.style.display = show ? "" : "none";
+
+                // SUBTASK IKUT HIDE
+                const subtasks = document.querySelectorAll(".subtask-" + row.dataset.id);
+
+                subtasks.forEach(sub => {
+                    sub.style.display = show ? sub.style.display : "none";
+                });
+
+                if(show){
+                    hasVisibleTask = true;
+                }
+
+            });
+
+            // HIDE GROUP TANGGAL KALAU KOSONG
+            group.style.display = hasVisibleTask ? "" : "none";
+
+        });
+
     });
 
 });
