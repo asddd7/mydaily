@@ -1902,6 +1902,114 @@ select[name="amount"]:hover   { border-color: #888; }
     color:#fff;
 }
 
+.task-category{
+    display:inline-block;
+    padding:3px 8px;
+    border-radius:20px;
+    font-size:11px;
+    font-weight:600;
+    margin-left:8px;
+    color:white;
+}
+
+.category-daily{
+    background:#3b82f6;
+}
+
+.category-game{
+    background:#8b5cf6;
+}
+
+.category-coding{
+    background:#10b981;
+}
+
+.category-kerja{
+    background:#f59e0b;
+}
+
+.category-finance{
+    background:#14b8a6;
+}
+
+.category-belajar{
+    background:#ef4444;
+}
+
+.category-pribadi{
+    background:#6b7280;
+}
+
+.top-actions{
+    display:flex;
+    gap:10px;
+    align-items:center;
+    margin-bottom:15px;
+    flex-wrap:wrap;
+}
+
+.filter-main-btn{
+    background:#111827;
+    color:white;
+    border:none;
+    padding:10px 14px;
+    border-radius:10px;
+    cursor:pointer;
+    font-weight:600;
+}
+
+.filter-dropdown{
+    position: relative;
+    display: inline-block;
+}
+
+.filter-menu{
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;              /* ganti dari right ke left */
+    transform: translateX(0);
+
+    width: 250px;
+    background: white;
+    border-radius: 14px;
+    box-shadow: 0 10px 30px rgba(0,0,0,.12);
+    padding: 15px;
+    display: none;
+    z-index: 99999999999999;
+}
+
+.filter-menu.show{
+    display:block;
+}
+
+.filter-section{
+    margin-bottom:15px;
+}
+
+.filter-section label{
+    display:block;
+    margin-bottom:6px;
+    font-size:13px;
+    font-weight:600;
+    color:#555;
+}
+
+.filter-section select{
+    width:100%;
+    padding:10px;
+    border:1px solid #ddd;
+    border-radius:10px;
+}
+
+.reset-filter{
+    width:100%;
+    border:none;
+    padding:10px;
+    border-radius:10px;
+    background:#ef4444;
+    color:white;
+    cursor:pointer;
+}
 /* ═══════════════════════════════════════════════
    SOCIAL ICONS
 ═══════════════════════════════════════════════ */

@@ -17,12 +17,35 @@ $user_id  = $_SESSION['id'];
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if (isset($_POST['nama_tugas'], $_POST['deadline'])) {
+
         $nama_tugas = trim($_POST['nama_tugas']);
         $deadline   = $_POST['deadline'];
 
+        $recurring_type = $_POST['recurring_type'] ?? 'none';
+        $kategori = $_POST['kategori'] ?? 'daily';
+
         if ($nama_tugas && $deadline) {
-            $stmt = $conn->prepare("INSERT INTO tugas (nama_tugas, deadline, user_id) VALUES (?, ?, ?)");
-            $stmt->bind_param("ssi", $nama_tugas, $deadline, $user_id);
+
+            $stmt = $conn->prepare("
+            INSERT INTO tugas (
+                nama_tugas,
+                deadline,
+                user_id,
+                recurring_type,
+                kategori
+            )
+            VALUES (?, ?, ?, ?, ?)
+            ");
+
+            $stmt->bind_param(
+                "ssiss",
+                $nama_tugas,
+                $deadline,
+                $user_id,
+                $recurring_type,
+                $kategori
+            );
+
             $stmt->execute();
             $stmt->close();
         }
@@ -74,6 +97,173 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->bind_param("iiii", $selesai, $selesai, $task_id, $user_id);
         $stmt->execute();
         $stmt->close();
+
+        // ======================================
+        // RECURRING TASK
+        // ======================================
+
+        if ($selesai == 1) {
+
+            $stmt = $conn->prepare("
+            SELECT 
+                nama_tugas,
+                deadline,
+                recurring_type,
+                recurring_generated,
+                kategori
+                FROM tugas
+                WHERE id=? AND user_id=?
+            ");
+
+            $stmt->bind_param("ii", $task_id, $user_id);
+            $stmt->execute();
+
+            $resultRecurring = $stmt->get_result();
+            $taskRecurring = $resultRecurring->fetch_assoc();
+
+            $stmt->close();
+
+            if (
+                $taskRecurring &&
+                $taskRecurring['recurring_type'] !== 'none' &&
+                $taskRecurring['recurring_generated'] == 0
+            ) {
+
+                $new_deadline = $taskRecurring['deadline'];
+
+                switch ($taskRecurring['recurring_type']) {
+
+                    case 'daily':
+                        $new_deadline = date(
+                            'Y-m-d',
+                            strtotime($new_deadline . ' +1 day')
+                        );
+                        break;
+
+                    case 'weekly':
+                        $new_deadline = date(
+                            'Y-m-d',
+                            strtotime($new_deadline . ' +1 week')
+                        );
+                        break;
+
+                    case 'monthly':
+                        $new_deadline = date(
+                            'Y-m-d',
+                            strtotime($new_deadline . ' +1 month')
+                        );
+                        break;
+
+                    case 'yearly':
+                        $new_deadline = date(
+                            'Y-m-d',
+                            strtotime($new_deadline . ' +1 year')
+                        );
+                        break;
+                }
+
+                // =========================
+                // DUPLICATE TASK BARU
+                // =========================
+
+                $stmt = $conn->prepare("
+                INSERT INTO tugas (
+                    nama_tugas,
+                    deadline,
+                    user_id,
+                    recurring_type,
+                    kategori
+                )
+                    VALUES (?, ?, ?, ?, ?)
+                ");
+
+                $stmt->bind_param(
+                    "ssiss",
+                    $taskRecurring['nama_tugas'],
+                    $new_deadline,
+                    $user_id,
+                    $taskRecurring['recurring_type'],
+                    $taskRecurring['kategori']
+                );
+
+                $stmt->execute();
+
+                $new_task_id = $stmt->insert_id;
+
+                $stmt->close();
+
+                // =========================
+                // COPY SUBTASK
+                // =========================
+
+                $stmt = $conn->prepare("
+                    SELECT nama_tugas
+                    FROM tugas
+                    WHERE parent_id=? AND user_id=?
+                ");
+
+                $stmt->bind_param("ii", $task_id, $user_id);
+                $stmt->execute();
+
+                $subs = $stmt->get_result();
+
+                while ($sub = $subs->fetch_assoc()) {
+
+                    $stmtInsert = $conn->prepare("
+                        INSERT INTO tugas (
+                            nama_tugas,
+                            deadline,
+                            user_id,
+                            parent_id
+                        )
+                        VALUES (?, ?, ?, ?)
+                    ");
+
+                    $stmtInsert->bind_param(
+                        "ssii",
+                        $sub['nama_tugas'],
+                        $new_deadline,
+                        $user_id,
+                        $new_task_id
+                    );
+
+                    $stmtInsert->execute();
+                    $stmtInsert->close();
+                }
+
+                $stmt->close();
+
+                // =========================
+                // LOCK AGAR TIDAK DOUBLE
+                // =========================
+
+                $stmt = $conn->prepare("
+                    UPDATE tugas
+                    SET recurring_generated=1
+                    WHERE id=? AND user_id=?
+                ");
+
+                $stmt->bind_param("ii", $task_id, $user_id);
+                $stmt->execute();
+                $stmt->close();
+            }
+
+            // ======================================
+            // RESET LOCK JIKA UNCHECK
+            // ======================================
+
+        } else {
+
+            $stmt = $conn->prepare("
+                UPDATE tugas
+                SET recurring_generated=0
+                WHERE id=? AND user_id=?
+            ");
+
+            $stmt->bind_param("ii", $task_id, $user_id);
+            $stmt->execute();
+            $stmt->close();
+        }
 
         exit;
     }
@@ -428,14 +618,53 @@ if (isset($_POST['import_excel'])) {
 
 <div class="card">
 <h3>📌 Daftar Tugas</h3>
-<input type="text" id="searchTask" placeholder="Cari tugas...">
+<div class="top-actions">
 
-<div class="task-filters">
-    <button class="filter-btn active" data-filter="all">Semua</button>
-    <button class="filter-btn" data-filter="pending">Belum Selesai</button>
-    <button class="filter-btn" data-filter="done">Selesai</button>
-    <button class="filter-btn" data-filter="today">Hari Ini</button>
-    <button class="filter-btn" data-filter="overdue">Terlambat</button>
+    <input type="text" id="searchTask" placeholder="Cari tugas...">
+
+    <div class="filter-dropdown">
+
+        <button id="filterToggle" class="filter-main-btn">
+            <i class="fa-solid fa-filter"></i>
+            Filter
+        </button>
+
+        <div class="filter-menu" id="filterMenu">
+
+            <div class="filter-section">
+                <label>Status</label>
+
+                <select id="statusFilter">
+                    <option value="all">Semua</option>
+                    <option value="pending">Belum Selesai</option>
+                    <option value="done">Selesai</option>
+                    <option value="today">Hari Ini</option>
+                    <option value="overdue">Terlambat</option>
+                </select>
+            </div>
+
+            <div class="filter-section">
+                <label>Kategori</label>
+
+                <select id="categoryFilter">
+                    <option value="all">Semua</option>
+                    <option value="daily">Daily</option>
+                    <option value="game">Game</option>
+                    <option value="coding">Coding</option>
+                    <option value="kerja">Kerja</option>
+                    <option value="finance">Finance</option>
+                    <option value="belajar">Belajar</option>
+                    <option value="pribadi">Pribadi</option>
+                </select>
+            </div>
+
+            <button id="resetFilter" class="reset-filter">
+                Reset Filter
+            </button>
+
+        </div>
+    </div>
+
 </div>
 
 <button class="btn-add-task" onclick="openModal('utama')">Tambah Tugas</button>
@@ -480,12 +709,23 @@ if (isset($_POST['import_excel'])) {
                 data-id="<?= $tugas['id']; ?>"
                 data-status="<?= $tugas['selesai'] ? 'done' : 'pending'; ?>"
                 data-deadline="<?= $tugas['deadline']; ?>"
+                data-category="<?= strtolower($tugas['kategori']); ?>"
                 onclick="handleRowClick(event, <?= $tugas['id']; ?>)">
                 <td>
                     <span class="task-text" 
                         title="<?= htmlspecialchars($tugas['nama_tugas']); ?>"
                         style="<?= $style ?>">
                         <?= htmlspecialchars($tugas['nama_tugas']); ?>
+
+                        <?php if($tugas['recurring_type'] !== 'none'): ?>
+                            <i class="fa-solid fa-rotate"
+                            title="<?= $tugas['recurring_type']; ?>"
+                            style="color:#3b82f6;font-size:12px;">
+                            </i>
+                        <?php endif; ?>
+                        <span class="task-category category-<?= strtolower($tugas['kategori']) ?>">
+                            <?= htmlspecialchars($tugas['kategori']) ?>
+                        </span>
                     </span>
 
                     <?php if ($tugas['selesai'] && $tugas['selesai_at']) : ?>
@@ -617,18 +857,54 @@ function openModal(type, id = null, title = 'Tambah Tugas') {
         modalParentId.value = '';
 
         modalInputs.innerHTML = `
-            <input type="text" 
-                name="nama_tugas" 
-                class="form-title" 
-                placeholder="Nama Tugas" 
-                required>
+        <input type="text" 
+            name="nama_tugas" 
+            class="form-title" 
+            placeholder="Nama Tugas" 
+            required>
 
-            <input type="text" 
-                name="deadline" 
-                class="flatpickr"
-                placeholder="Pilih tanggal"
-                required>
-        `;
+        <input type="text" 
+            name="deadline" 
+            class="flatpickr"
+            placeholder="Pilih tanggal"
+            required>
+
+        <select name="kategori" class="form-select">
+
+            <option value="daily">Daily</option>
+            <option value="game">Game</option>
+            <option value="coding">Coding</option>
+            <option value="kerja">Kerja</option>
+            <option value="finance">Finance</option>
+            <option value="belajar">Belajar</option>
+            <option value="pribadi">Pribadi</option>
+
+        </select>
+
+        <select name="recurring_type" class="form-select">
+
+            <option value="none">
+                Tidak Berulang
+            </option>
+
+            <option value="daily">
+                Harian
+            </option>
+
+            <option value="weekly">
+                Mingguan
+            </option>
+
+            <option value="monthly">
+                Bulanan
+            </option>
+
+            <option value="yearly">
+                Tahunan
+            </option>
+
+        </select>
+    `;
 
         // INIT FLATPICKR
         flatpickr(".flatpickr", {
@@ -1061,80 +1337,110 @@ document.getElementById("searchTask").addEventListener("keyup", function () {
 
 });
 
-const filterButtons = document.querySelectorAll(".filter-btn");
+const statusFilter = document.getElementById("statusFilter");
+const categoryFilter = document.getElementById("categoryFilter");
 
-filterButtons.forEach(btn => {
+statusFilter.addEventListener("change", applyFilters);
+categoryFilter.addEventListener("change", applyFilters);
 
-    btn.addEventListener("click", function () {
+function applyFilters(){
 
-        // ACTIVE BUTTON
-        filterButtons.forEach(b => b.classList.remove("active"));
-        this.classList.add("active");
+    const status = statusFilter.value;
+    const category = categoryFilter.value;
 
-        const filter = this.dataset.filter;
-        const today = new Date().toISOString().split("T")[0];
+    const today = new Date().toISOString().split("T")[0];
 
-        document.querySelectorAll(".task-group").forEach(group => {
+    document.querySelectorAll(".task-group").forEach(group => {
 
-            let hasVisibleTask = false;
+        let hasVisibleTask = false;
 
-            group.querySelectorAll("tr.main-task").forEach(row => {
+        group.querySelectorAll(".main-task").forEach(row => {
 
-                const status = row.dataset.status;
-                const deadline = row.dataset.deadline;
+            const rowStatus = row.dataset.status;
+            const deadline = row.dataset.deadline;
+            const rowCategory = row.dataset.category;
 
-                let show = false;
+            let statusMatch = false;
+            let categoryMatch = false;
 
-                switch(filter){
+            // =========================
+            // STATUS FILTER
+            // =========================
 
-                    case "all":
-                        show = true;
-                        break;
+            switch(status){
 
-                    case "pending":
-                        show = status === "pending";
-                        break;
+                case "all":
+                    statusMatch = true;
+                    break;
 
-                    case "done":
-                        show = status === "done";
-                        break;
+                case "pending":
+                    statusMatch = rowStatus === "pending";
+                    break;
 
-                    case "today":
-                        show = deadline === today;
-                        break;
+                case "done":
+                    statusMatch = rowStatus === "done";
+                    break;
 
-                    case "overdue":
-                        show = (
-                            status === "pending" &&
-                            deadline < today
-                        );
-                        break;
-                }
+                case "today":
+                    statusMatch = deadline === today;
+                    break;
 
-                row.style.display = show ? "" : "none";
+                case "overdue":
+                    statusMatch = (
+                        rowStatus === "pending" &&
+                        deadline < today
+                    );
+                    break;
+            }
 
-                // SUBTASK IKUT HIDE
-                const subtasks = document.querySelectorAll(".subtask-" + row.dataset.id);
+            // =========================
+            // CATEGORY FILTER
+            // =========================
 
-                subtasks.forEach(sub => {
-                    sub.style.display = show ? sub.style.display : "none";
-                });
+            categoryMatch = (
+                category === "all" ||
+                rowCategory === category
+            );
 
-                if(show){
-                    hasVisibleTask = true;
-                }
+            const show = statusMatch && categoryMatch;
 
-            });
+            row.style.display = show ? "" : "none";
 
-            // HIDE GROUP TANGGAL KALAU KOSONG
-            group.style.display = hasVisibleTask ? "" : "none";
+            if(show){
+                hasVisibleTask = true;
+            }
 
         });
 
+        group.style.display = hasVisibleTask ? "" : "none";
     });
+}
 
+document.getElementById("resetFilter")
+.addEventListener("click", function(){
+
+    statusFilter.value = "all";
+    categoryFilter.value = "all";
+
+    applyFilters();
 });
 
+const filterToggle = document.getElementById("filterToggle");
+const filterMenu = document.getElementById("filterMenu");
+
+filterToggle.addEventListener("click", function(e){
+    e.stopPropagation();
+    filterMenu.classList.toggle("show");
+});
+
+document.addEventListener("click", function(e){
+    const filterDropdown = document.querySelector(".filter-dropdown");
+
+    // kalau klik bukan di dalam filter dropdown → tutup
+    if (!filterDropdown.contains(e.target)) {
+        filterMenu.classList.remove("show");
+    }
+});
 </script>
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 </body>
