@@ -1540,6 +1540,16 @@ button:disabled {
   margin-top: 10px;
 }
 
+.modal input[type=text],
+.modal input[type=number],
+.modal input[type=email],
+.modal input[type=password],
+.modal input[type=date],
+.modal select,
+.modal textarea {
+  color: var(--clr-text2) !important;
+}
+
 /* ═══════════════════════════════════════════════
    DASHBOARD
 ═══════════════════════════════════════════════ */

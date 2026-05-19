@@ -167,6 +167,7 @@ header("X-XSS-Protection: 1; mode=block");
 
 <!-- PINDAH KE SINI -->
 <div id="sidebarBackdrop" class="sidebar-backdrop"></div>
+<?php include 'sub/floating_action.php'; ?>
 <?php include 'sub/floating_clock.php'; ?>
 <script>
 const sidebar = document.getElementById("sidebar");
