@@ -401,7 +401,6 @@ function renderHolidayList(month, year) {
         const divider = document.createElement("li");
 
         divider.innerHTML = `
-            <hr>
             <strong>🎌 Hari Libur Nasional</strong>
         `;
 
