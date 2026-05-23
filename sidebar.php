@@ -31,6 +31,12 @@ $jumlahNotif = $resultNotif->num_rows;
 
 $base_url = '../';
 $current_page = basename($_SERVER['PHP_SELF']);
+
+$isGameActive = in_array($current_page, [
+    'snake.php',
+    'tictactoe.php',
+    'memory.php'
+]);
 header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
 header("Pragma: no-cache");
 if (isset($_SESSION['LAST_ACTIVITY'])) {
@@ -156,6 +162,43 @@ header("X-XSS-Protection: 1; mode=block");
         <i class="menu-icon fa-solid fa-folder"></i>
         <span class="menu-text">File Manager</span>
     </a>
+
+    <div class="sidebar-dropdown <?= $isGameActive ? 'active open' : '' ?>">
+
+        <div class="sidebar-link dropdown-btn" id="gameDropdownBtn">
+
+            <div class="sidebar-left">
+                <i class="menu-icon fa-solid fa-gamepad"></i>
+                <span class="menu-text">Games</span>
+            </div>
+
+            <i class="fa-solid fa-chevron-down arrow"></i>
+
+        </div>
+
+        <div class="dropdown-content <?= $isGameActive ? 'show' : '' ?>" id="gameDropdown">
+
+            <a href="<?= $base_url ?>games/gbf/index.php"
+            class="<?= $current_page == 'index.php' ? 'active' : '' ?>">
+                <img src="<?= $base_url ?>games/gbf/assets/logo.png" alt="GBF" title="GBF">
+                <i class="fa-solid fa-swords"></i>
+                <span>GBF</span>
+            </a>
+
+            <a href="<?= $base_url ?>games/tictactoe.php"
+            class="<?= $current_page == 'tictactoe.php' ? 'active' : '' ?>">
+                <i class="fa-solid fa-grid"></i>
+                <span>Tic Tac Toe</span>
+            </a>
+
+            <a href="<?= $base_url ?>games/memory.php"
+            class="<?= $current_page == 'memory.php' ? 'active' : '' ?>">
+                <i class="fa-solid fa-brain"></i>
+                <span>Memory Game</span>
+            </a>
+
+        </div>
+    </div>
 
     <?php if (($_SESSION['role'] ?? '') === 'admin'): ?>
     <a href="<?= $base_url ?>koneksi/database_structure.php" class="<?= $current_page == 'database_structure.php' ? 'active' : '' ?>">
@@ -288,4 +331,29 @@ notifBtn.addEventListener("click", function(e) {
 document.addEventListener("click", function() {
     notifDropdown.classList.remove("show");
 });
+
+const gameDropdownBtn = document.getElementById("gameDropdownBtn");
+const gameDropdown = document.getElementById("gameDropdown");
+const gameWrapper = document.querySelector(".sidebar-dropdown");
+
+if (gameDropdownBtn) {
+    gameDropdownBtn.addEventListener("click", () => {
+
+        gameDropdown.classList.toggle("show");
+        gameWrapper.classList.toggle("open");
+
+        localStorage.setItem(
+            "gameDropdown",
+            gameDropdown.classList.contains("show")
+                ? "open"
+                : "closed"
+        );
+    });
+
+    // restore state
+    if (localStorage.getItem("gameDropdown") === "open") {
+        gameDropdown.classList.add("show");
+        gameWrapper.classList.add("open");
+    }
+}
 </script>

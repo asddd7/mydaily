@@ -466,7 +466,7 @@ header .nav {
 .sidebar.no-transition { transition: none !important; }
 
 /* Collapsed */
-.sidebar.collapsed { width: 70px; }
+.sidebar.collapsed { width: 70px; overflow: visible; }
 
 .sidebar.collapsed .sidebar-section,
 .sidebar.collapsed a span { opacity: 0; width: 0; overflow: hidden; display: none; }
@@ -602,6 +602,152 @@ header .nav {
 }
 
 .sidebar-overlay.show { display: block; }
+
+/* DROPDOWN */
+.sidebar-dropdown {
+  margin-bottom: 3px;
+  position: relative;
+}
+
+/* tombol utama games */
+.dropdown-btn {
+  width: 100%;
+  border: none;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 11px 14px;
+  border-radius: var(--radius);
+  color: var(--clr-text-muted);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--t);
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.dropdown-btn > div {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.dropdown-btn i {
+  font-size: 16px;
+  min-width: 20px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+/* hover sama seperti sidebar link */
+.dropdown-btn:hover {
+  background: var(--clr-text2);
+  color: var(--clr-text);
+  transform: translateX(3px);
+}
+
+/* active */
+.sidebar-dropdown.active .dropdown-btn {
+  background: linear-gradient(
+    135deg,
+    rgba(79, 142, 247, 0.2),
+    rgba(124, 58, 237, 0.15)
+  );
+
+  color: var(--clr-text2);
+  border: 1px solid rgba(79, 142, 247, 0.25);
+  font-weight: 600;
+}
+
+/* garis kiri active */
+.sidebar-dropdown.active .dropdown-btn::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 25%;
+  bottom: 25%;
+  width: 3px;
+  background: var(--clr-accent);
+  border-radius: 0 3px 3px 0;
+}
+
+/* arrow */
+.dropdown-btn .arrow {
+  transition: transform var(--t);
+  font-size: 12px;
+}
+
+/* rotate arrow */
+.sidebar-dropdown.open .arrow {
+  transform: rotate(180deg);
+}
+
+/* dropdown content */
+.dropdown-content {
+  display: none;
+  margin-top: 4px;
+  margin-left: 10px;
+  padding-left: 10px;
+  border-left: 1px solid var(--clr-border);
+  flex-direction: column;
+}
+
+/* show */
+.dropdown-content.show {
+  display: flex;
+}
+
+/* child menu */
+.dropdown-content a {
+  font-size: 13px;
+  padding: 10px 12px;
+}
+
+/* collapsed mode */
+.sidebar.collapsed .sidebar-dropdown {
+    position: relative;
+}
+.sidebar.collapsed .dropdown-btn span,
+.sidebar.collapsed .dropdown-btn .arrow {
+  display: none;
+}
+
+.sidebar.collapsed .dropdown-btn {
+  justify-content: center;
+  padding: 11px;
+}
+
+.sidebar.collapsed .dropdown-btn > div {
+  justify-content: center;
+}
+
+.sidebar.collapsed .dropdown-content {
+    position: absolute;
+    left: 70px;
+    top: 0;
+    min-width: 180px;
+    background: #1e293b;
+    border-radius: 10px;
+    padding: 8px;
+    z-index: 9999;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.25);
+
+    display: none;
+}
+
+.sidebar.collapsed .dropdown-content.show {
+    display: flex;
+}
+
+/* OPTIONAL */
+.sidebar.collapsed .dropdown-content a {
+    padding: 10px;
+    border-radius: 8px;
+    white-space: nowrap;
+}
 
 /* Toggle button */
 .toggle-btn {
