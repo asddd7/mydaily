@@ -1770,7 +1770,7 @@ label {
 .form-group label {
   display: block;
   margin-bottom: 6px;
-  color: #ffffff !important;
+  color: #000000 !important;
   font-weight: 600;
   font-size: 14px;
 }
@@ -3317,7 +3317,6 @@ body.modal-open {
   .summary-title      { font-size: 18px; }
   .summary-item h2    { font-size: 24px; }
 }
-
 /* ═══════════════════════════════════════════════
    RESPONSIVE — SMALL MOBILE (≤ 480px)
 ═══════════════════════════════════════════════ */
