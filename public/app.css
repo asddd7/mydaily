@@ -1,0 +1,218 @@
+.app-topbar {
+    position: fixed;
+    top: 0;
+    left: var(--sidebar-w);
+    right: 0;
+    z-index: 10001;
+    min-height: var(--header-h);
+    margin: 0;
+    padding: 10px 22px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 16px;
+    border-radius: 0;
+    background: linear-gradient(135deg, #4338ca 0%, #2563eb 50%, #0ea5e9 100%);
+}
+
+.app-topbar-logo {
+    margin-right: auto;
+    color: #fff;
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    letter-spacing: .04em;
+    text-decoration: none;
+}
+
+.app-topbar-welcome,
+.app-topbar-notifications {
+    color: #fff;
+}
+
+.app-topbar-notifications {
+    font-size: 18px;
+    text-decoration: none;
+}
+
+.app-topbar .toggle-btn {
+    display: inline-flex;
+    width: auto;
+    margin: 0;
+    padding: 5px 10px;
+    background: transparent;
+    border: 0;
+    color: #fff;
+    cursor: pointer;
+    font-size: 20px;
+}
+
+.sidebar.collapsed ~ .content .app-topbar {
+    left: var(--sidebar-collapsed-w);
+}
+
+.content {
+    padding-top: calc(var(--header-h) + 20px);
+}
+
+.fab-container {
+    position: fixed;
+    right: 20px;
+    bottom: 86px;
+    z-index: 10002;
+}
+
+.fab-main {
+    width: 56px;
+    height: 56px;
+    border: 0;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #2563eb, #7c3aed);
+    color: #fff;
+    font-size: 21px;
+    cursor: pointer;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, .25);
+}
+
+.fab-menu {
+    position: absolute;
+    right: 0;
+    bottom: 68px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    visibility: hidden;
+    opacity: 0;
+    transform: translateY(8px);
+    transition: .2s ease;
+}
+
+.fab-menu.show {
+    visibility: visible;
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.fab-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 160px;
+    padding: 12px 16px;
+    border: 1px solid rgba(0, 0, 0, .08);
+    border-radius: 14px;
+    background: #fff;
+    color: #111827;
+    box-shadow: 0 8px 18px rgba(0, 0, 0, .12);
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.floating-clock {
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    z-index: 10002;
+    padding: 12px 20px;
+    border-radius: 50px;
+    background: #111;
+    color: #fff;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, .3);
+    font-size: 18px;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.calendar-widget .calendar-table td[role="button"] {
+    cursor: pointer;
+}
+
+.calendar-widget .calendar-table td[role="button"]:focus-visible {
+    outline: 3px solid #2563eb;
+    outline-offset: 2px;
+}
+
+.calendar-day-number {
+    display: block;
+    font-weight: 700;
+}
+
+.calendar-status {
+    min-height: 1.5em;
+    color: #b91c1c;
+}
+
+.calendar-dialog {
+    width: min(92vw, 480px);
+    padding: 22px;
+    border: 1px solid #dbe3ef;
+    border-radius: 16px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, .25);
+}
+
+.calendar-dialog::backdrop {
+    background: rgba(15, 23, 42, .55);
+}
+
+.calendar-dialog form,
+.calendar-dialog label,
+.calendar-dialog input,
+.calendar-dialog textarea {
+    display: block;
+    width: 100%;
+}
+
+.calendar-dialog input,
+.calendar-dialog textarea {
+    margin: 6px 0 14px;
+}
+
+.calendar-dialog-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.calendar-task-item .mark-text {
+    opacity: .8;
+}
+
+@media (max-width: 768px) {
+    .app-topbar,
+    .sidebar.collapsed ~ .content .app-topbar {
+        left: 0;
+        padding: 8px 12px;
+        gap: 9px;
+    }
+
+    #toggleSidebar {
+        display: inline-flex;
+    }
+
+    .app-topbar-welcome {
+        overflow: hidden;
+        max-width: 42vw;
+        font-size: 12px;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .app-topbar-logo {
+        font-size: 13px;
+    }
+
+    .content {
+        padding-top: calc(var(--header-h) + 12px);
+    }
+
+    .floating-clock {
+        right: 15px;
+        bottom: 15px;
+        padding: 10px 14px;
+        font-size: 15px;
+    }
+
+    .fab-container {
+        right: 15px;
+        bottom: 70px;
+    }
+}

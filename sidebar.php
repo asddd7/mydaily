@@ -31,6 +31,7 @@ $jumlahNotif = $resultNotif->num_rows;
 
 $base_url = '/';
 $current_path = trim($_SERVER['PHP_SELF'], '/');
+$current_page = basename($_SERVER['PHP_SELF']);
 header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
 header("Pragma: no-cache");
 if (isset($_SESSION['LAST_ACTIVITY'])) {
@@ -181,17 +182,36 @@ function isMobile() {
 
 // INIT STATE
 function initSidebar() {
+
+    // MOBILE
     if (isMobile()) {
+
         sidebar.classList.remove("collapsed");
+
+        // sidebar mobile default tertutup
         sidebar.classList.remove("show");
         backdrop.classList.remove("active");
-    } else {
-        if (localStorage.getItem("sidebar") === "collapsed") {
+
+    } 
+    
+    // DESKTOP
+    else {
+
+        sidebar.classList.remove("show");
+        backdrop.classList.remove("active");
+
+        // ambil state dari localStorage
+        const sidebarState = localStorage.getItem("sidebar");
+
+        if (sidebarState === "collapsed") {
             sidebar.classList.add("collapsed");
+        } else {
+            sidebar.classList.remove("collapsed");
         }
     }
 }
 
+// jalankan pertama kali
 initSidebar();
 
 // REMOVE TRANSITION DELAY
@@ -251,15 +271,27 @@ function updateNotif() {
     })
     .then(res => res.json())
     .then(data => {
-        const badge = document.getElementById("notifCount");
-        if (!badge) return;
+    const notifWrapper = document.querySelector(".notif-btn");
 
-        if (data.count > 0) {
+    if (data.count > 0) {
+
+        if (!badge) {
+            const span = document.createElement("span");
+            span.id = "notifCount";
+            span.className = "notif-badge";
+            span.innerText = data.count;
+
+            notifWrapper.appendChild(span);
+        } else {
             badge.style.display = "inline-block";
             badge.innerText = data.count;
-        } else {
-            badge.style.display = "none";
         }
+
+    } else {
+        if (badge) {
+            badge.remove();
+        }
+    }
     })
     .catch(err => console.error(err));
 }
@@ -277,15 +309,14 @@ function confirmLogout() {
     return false;
 }
 
-const notifBtn = document.getElementById("notifBtn");
-const notifDropdown = document.getElementById("notifDropdown");
+if (notifBtn && notifDropdown) {
+    notifBtn.addEventListener("click", function(e) {
+        e.stopPropagation();
+        notifDropdown.classList.toggle("show");
+    });
 
-notifBtn.addEventListener("click", function(e) {
-    e.stopPropagation();
-    notifDropdown.classList.toggle("show");
-});
-
-document.addEventListener("click", function() {
-    notifDropdown.classList.remove("show");
-});
+    document.addEventListener("click", function() {
+        notifDropdown.classList.remove("show");
+    });
+}
 </script>

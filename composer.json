@@ -2,6 +2,7 @@
     "name": "admin/mydaily",
     "autoload": {
         "psr-4": {
+            "App\\": "app/",
             "Admin\\Mydaily\\": "src/"
         }
     },
@@ -12,7 +13,14 @@
         }
     ],
     "require": {
-        "phpoffice/phpspreadsheet": "1.29"
+        "phpoffice/phpspreadsheet": "^1.30.6",
+        "laravel/framework": "^13.34"
+    },
+    "scripts": {
+        "post-autoload-dump": [
+            "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
+            "@php artisan package:discover --ansi"
+        ]
     },
     "config": {
         "audit": {

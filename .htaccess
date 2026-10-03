@@ -4,10 +4,17 @@ RewriteEngine On
 RewriteCond %{HTTPS} off
 RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 
-# Jangan rewrite file/folder asli
-RewriteCond %{REQUEST_FILENAME} -f [OR]
-RewriteCond %{REQUEST_FILENAME} -d
+# Do not expose uploaded files by their storage path; Laravel serves them through
+# routes that check the current user's access.
+RewriteRule ^uploads/ public/index.php [L]
+RewriteRule ^public/ - [L]
+RewriteRule ^(style\.css|favicon\.ico)$ public/$1 [L]
+RewriteRule ^template_import\.xlsx$ public/$0 [L]
+RewriteCond %{REQUEST_URI} \.(?:css|js|ico|png|jpe?g|gif|svg|webp|woff2?|ttf|eot|json|xlsx?)$ [NC]
 RewriteRule ^ - [L]
+
+# Send application requests through Laravel.
+RewriteRule ^ public/index.php [L]
 
 # PAKSA JSON DI /app/
 <FilesMatch "manifest\.json$">
