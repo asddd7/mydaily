@@ -10,10 +10,6 @@
     </nav>
 </div>
 
-<a href="{{ route('clock.edit') }}" id="floatingClockLink" class="floating-clock" title="Pengaturan jam">
-    <span id="floatingClock" aria-live="off"></span>
-</a>
-
 <script>
 (() => {
     const toggle = document.getElementById('fabToggle');
