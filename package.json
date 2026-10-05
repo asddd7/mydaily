@@ -1,0 +1,26 @@
+{
+  "name": "mydaily",
+  "version": "1.0.0",
+  "description": "MyDaily now runs on Laravel 13 and continues to use the existing MySQL database\r and application tables. The Laravel front controller is in `public/index.php`.\r All active user-facing templates, shared navigation, and reusable UI fragments\r are Blade files under `resources/views`.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "vite",
+    "build": "vite build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/asddd7/mydaily.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/asddd7/mydaily/issues"
+  },
+  "homepage": "https://github.com/asddd7/mydaily#readme",
+  "devDependencies": {
+    "laravel-vite-plugin": "^3.2.0",
+    "vite": "^8.3.2"
+  }
+}
