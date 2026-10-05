@@ -22,6 +22,11 @@ the root Apache rewrite also supports a Laragon document root at the project
 directory. Existing accounts and application data remain in place, but users
 must sign in again because Laravel uses its own session format.
 
+Initial table migrations are available under `database/migrations` for setting
+up a **new, empty database**. They describe the current `daily` schema. Do not
+run `php artisan migrate` against an existing `daily` database: its tables
+already exist and these initial migrations are not a baseline/import operation.
+
 The authentication, dashboard attendance, tasks (including recurring tasks,
 subtasks and Excel import), finance, notes, profile, file manager, calendar
 marks, clock settings, and admin database-structure screens use Laravel routes,
