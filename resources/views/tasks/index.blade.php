@@ -2,9 +2,13 @@
 
 @section('title', 'Tugas - MyDaily')
 
+@push('styles')
+    <link rel="stylesheet" href="{{ asset('tasks.css') }}">
+@endpush
+
 @section('content')
 <div class="tasks-page">
-    <header class="tasks-heading">
+    <div class="tasks-heading">
         <div>
             <p class="tasks-eyebrow">Perencanaan harian</p>
             <h1>Tugas</h1>
@@ -14,7 +18,7 @@
             <strong>{{ $tasks->count() }}</strong>
             <span>tugas</span>
         </div>
-    </header>
+    </div>
 
     <div class="tasks-tools">
         <section class="card task-tool-card">
