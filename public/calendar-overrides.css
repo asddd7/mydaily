@@ -1,0 +1,444 @@
+/* ==========================================================
+   CALENDAR — final overrides
+   Letakkan DI PALING BAWAH app.css agar mengalahkan style.css.
+   ========================================================== */
+.calendar-widget {
+    width: 100%;
+    min-width: 0;
+    overflow: hidden;
+}
+
+.calendar-header {
+    display: grid;
+    grid-template-columns: 40px minmax(0, 1fr) 40px;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 14px;
+}
+
+.calendar-header h2,
+.calendar-header h3,
+.calendar-header h4 {
+    margin: 0;
+    min-width: 0;
+    text-align: center;
+    color: #172033;
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(18px, 2vw, 22px);
+    font-weight: 800;
+    line-height: 1.2;
+    text-transform: capitalize;
+}
+
+.calendar-header button {
+    width: 40px;
+    height: 40px;
+    display: inline-grid;
+    place-items: center;
+    margin: 0;
+    padding: 0;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    background: #fff;
+    color: #475569;
+    cursor: pointer;
+    transition: background-color .18s ease, border-color .18s ease,
+                color .18s ease, transform .18s ease;
+}
+
+.calendar-header button:hover {
+    border-color: #bfdbfe;
+    background: #eff6ff;
+    color: #2563eb;
+    transform: translateY(-1px);
+}
+
+.calendar-status {
+    min-height: 20px;
+    margin: 0 0 4px;
+    color: #64748b;
+    font-size: 11px;
+    text-align: center;
+}
+
+.calendar-status:empty {
+    display: block;
+    min-height: 0;
+    margin: 0;
+}
+
+.calendar-widget[aria-busy="true"] .calendar-table {
+    opacity: .78;
+}
+
+.calendar-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 5px;
+    table-layout: fixed;
+}
+
+.calendar-table thead th {
+    padding: 6px 2px;
+    color: #94a3b8;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: .07em;
+    text-align: center;
+    text-transform: uppercase;
+}
+
+.calendar-table tbody td {
+    position: relative;
+    width: 14.285%;
+    height: clamp(54px, 6vw, 72px);
+    padding: 9px;
+    overflow: hidden;
+    border: 1px solid #eef2f7;
+    border-radius: 13px;
+    background: #f8fafc;
+    color: #1e293b;
+    font-size: 13px;
+    font-weight: 700;
+    vertical-align: top;
+    text-align: left;
+    transition: background-color .16s ease, border-color .16s ease,
+                transform .16s ease, box-shadow .16s ease;
+}
+
+.calendar-table tbody td[role="button"] {
+    cursor: pointer;
+}
+
+.calendar-table tbody td:hover {
+    border-color: #bfdbfe;
+    background: #f1f5f9;
+    transform: translateY(-1px);
+}
+
+.calendar-table tbody td:focus-visible {
+    outline: 3px solid rgba(37, 99, 235, .25);
+    outline-offset: 1px;
+}
+
+.calendar-day-number {
+    position: relative;
+    z-index: 2;
+    display: block;
+    font-size: 13px;
+    font-weight: 800;
+    line-height: 1;
+}
+
+.calendar-table tbody td.weekend {
+    background: #fefce8;
+}
+
+.calendar-table tbody td.today {
+    border-color: #2563eb;
+    background: #2563eb;
+    color: #fff;
+    box-shadow: 0 7px 16px rgba(37, 99, 235, .18);
+}
+
+.calendar-table tbody td.today:hover {
+    background: #1d4ed8;
+    border-color: #1d4ed8;
+}
+
+.calendar-table tbody td.marked-date {
+    border-color: #fed7aa;
+    background: #fff7ed;
+}
+
+.calendar-table tbody td.done-date {
+    border-color: #a7f3d0;
+    background: #ecfdf5;
+}
+
+.calendar-table tbody td.marked-date::after,
+.calendar-table tbody td.done-date::after {
+    content: '';
+    position: absolute;
+    right: 8px;
+    bottom: 8px;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+}
+
+.calendar-table tbody td.marked-date::after { background: #f59e0b; }
+.calendar-table tbody td.done-date::after { background: #10b981; }
+
+.calendar-table tbody td.today.marked-date::after {
+    background: #fef08a;
+}
+
+.holiday-label {
+    display: block;
+    max-width: 100%;
+    margin-top: 7px;
+    overflow: hidden;
+    color: #b91c1c;
+    font-size: 9px;
+    font-weight: 700;
+    line-height: 1.25;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.calendar-table tbody td.today .holiday-label {
+    color: #dbeafe;
+}
+
+.calendar-marks {
+    margin-top: 18px;
+}
+
+.calendar-marks h3,
+.calendar-marks h4 {
+    margin: 0 0 10px;
+    color: #1e293b;
+    font-size: 14px;
+    font-weight: 800;
+    line-height: 1.35;
+}
+
+.calendar-marks ul {
+    display: grid;
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.calendar-marks li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 11px 12px;
+    border: 1px solid #eef2f7;
+    border-radius: 12px;
+    background: #fff;
+}
+
+.calendar-marks li.holiday-item {
+    border-color: #fee2e2;
+    background: #fff7f7;
+}
+
+.calendar-marks li.calendar-loading-item {
+    justify-content: center;
+    color: #94a3b8;
+    font-size: 12px;
+}
+
+.mark-text {
+    min-width: 0;
+    flex: 1;
+    color: #475569;
+    font-size: 12px;
+    line-height: 1.45;
+    overflow-wrap: anywhere;
+}
+
+.mark-text strong {
+    color: #2563eb;
+    font-weight: 800;
+}
+
+.mark-text a {
+    color: #2563eb;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.mark-text a:hover {
+    text-decoration: underline;
+}
+
+.mark-actions {
+    display: flex;
+    flex: 0 0 auto;
+    gap: 6px;
+}
+
+.mark-actions button {
+    min-height: 32px;
+    padding: 6px 9px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    background: #fff;
+    color: #475569;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.mark-actions button:hover {
+    border-color: #bfdbfe;
+    background: #eff6ff;
+    color: #1d4ed8;
+}
+
+.mark-actions .delete-mark:hover {
+    border-color: #fecaca;
+    background: #fef2f2;
+    color: #dc2626;
+}
+
+.calendar-dialog {
+    width: min(92vw, 480px);
+    max-width: 100%;
+    margin: auto;
+    padding: 22px;
+    border: 1px solid #dbe3ef;
+    border-radius: 16px;
+    background: #fff;
+    box-shadow: 0 20px 60px rgba(15, 23, 42, .2);
+}
+
+.calendar-dialog::backdrop {
+    background: rgba(15, 23, 42, .55);
+}
+
+.calendar-dialog form {
+    display: grid;
+    gap: 7px;
+}
+
+.calendar-dialog form h3 {
+    margin: 0 0 6px;
+    color: #172033;
+    font-size: 18px;
+    font-weight: 800;
+}
+
+.calendar-dialog label {
+    color: #475569;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.calendar-dialog input,
+.calendar-dialog textarea {
+    width: 100%;
+    margin: 0 0 7px;
+    padding: 10px 12px;
+    border: 1px solid #dbe3ef;
+    border-radius: 9px;
+    background: #fff;
+    color: #1e293b;
+    font: inherit;
+    font-size: 13px;
+}
+
+.calendar-dialog input:focus,
+.calendar-dialog textarea:focus {
+    outline: none;
+    border-color: #60a5fa;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, .10);
+}
+
+.calendar-dialog-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 4px;
+}
+
+.calendar-dialog-actions button {
+    min-height: 38px;
+}
+
+@media (max-width: 600px) {
+    .calendar-header {
+        grid-template-columns: 36px minmax(0, 1fr) 36px;
+        gap: 8px;
+    }
+
+    .calendar-header button {
+        width: 36px;
+        height: 36px;
+    }
+
+    .calendar-header h2,
+    .calendar-header h3,
+    .calendar-header h4 {
+        font-size: 17px;
+    }
+
+    .calendar-table {
+        border-spacing: 3px;
+    }
+
+    .calendar-table thead th {
+        padding: 4px 0;
+        font-size: 9px;
+        letter-spacing: .04em;
+    }
+
+    .calendar-table tbody td {
+        height: 54px;
+        padding: 7px;
+        border-radius: 10px;
+        font-size: 12px;
+    }
+
+    .calendar-day-number {
+        font-size: 12px;
+    }
+
+    .holiday-label {
+        display: none;
+    }
+
+    .calendar-marks li {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .mark-actions {
+        width: 100%;
+    }
+
+    .mark-actions button {
+        flex: 1;
+    }
+}
+
+@media (max-width: 390px) {
+    .calendar-widget {
+        padding: 14px;
+    }
+
+    .calendar-table {
+        border-spacing: 2px;
+    }
+
+    .calendar-table tbody td {
+        height: 44px;
+        padding: 6px;
+        border-radius: 9px;
+    }
+
+    .calendar-day-number {
+        font-size: 11px;
+    }
+
+    .calendar-table tbody td.marked-date::after,
+    .calendar-table tbody td.done-date::after {
+        right: 5px;
+        bottom: 5px;
+        width: 6px;
+        height: 6px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .calendar-header button,
+    .calendar-table tbody td {
+        transition: none;
+    }
+}
