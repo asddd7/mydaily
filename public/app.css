@@ -1224,6 +1224,97 @@ body {
     display: none;
 }
 
+.dashboard-page {
+    display: grid;
+    width: 100%;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    align-items: start;
+    gap: 20px;
+}
+
+.dashboard-title {
+    grid-column: 1 / -1;
+    margin: 0;
+    color: #172033;
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(26px, 3vw, 34px);
+    font-weight: 800;
+    letter-spacing: -.04em;
+    line-height: 1.15;
+}
+
+.dashboard-page > .dashboard-card,
+.dashboard-page > .calendar-widget {
+    min-width: 0;
+    margin: 0;
+}
+
+.dashboard-page > .dashboard-summary,
+.dashboard-page > .calendar-widget {
+    grid-column: span 7;
+}
+
+.dashboard-page > .dashboard-attendance,
+.dashboard-page > .dashboard-history {
+    grid-column: span 5;
+}
+
+.dashboard-page .dashboard-card h2 {
+    margin: 0 0 14px;
+    color: #1e293b;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: -.01em;
+    line-height: 1.4;
+}
+
+.dashboard-page .dashboard-card p {
+    margin: 0;
+    color: #64748b;
+    font-size: 14px;
+    line-height: 1.7;
+}
+
+.dashboard-page .dashboard-card p + p {
+    margin-top: 10px;
+}
+
+.dashboard-page .dashboard-card strong {
+    color: #172033;
+    font-weight: 700;
+}
+
+.dashboard-page .dashboard-attendance form {
+    margin-top: 14px;
+}
+
+.dashboard-page .dashboard-history p {
+    padding: 10px 0;
+    border-bottom: 1px solid #edf1f7;
+    font-variant-numeric: tabular-nums;
+}
+
+.dashboard-page .dashboard-history p:last-child {
+    padding-bottom: 0;
+    border-bottom: 0;
+}
+
+@media (max-width: 900px) {
+    .dashboard-page {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 16px;
+    }
+
+    .dashboard-title,
+    .dashboard-page > .dashboard-summary,
+    .dashboard-page > .dashboard-attendance,
+    .dashboard-page > .calendar-widget,
+    .dashboard-page > .dashboard-history {
+        grid-column: 1;
+    }
+}
+
 @media (max-width: 768px) {
     .app-topbar,
     .sidebar.collapsed ~ .content .app-topbar {

@@ -3,8 +3,9 @@
 @section('title', 'Dashboard - MyDaily')
 
 @section('content')
-        <h1>Dashboard</h1>
-        <section class="card">
+    <div class="dashboard-page">
+        <h1 class="dashboard-title">Dashboard</h1>
+        <section class="card dashboard-card dashboard-summary">
             <h2>Ringkasan Harian - {{ \Illuminate\Support\Carbon::parse($today)->translatedFormat('d F Y') }}</h2>
             <p>Total pengeluaran hari ini: <strong>Rp {{ number_format((float) $expenseToday, 0, ',', '.') }}</strong></p>
             @if ($latestNote)
@@ -14,7 +15,7 @@
             @endif
         </section>
 
-        <section class="card">
+        <section class="card dashboard-card dashboard-attendance">
             <h2>Absen Hari Ini</h2>
             @if (!$attendanceToday)
                 <form method="post" action="{{ route('attendance.check-in') }}">
@@ -34,7 +35,7 @@
 
         @include('calendar.widget')
 
-        <section class="card">
+        <section class="card dashboard-card dashboard-history">
             <h2>Riwayat Absen</h2>
             @forelse ($attendanceHistory as $attendance)
                 <p>{{ $attendance->tanggal }} — {{ $attendance->jam_masuk ?? '-' }} sampai {{ $attendance->jam_pulang ?? '-' }}</p>
@@ -42,4 +43,5 @@
                 <p>Belum ada riwayat absen.</p>
             @endforelse
         </section>
+    </div>
 @endsection
