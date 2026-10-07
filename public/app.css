@@ -1766,3 +1766,250 @@ body {
         transition: none !important;
     }
 }
+
+/* Calendar widget layout and touch-friendly controls. */
+.calendar-widget {
+    min-width: 0;
+}
+.calendar-widget .calendar-header {
+    display: grid;
+    grid-template-columns: 42px minmax(0, 1fr) 42px;
+    align-items: center;
+    gap: 12px;
+}
+.calendar-widget .calendar-header h2 {
+    margin: 0;
+    color: #172033;
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(18px, 2vw, 23px);
+    font-weight: 800;
+    line-height: 1.2;
+    text-align: center;
+    text-transform: capitalize;
+}
+.calendar-widget .calendar-header button {
+    width: 42px;
+    height: 42px;
+    border: 1px solid #dbe3ef;
+    border-radius: 13px;
+    color: #1d4ed8;
+}
+.calendar-widget .calendar-header button:focus-visible,
+.calendar-widget .calendar-table td[role="button"]:focus-visible {
+    outline: 3px solid rgba(37, 99, 235, .35);
+    outline-offset: 2px;
+}
+.calendar-widget .calendar-status {
+    margin: 0 0 10px;
+    color: #b45309;
+    font-size: 13px;
+    line-height: 1.5;
+}
+.calendar-widget .table-responsive {
+    min-width: 0;
+}
+.calendar-widget .calendar-table {
+    width: 100%;
+    min-width: 0;
+    border-spacing: 5px;
+}
+.calendar-widget .calendar-table thead th {
+    color: #64748b;
+    font-size: 11px;
+    letter-spacing: .04em;
+}
+.calendar-widget .calendar-table td {
+    height: 64px;
+    padding: 8px;
+    overflow: hidden;
+    text-align: center;
+    vertical-align: middle;
+}
+.calendar-widget .calendar-table td:not([data-date]) {
+    background: transparent;
+    border-color: transparent;
+    box-shadow: none;
+    cursor: default;
+}
+.calendar-widget .calendar-day-number {
+    position: relative;
+    z-index: 1;
+}
+.calendar-widget .calendar-table td.marked-date,
+.calendar-widget .calendar-table td.done-date {
+    color: #172033;
+}
+.calendar-widget .calendar-table td.holiday {
+    background: #fff1f2 !important;
+    border-color: #fecdd3;
+    box-shadow: none;
+    color: #be123c !important;
+}
+.calendar-widget .calendar-table td.holiday::before {
+    position: absolute;
+    top: 7px;
+    right: 7px;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #f43f5e;
+    content: "";
+}
+.calendar-widget .calendar-table td.marked-date::after,
+.calendar-widget .calendar-table td.done-date::after {
+    bottom: 7px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+.calendar-widget .calendar-table td.today {
+    background: #2563eb !important;
+    border-color: #2563eb;
+    color: #fff !important;
+}
+.calendar-widget .calendar-table td.today.holiday::before {
+    background: #fff;
+}
+.calendar-widget .calendar-table td .holiday-label {
+    display: none;
+}
+.calendar-widget .calendar-marks {
+    margin-top: 24px;
+}
+.calendar-widget .calendar-marks h3 {
+    margin: 0 0 12px;
+    color: #172033;
+    font-size: 16px;
+    font-weight: 750;
+}
+.calendar-widget .calendar-marks li {
+    min-width: 0;
+}
+.calendar-widget .mark-text {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+.calendar-widget .calendar-dialog {
+    max-height: min(90dvh, 720px);
+    overflow-y: auto;
+}
+
+@media (max-width: 768px) {
+    .calendar-widget .calendar-header {
+        grid-template-columns: 44px minmax(0, 1fr) 44px;
+        gap: 8px;
+        margin-bottom: 12px;
+    }
+    .calendar-widget .calendar-header button {
+        width: 44px;
+        height: 44px;
+    }
+    .calendar-widget .calendar-table {
+        border-spacing: 3px;
+    }
+    .calendar-widget .calendar-table td {
+        height: 52px;
+        padding: 5px 2px;
+        border-radius: 13px;
+    }
+    .calendar-widget .calendar-table td.holiday::before {
+        top: 5px;
+        right: 5px;
+        width: 6px;
+        height: 6px;
+    }
+    .calendar-widget .calendar-table td.marked-date::after,
+    .calendar-widget .calendar-table td.done-date::after {
+        bottom: 5px;
+        width: 6px;
+        height: 6px;
+    }
+    .calendar-widget .calendar-marks {
+        margin-top: 18px;
+    }
+    .calendar-widget .calendar-marks li {
+        flex-direction: row;
+        align-items: center;
+        gap: 10px;
+        padding: 12px;
+        border-radius: 14px;
+    }
+    .calendar-widget .mark-text {
+        font-size: 13px;
+    }
+    .calendar-widget .mark-text strong {
+        display: block;
+        margin: 0 0 3px;
+        font-size: 12px;
+    }
+    .calendar-widget .mark-actions {
+        width: auto;
+        flex: 0 0 auto;
+        gap: 6px;
+    }
+    .calendar-widget .mark-actions button {
+        min-height: 40px;
+        padding: 8px 10px;
+    }
+}
+
+@media (max-width: 480px) {
+    .calendar-widget .calendar-header h2 {
+        font-size: 18px;
+    }
+    .calendar-widget .calendar-table {
+        display: table;
+        table-layout: fixed;
+        border-spacing: 2px 4px;
+    }
+    .calendar-widget .calendar-table thead {
+        display: table-header-group;
+    }
+    .calendar-widget .calendar-table tbody {
+        display: table-row-group;
+    }
+    .calendar-widget .calendar-table tr {
+        display: table-row;
+        margin: 0;
+    }
+    .calendar-widget .calendar-table th,
+    .calendar-widget .calendar-table td {
+        display: table-cell;
+        width: auto;
+    }
+    .calendar-widget .calendar-table thead th {
+        padding: 6px 0;
+        font-size: 10px;
+        letter-spacing: 0;
+    }
+    .calendar-widget .calendar-table td {
+        height: 44px;
+        padding: 4px 1px;
+        border-radius: 12px;
+        font-size: 13px;
+    }
+    .calendar-widget .calendar-marks h3 {
+        font-size: 15px;
+    }
+    .calendar-widget .calendar-marks li {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .calendar-widget .mark-actions {
+        width: 100%;
+    }
+    .calendar-widget .mark-actions button {
+        min-width: 0;
+        flex: 1 1 0;
+    }
+    .calendar-widget .calendar-dialog {
+        width: calc(100% - 24px);
+        max-width: 480px;
+        padding: 18px;
+    }
+    .calendar-widget .calendar-dialog-actions {
+        flex-direction: column-reverse;
+    }
+    .calendar-widget .calendar-dialog-actions button {
+        min-height: 44px;
+    }
+}

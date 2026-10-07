@@ -317,12 +317,6 @@
 
             cell.querySelectorAll('.holiday-label').forEach(node => node.remove());
             cell.classList.remove('holiday', 'marked-date', 'done-date');
-            cell.setAttribute(
-                'aria-label',
-                dayMarks.length || dayTasks.length
-                    ? `${date}, ${dayMarks.length} penanda, ${dayTasks.length} tugas`
-                    : date
-            );
 
             if (holiday) {
                 cell.classList.add('holiday');
@@ -331,6 +325,12 @@
             } else {
                 cell.removeAttribute('title');
             }
+
+            const description = [date];
+            if (holiday?.keterangan) description.push(`hari libur: ${holiday.keterangan}`);
+            if (dayMarks.length) description.push(`${dayMarks.length} penanda`);
+            if (dayTasks.length) description.push(`${dayTasks.length} tugas`);
+            cell.setAttribute('aria-label', description.join(', '));
 
             if (dayMarks.length || dayTasks.length) {
                 cell.classList.add('marked-date');
