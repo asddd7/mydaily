@@ -12,7 +12,7 @@
     justify-content: flex-end;
     gap: 16px;
     border-radius: 0;
-    background: linear-gradient(135deg, #4338ca 0%, #2563eb 50%, #0ea5e9 100%);
+    background: linear-gradient(135deg, #1e40af 0%, #2563eb 52%, #0284c7 100%);
 }
 .app-topbar-logo {
     margin-right: auto;
@@ -59,7 +59,7 @@
     height: 56px;
     border: 0;
     border-radius: 50%;
-    background: linear-gradient(135deg, #2563eb, #7c3aed);
+    background: linear-gradient(135deg, #2563eb, #0284c7);
     color: #fff;
     font-size: 21px;
     cursor: pointer;
@@ -205,7 +205,7 @@
     place-content: center;
     border: 1px solid #dbeafe;
     border-radius: 20px;
-    background: linear-gradient(145deg, #eff6ff, #f5f3ff);
+    background: linear-gradient(145deg, #eff6ff, #f0f9ff);
     color: #1d4ed8;
     text-align: center;
 }
@@ -245,8 +245,8 @@
     color: #2563eb;
 }
 .task-import-icon {
-    background: #f5f3ff;
-    color: #7c3aed;
+    background: #f0f9ff;
+    color: #0284c7;
 }
 .content .task-section-heading h2,
 
@@ -705,7 +705,7 @@
     --clr-text-muted: #64748b;
     --clr-text-faint: #94a3b8;
     --clr-accent: #2563eb;
-    --clr-accent-2: #4f46e5;
+    --clr-accent-2: #0ea5e9;
     --radius: 12px;
     --radius-lg: 16px;
     --shadow-card: 0 8px 24px rgba(15, 23, 42, .05);
@@ -738,7 +738,7 @@ body {
 }
 .sidebar-logo .logo-icon {
     color: #fff;
-    background: linear-gradient(145deg, #2563eb, #4f46e5);
+    background: linear-gradient(145deg, #2563eb, #0284c7);
     border-radius: 11px;
     box-shadow: 0 5px 12px rgba(37, 99, 235, .2);
 }
@@ -1074,7 +1074,7 @@ body {
     color: #b91c1c;
 }
 .fab-main {
-    background: linear-gradient(145deg, #2563eb, #4f46e5);
+    background: linear-gradient(145deg, #2563eb, #0284c7);
     box-shadow: 0 8px 20px rgba(37, 99, 235, .26);
 }
 .floating-clock {
