@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Syne:wght@700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap');
 
 /* ═══════════════════════════════════════════════
    DESIGN TOKENS
@@ -125,7 +125,7 @@ html {
    BASE
 ═══════════════════════════════════════════════ */
 body {
-  font-family: 'Poppins', sans-serif;
+  font-family: 'DM Sans', sans-serif;
   background: var(--clr-bg);
   color: var(--clr-text);
   line-height: 1.65;
@@ -139,7 +139,7 @@ body {
 }
 
 body.login-page {
-  font-family: Arial, sans-serif;
+  font-family: 'DM Sans', sans-serif;
   padding-top: 0;
   min-height: 100vh;
   display: flex;
@@ -245,7 +245,7 @@ header .nav {
 }
 
 .welcome {
-  font-family: 'Poppins', sans-serif;
+  font-family: 'DM Sans', sans-serif;
   font-size: 16px;
   font-weight: 700;
   color: var(--clr-text2);
@@ -319,7 +319,7 @@ header .nav {
   background: linear-gradient(135deg, #ffecec, #fff5f5);
   border: 1px solid #ffb3b3;
   box-shadow: 0 6px 20px rgba(255, 0, 0, 0.08);
-  font-family: 'Segoe UI', sans-serif;
+  font-family: 'DM Sans', sans-serif;
   animation: fadeIn 0.4s ease-in-out;
 }
 
@@ -483,7 +483,7 @@ header .nav {
 
 /* Logo */
 .sidebar-logo {
-  font-family: 'Syne', sans-serif;
+  font-family: 'DM Sans', sans-serif;
   font-size: 17px;
   font-weight: 800;
   color: var(--clr-text);
@@ -791,7 +791,7 @@ header .nav {
 }
 
 .page-title {
-  font-family: 'Syne', sans-serif;
+  font-family: 'DM Sans', sans-serif;
   font-size: 26px;
   font-weight: 800;
   color: var(--clr-text);
@@ -850,7 +850,7 @@ header .nav {
 .card:nth-child(5) { animation-delay: 0.25s; }
 
 .card h3 {
-  font-family: 'Poppins', sans-serif;
+  font-family: 'DM Sans', sans-serif;
   font-size: 17px;
   font-weight: 700;
   color: var(--clr-text);
@@ -945,7 +945,7 @@ header .nav {
 .stat-icon.orange { background: rgba(251, 191, 36, 0.15);  color: var(--clr-warning); }
 
 .stat-info  { flex: 1; }
-.stat-value { font-family: 'Syne', sans-serif; font-size: 24px; font-weight: 800; line-height: 1.1; }
+.stat-value { font-family: 'DM Sans', sans-serif; font-size: 24px; font-weight: 800; line-height: 1.1; }
 .stat-label { font-size: 12px; color: var(--clr-text-muted); margin-top: 2px; }
 
 /* ═══════════════════════════════════════════════
@@ -960,7 +960,7 @@ header .nav {
   overflow: hidden;
   transition: var(--t);
   animation: fadeIn 0.4s ease both;
-  font-family: 'Poppins', sans-serif;
+  font-family: 'DM Sans', sans-serif;
   max-width: 100%;
 }
 
@@ -974,7 +974,7 @@ header .nav {
 }
 
 .money-card h1 {
-  font-family: 'Poppins', sans-serif;
+  font-family: 'DM Sans', sans-serif;
   font-size: 36px;
   font-weight: 800;
   color: var(--clr-text);
@@ -1295,7 +1295,7 @@ button,
 .btn-checkin,
 .btn-checkout {
   cursor: pointer;
-  font-family: 'Poppins', sans-serif;
+  font-family: 'DM Sans', sans-serif;
   font-weight: 600;
   border: none;
   border-radius: var(--radius-sm);
@@ -1543,7 +1543,7 @@ button:disabled {
   color: var(--clr-success);
   margin: 8px 0 7px;
   box-shadow: none;
-  font-family: 'Poppins', sans-serif;
+  font-family: 'DM Sans', sans-serif;
   border-radius: var(--radius-sm);
   font-size: 12px;
   padding: 6px 12px;
@@ -1618,7 +1618,7 @@ button:disabled {
 
 .modal-header h3,
 .modal-content h3 {
-  font-family: 'Poppins', sans-serif;
+  font-family: 'DM Sans', sans-serif;
   font-size: 18px;
   font-weight: 700;
   color: var(--clr-text2);
@@ -1652,7 +1652,7 @@ button:disabled {
   color: var(--clr-text2);
   margin-top: 8px;
   box-shadow: none;
-  font-family: 'Poppins', sans-serif;
+  font-family: 'DM Sans', sans-serif;
 }
 
 .modal button.close:hover {
@@ -1668,7 +1668,7 @@ button:disabled {
   color: var(--clr-text2);
   margin-top: 8px;
   box-shadow: none;
-  font-family: 'Poppins', sans-serif;
+  font-family: 'DM Sans', sans-serif;
 }
 
 .modal button[type="submit"]:hover {
@@ -1789,7 +1789,7 @@ textarea {
   border-color: 1px solid var(--clr-border)!important;
   background: rgba(255, 255, 255, 0.04);
   color: var(--clr-text) !important;
-  font-family: 'Poppins', sans-serif;
+  font-family: 'DM Sans', sans-serif;
   font-size: 14px;
   transition: var(--t);
   -webkit-appearance: none;
@@ -2526,7 +2526,7 @@ select[name="amount"]:hover   { border-color: #888; }
 }
 
 .login-container .logo {
-  font-family: 'Syne', sans-serif;
+  font-family: 'DM Sans', sans-serif;
   font-size: 28px;
   font-weight: 800;
   color: var(--clr-text2);
@@ -3135,7 +3135,7 @@ body.modal-open {
     background: rgba(0, 255, 0, 0.12);
     border: 1px solid rgba(113, 248, 142, 0.3);
     color: var(--clr-success);
-    font-family: 'Poppins', sans-serif;
+    font-family: 'DM Sans', sans-serif;
     border-radius: var(--radius-sm);
     font-size: 12px;
     padding: 6px 12px;
@@ -3495,7 +3495,7 @@ body.login-page::after {
 .login-container h2 {
   margin: 0 0 30px;
   color: #f8fafc;
-  font-family: 'Syne', sans-serif;
+  font-family: 'DM Sans', sans-serif;
   font-size: clamp(25px, 5vw, 30px);
   font-weight: 800;
   letter-spacing: -0.045em;
