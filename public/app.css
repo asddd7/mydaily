@@ -2013,3 +2013,255 @@ body {
         min-height: 44px;
     }
 }
+
+/* =========================================
+   CALENDAR DIALOG - TAMBAH PENANDA
+   ========================================= */
+
+.calendar-dialog {
+    position: fixed;
+    inset: 0;
+    margin: auto;
+
+    width: min(32rem, calc(100vw - 2rem));
+    max-width: calc(100vw - 2rem);
+
+    max-height: calc(100vh - 2rem);
+    max-height: calc(100dvh - 2rem);
+
+    box-sizing: border-box;
+    padding: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+
+    background: #ffffff;
+    color: #1e293b;
+    border: 1px solid #e2e8f0;
+    border-radius: 18px;
+
+    box-shadow: 0 24px 70px rgb(15 23 42 / 20%);
+}
+
+/* Latar belakang ketika popup terbuka */
+.calendar-dialog::backdrop {
+    background: rgb(15 23 42 / 55%);
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px);
+}
+
+/* Form di dalam popup */
+.calendar-dialog form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 1.5rem;
+
+    background: transparent;
+}
+
+/* Judul popup */
+.calendar-dialog h3 {
+    margin: 0 0 0.65rem;
+
+    font-size: 1.3rem;
+    font-weight: 700;
+    line-height: 1.4;
+    color: #0f172a;
+
+    overflow-wrap: anywhere;
+}
+
+/* Label input */
+.calendar-dialog .form-label {
+    display: block;
+    margin: 0.4rem 0 0.15rem;
+
+    font-size: 0.92rem;
+    font-weight: 600;
+    line-height: 1.5;
+    color: #334155;
+}
+
+/* Input tanggal, judul, dan catatan */
+.calendar-dialog input[type="date"],
+.calendar-dialog input[type="text"],
+.calendar-dialog textarea {
+    display: block;
+
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    min-height: 44px;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0.7rem 0.85rem;
+
+    font-family: inherit;
+    font-size: 0.95rem;
+    line-height: 1.5;
+
+    color: #1e293b;
+    background: #ffffff;
+
+    border: 1px solid #cbd5e1;
+    border-radius: 10px;
+
+    outline: none;
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+/* Area catatan */
+.calendar-dialog textarea {
+    min-height: 110px;
+    resize: vertical;
+}
+
+/* Efek fokus input */
+.calendar-dialog input:focus,
+.calendar-dialog textarea:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgb(59 130 246 / 15%);
+}
+
+/* Area tombol */
+.calendar-dialog .calendar-dialog-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+
+    width: 100%;
+    margin-top: 1rem;
+}
+
+/* Semua tombol popup */
+.calendar-dialog .calendar-dialog-actions button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 100%;
+    min-width: 0;
+    min-height: 46px;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0.7rem 1rem;
+
+    font-family: inherit;
+    font-size: 0.95rem;
+    font-weight: 600;
+    line-height: 1.4;
+    text-align: center;
+
+    border-radius: 10px;
+    cursor: pointer;
+
+    transition:
+        background-color 0.2s ease,
+        border-color 0.2s ease,
+        transform 0.15s ease;
+}
+
+/* Tombol simpan */
+.calendar-dialog .calendar-dialog-actions .download-btn {
+    color: #ffffff;
+    background: #2563eb;
+    border: 1px solid #2563eb;
+}
+
+.calendar-dialog .calendar-dialog-actions .download-btn:hover {
+    background: #1d4ed8;
+    border-color: #1d4ed8;
+}
+
+/* Tombol batal */
+.calendar-dialog .calendar-dialog-actions .close {
+    color: #334155;
+    background: #f1f5f9;
+    border: 1px solid #e2e8f0;
+    opacity: 1;
+}
+
+.calendar-dialog .calendar-dialog-actions .close:hover {
+    background: #e2e8f0;
+    border-color: #cbd5e1;
+}
+
+/* Kondisi tombol saat menyimpan data */
+.calendar-dialog .calendar-dialog-actions button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* =========================================
+   RESPONSIVE - TABLET DAN MOBILE
+   ========================================= */
+
+@media (max-width: 600px) {
+    .calendar-dialog {
+        width: calc(100vw - 1.5rem);
+        max-width: calc(100vw - 1.5rem);
+
+        max-height: calc(100vh - 1.5rem);
+        max-height: calc(100dvh - 1.5rem);
+
+        border-radius: 15px;
+    }
+
+    .calendar-dialog form {
+        padding: 1.15rem;
+        gap: 0.45rem;
+    }
+
+    .calendar-dialog h3 {
+        margin-bottom: 0.45rem;
+        font-size: 1.18rem;
+    }
+
+    .calendar-dialog input[type="date"],
+    .calendar-dialog input[type="text"],
+    .calendar-dialog textarea {
+        font-size: 16px;
+    }
+
+    .calendar-dialog textarea {
+        min-height: 100px;
+    }
+
+    .calendar-dialog .calendar-dialog-actions {
+        gap: 0.6rem;
+        margin-top: 0.85rem;
+    }
+
+    .calendar-dialog .calendar-dialog-actions button {
+        min-height: 44px;
+        padding: 0.7rem 0.6rem;
+    }
+}
+
+/* HP dengan layar sangat kecil */
+@media (max-width: 360px) {
+    .calendar-dialog form {
+        padding: 1rem;
+    }
+
+    .calendar-dialog .calendar-dialog-actions {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Hormati pengaturan pengurangan animasi */
+@media (prefers-reduced-motion: reduce) {
+    .calendar-dialog input,
+    .calendar-dialog textarea,
+    .calendar-dialog .calendar-dialog-actions button {
+        transition: none;
+    }
+}
