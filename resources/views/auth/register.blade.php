@@ -5,8 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Register - MyDaily</title>
     <link rel="stylesheet" href="{{ asset('style.css') }}">
+    <script src="{{ asset('page-loader.js') }}" defer></script>
 </head>
 <body class="login-page">
+@include('layouts.partials.page-loader')
 <main class="login-container">
     <h2>Register</h2>
 

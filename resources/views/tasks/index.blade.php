@@ -105,7 +105,7 @@
                             name="selesai"
                             value="1"
                             @checked($task->selesai)
-                            onchange="this.form.submit()"
+                            onchange="this.form.requestSubmit()"
                             aria-label="Tandai {{ $task->nama_tugas }} sebagai {{ $task->selesai ? 'belum selesai' : 'selesai' }}"
                         >
                     </form>
@@ -180,7 +180,7 @@
                                             name="selesai"
                                             value="1"
                                             @checked($subtask->selesai)
-                                            onchange="this.form.submit()"
+                                            onchange="this.form.requestSubmit()"
                                             aria-label="Tandai subtugas {{ $subtask->nama_tugas }} sebagai {{ $subtask->selesai ? 'belum selesai' : 'selesai' }}"
                                         >
                                         <span class="{{ $subtask->selesai ? 'is-complete' : '' }}">{{ $subtask->nama_tugas }}</span>

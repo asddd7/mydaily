@@ -6,10 +6,12 @@
     <title>@yield('title', 'MyDaily')</title>
     <link rel="stylesheet" href="{{ asset('style.css') }}">
     <link rel="stylesheet" href="{{ asset('app.css') }}">
+    <script src="{{ asset('page-loader.js') }}" defer></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     @stack('styles')
 </head>
 <body>
+@include('layouts.partials.page-loader')
 <div class="layout">
     @include('layouts.partials.sidebar')
     <main class="content">
