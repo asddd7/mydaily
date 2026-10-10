@@ -29,30 +29,9 @@
                     <p>Catat hal yang ingin kamu selesaikan.</p>
                 </div>
             </div>
-            <form method="post" action="{{ route('tasks.store') }}" class="task-form">
-                @csrf
-                <label class="task-field task-field-wide">Nama tugas
-                    <input name="nama_tugas" maxlength="100" placeholder="Contoh: Selesaikan laporan" required>
-                </label>
-                <label class="task-field">Tenggat
-                    <input type="date" name="deadline" value="{{ today()->toDateString() }}" required>
-                </label>
-                <label class="task-field">Kategori
-                    <input name="kategori" value="daily" maxlength="100" placeholder="Contoh: kerja">
-                </label>
-                <label class="task-field task-field-wide">Pengulangan
-                    <select name="recurring_type">
-                        <option value="none">Tidak berulang</option>
-                        <option value="daily">Harian</option>
-                        <option value="weekly">Mingguan</option>
-                        <option value="monthly">Bulanan</option>
-                        <option value="yearly">Tahunan</option>
-                    </select>
-                </label>
-                <button class="task-primary-button task-field-wide" type="submit">
-                    <i class="fa-solid fa-plus" aria-hidden="true"></i> Tambah tugas
-                </button>
-            </form>
+            <button class="task-primary-button" type="button" data-open-task-dialog aria-haspopup="dialog">
+                <i class="fa-solid fa-plus" aria-hidden="true"></i> Tambah tugas
+            </button>
         </section>
 
         <section class="card task-tool-card task-import-card">
@@ -83,6 +62,48 @@
             </form>
         </section>
     </div>
+
+    <dialog class="task-create-dialog" data-task-dialog aria-labelledby="task-dialog-title" aria-describedby="task-dialog-description">
+        <div class="task-dialog-heading">
+            <div>
+                <p class="tasks-eyebrow">Tugas baru</p>
+                <h2 id="task-dialog-title">Tambah tugas</h2>
+                <p id="task-dialog-description">Isi detail tugas yang ingin kamu selesaikan.</p>
+            </div>
+            <button class="task-icon-button" type="button" data-close-task-dialog aria-label="Tutup dialog">
+                <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+            </button>
+        </div>
+        @if ($errors->any() && old('_form') === 'task_create')
+            <p class="task-dialog-error" role="alert">{{ $errors->first() }}</p>
+        @endif
+        <form method="post" action="{{ route('tasks.store') }}" class="task-form">
+            @csrf
+            <input type="hidden" name="_form" value="task_create">
+            <label class="task-field task-field-wide">Nama tugas
+                <input name="nama_tugas" value="{{ old('nama_tugas') }}" maxlength="100" placeholder="Contoh: Selesaikan laporan" required autofocus>
+            </label>
+            <label class="task-field">Tenggat
+                <input type="date" name="deadline" value="{{ old('deadline', today()->toDateString()) }}" required>
+            </label>
+            <label class="task-field">Kategori
+                <input name="kategori" value="{{ old('kategori', 'daily') }}" maxlength="100" placeholder="Contoh: kerja">
+            </label>
+            <label class="task-field task-field-wide">Pengulangan
+                <select name="recurring_type">
+                    @foreach (['none' => 'Tidak berulang', 'daily' => 'Harian', 'weekly' => 'Mingguan', 'monthly' => 'Bulanan', 'yearly' => 'Tahunan'] as $value => $label)
+                        <option value="{{ $value }}" @selected(old('recurring_type', 'none') === $value)>{{ $label }}</option>
+                    @endforeach
+                </select>
+            </label>
+            <div class="task-dialog-actions task-field-wide">
+                <button class="task-secondary-button" type="button" data-close-task-dialog>Batal</button>
+                <button class="task-primary-button" type="submit">
+                    <i class="fa-solid fa-plus" aria-hidden="true"></i> Tambah tugas
+                </button>
+            </div>
+        </form>
+    </dialog>
 
     <section class="task-list-section" aria-labelledby="task-list-title">
         <div class="task-list-heading">
@@ -218,3 +239,29 @@
     </section>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+(() => {
+    const dialog = document.querySelector('[data-task-dialog]');
+    const openButton = document.querySelector('[data-open-task-dialog]');
+    if (!(dialog instanceof HTMLDialogElement) || !(openButton instanceof HTMLButtonElement)) return;
+
+    const closeButtons = dialog.querySelectorAll('[data-close-task-dialog]');
+    const taskName = dialog.querySelector('[name="nama_tugas"]');
+
+    const openDialog = () => {
+        if (!dialog.open) dialog.showModal();
+        taskName?.focus();
+    };
+
+    openButton.addEventListener('click', openDialog);
+    closeButtons.forEach(button => button.addEventListener('click', () => dialog.close()));
+    dialog.addEventListener('click', event => {
+        if (event.target === dialog) dialog.close();
+    });
+
+    if (dialog.querySelector('.task-dialog-error')) openDialog();
+})();
+</script>
+@endpush
