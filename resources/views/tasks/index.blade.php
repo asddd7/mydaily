@@ -184,8 +184,11 @@
                     </form>
                 </details>
 
-                <div class="task-subtasks">
-                    <h4>Subtugas <span>{{ $subtasks->get($task->id, collect())->count() }}</span></h4>
+                <details class="task-subtasks">
+                    <summary class="task-subtasks-heading">
+                        <span>Subtugas</span>
+                        <span class="task-subtask-count">{{ $subtasks->get($task->id, collect())->count() }}</span>
+                    </summary>
                     @if ($subtasks->get($task->id, collect())->isNotEmpty())
                         <ul class="task-subtask-list">
                             @foreach ($subtasks->get($task->id, collect()) as $subtask)
@@ -227,7 +230,7 @@
                         </label>
                         <button class="task-secondary-button" type="submit">Tambah</button>
                     </form>
-                </div>
+                </details>
             </article>
         @empty
             <div class="card task-empty">

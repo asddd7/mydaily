@@ -431,16 +431,45 @@
     background: #f8fafc;
 }
 
-.content .tasks-page .task-subtasks h4 {
+.content .tasks-page .task-subtasks-heading {
     display: flex;
+    width: fit-content;
     align-items: center;
     gap: 8px;
-    margin: 0;
+    padding: 0;
     color: #334155;
     font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    list-style: none;
 }
 
-.content .tasks-page .task-subtasks h4 span {
+.content .tasks-page .task-subtasks-heading::-webkit-details-marker {
+    display: none;
+}
+
+.content .tasks-page .task-subtasks-heading::after {
+    content: "";
+    width: 7px;
+    height: 7px;
+    margin-left: 3px;
+    border-right: 1.5px solid #64748b;
+    border-bottom: 1.5px solid #64748b;
+    transform: rotate(45deg) translateY(-2px);
+    transition: transform .18s ease;
+}
+
+.content .tasks-page .task-subtasks[open] .task-subtasks-heading::after {
+    transform: rotate(225deg) translate(-1px, -1px);
+}
+
+.content .tasks-page .task-subtasks-heading:focus-visible {
+    outline: 3px solid rgba(37, 99, 235, .25);
+    outline-offset: 4px;
+    border-radius: 3px;
+}
+
+.content .tasks-page .task-subtask-count {
     display: inline-grid;
     min-width: 20px;
     height: 20px;
