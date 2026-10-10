@@ -380,7 +380,7 @@
 
 .content .tasks-page button.task-icon-button:focus-visible,
 .content .tasks-page button.task-subtask-delete:focus-visible,
-.content .tasks-page .task-edit summary:focus-visible {
+.content .tasks-page .task-subtasks-heading:focus-visible {
     outline: 3px solid rgba(37, 99, 235, .25);
     outline-offset: 2px;
 }
@@ -390,39 +390,6 @@
     border-color: #fecaca;
     background: #fef2f2;
     color: #dc2626;
-}
-
-.content .tasks-page .task-edit {
-    margin: 0 20px;
-    border-top: 1px solid #eef2f7;
-}
-
-.content .tasks-page .task-edit summary {
-    width: fit-content;
-    padding: 12px 0;
-    color: #64748b;
-    font-size: 12px;
-    font-weight: 700;
-    cursor: pointer;
-    list-style: none;
-}
-
-.content .tasks-page .task-edit summary::-webkit-details-marker {
-    display: none;
-}
-
-.content .tasks-page .task-edit summary::after {
-    content: "+";
-    margin-left: 7px;
-    color: #2563eb;
-}
-
-.content .tasks-page .task-edit[open] summary::after {
-    content: "−";
-}
-
-.content .tasks-page .task-edit-form {
-    padding: 4px 0 17px;
 }
 
 .content .tasks-page .task-subtasks {
@@ -580,7 +547,8 @@
     font-size: 13px;
 }
 
-.content .tasks-page dialog.task-create-dialog {
+.content .tasks-page dialog.task-create-dialog,
+.content .tasks-page dialog.task-edit-dialog {
     width: min(92vw, 520px);
     max-height: 90vh;
     max-height: 90dvh;
@@ -594,7 +562,8 @@
     box-shadow: 0 20px 60px rgba(15, 23, 42, .25);
 }
 
-.content .tasks-page dialog.task-create-dialog::backdrop {
+.content .tasks-page dialog.task-create-dialog::backdrop,
+.content .tasks-page dialog.task-edit-dialog::backdrop {
     background: rgba(15, 23, 42, .5);
     -webkit-backdrop-filter: blur(3px);
     backdrop-filter: blur(3px);
@@ -661,7 +630,8 @@
         padding: 17px;
     }
 
-    .content .tasks-page dialog.task-create-dialog {
+    .content .tasks-page dialog.task-create-dialog,
+    .content .tasks-page dialog.task-edit-dialog {
         padding: 19px;
     }
 
@@ -687,11 +657,6 @@
     .content .tasks-page button.task-icon-button {
         width: 32px;
         height: 32px;
-    }
-
-    .content .tasks-page .task-edit {
-        margin-right: 13px;
-        margin-left: 13px;
     }
 
     .content .tasks-page .task-subtasks {

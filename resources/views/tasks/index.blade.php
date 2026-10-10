@@ -149,6 +149,17 @@
                                 <i class="fa-regular fa-copy" aria-hidden="true"></i>
                             </button>
                         </form>
+                        <button
+                            class="task-icon-button"
+                            type="button"
+                            data-open-task-edit
+                            data-dialog-target="editTaskDialog{{ $task->id }}"
+                            aria-label="Edit tugas {{ $task->nama_tugas }}"
+                            title="Edit tugas"
+                            aria-haspopup="dialog"
+                        >
+                            <i class="fa-regular fa-pen-to-square" aria-hidden="true"></i>
+                        </button>
                         <form method="post" action="{{ route('tasks.destroy', $task->id) }}" onsubmit="return confirm('Hapus tugas dan seluruh subtugas?')">
                             @csrf
                             @method('delete')
@@ -159,30 +170,54 @@
                     </div>
                 </div>
 
-                <details class="task-edit">
-                    <summary><i class="fa-regular fa-pen-to-square" aria-hidden="true"></i> Edit detail tugas</summary>
-                    <form method="post" action="{{ route('tasks.update', $task->id) }}" class="task-form task-edit-form">
+                @php($isEditError = $errors->any() && old('_form') === 'task_edit' && (string) old('_task_id') === (string) $task->id)
+                <dialog
+                    class="task-edit-dialog"
+                    id="editTaskDialog{{ $task->id }}"
+                    aria-labelledby="editTaskTitle{{ $task->id }}"
+                    aria-describedby="editTaskDescription{{ $task->id }}"
+                    @if ($isEditError) data-reopen @endif
+                >
+                    <div class="task-dialog-heading">
+                        <div>
+                            <p class="tasks-eyebrow">Edit tugas</p>
+                            <h2 id="editTaskTitle{{ $task->id }}">Ubah detail tugas</h2>
+                            <p id="editTaskDescription{{ $task->id }}">Perbarui nama, tenggat, kategori, atau pengulangan.</p>
+                        </div>
+                        <button class="task-icon-button" type="button" data-close-task-dialog aria-label="Tutup dialog">
+                            <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+                        </button>
+                    </div>
+                    @if ($isEditError)
+                        <p class="task-dialog-error" role="alert">{{ $errors->first() }}</p>
+                    @endif
+                    <form method="post" action="{{ route('tasks.update', $task->id) }}" class="task-form">
                         @csrf
                         @method('put')
+                        <input type="hidden" name="_form" value="task_edit">
+                        <input type="hidden" name="_task_id" value="{{ $task->id }}">
                         <label class="task-field task-field-wide">Nama tugas
-                            <input name="nama_tugas" value="{{ $task->nama_tugas }}" maxlength="100" required>
+                            <input name="nama_tugas" value="{{ $isEditError ? old('nama_tugas', $task->nama_tugas) : $task->nama_tugas }}" maxlength="100" required>
                         </label>
                         <label class="task-field">Tenggat
-                            <input type="date" name="deadline" value="{{ $task->deadline }}" required>
+                            <input type="date" name="deadline" value="{{ $isEditError ? old('deadline', $task->deadline) : $task->deadline }}" required>
                         </label>
                         <label class="task-field">Kategori
-                            <input name="kategori" value="{{ $task->kategori }}" maxlength="100">
+                            <input name="kategori" value="{{ $isEditError ? old('kategori', $task->kategori) : $task->kategori }}" maxlength="100">
                         </label>
                         <label class="task-field task-field-wide">Pengulangan
                             <select name="recurring_type">
                                 @foreach (['none' => 'Tidak berulang', 'daily' => 'Harian', 'weekly' => 'Mingguan', 'monthly' => 'Bulanan', 'yearly' => 'Tahunan'] as $value => $label)
-                                    <option value="{{ $value }}" @selected($task->recurring_type === $value)>{{ $label }}</option>
+                                    <option value="{{ $value }}" @selected(($isEditError ? old('recurring_type', $task->recurring_type) : $task->recurring_type) === $value)>{{ $label }}</option>
                                 @endforeach
                             </select>
                         </label>
-                        <button class="task-primary-button task-field-wide" type="submit">Simpan perubahan</button>
+                        <div class="task-dialog-actions task-field-wide">
+                            <button class="task-secondary-button" type="button" data-close-task-dialog>Batal</button>
+                            <button class="task-primary-button" type="submit">Simpan perubahan</button>
+                        </div>
                     </form>
-                </details>
+                </dialog>
 
                 <details class="task-subtasks">
                     <summary class="task-subtasks-heading">
@@ -248,23 +283,37 @@
 (() => {
     const dialog = document.querySelector('[data-task-dialog]');
     const openButton = document.querySelector('[data-open-task-dialog]');
-    if (!(dialog instanceof HTMLDialogElement) || !(openButton instanceof HTMLButtonElement)) return;
-
-    const closeButtons = dialog.querySelectorAll('[data-close-task-dialog]');
-    const taskName = dialog.querySelector('[name="nama_tugas"]');
-
-    const openDialog = () => {
-        if (!dialog.open) dialog.showModal();
-        taskName?.focus();
+    const openDialog = (targetDialog) => {
+        if (!targetDialog.open) targetDialog.showModal();
+        targetDialog.querySelector('[name="nama_tugas"]')?.focus();
     };
 
-    openButton.addEventListener('click', openDialog);
-    closeButtons.forEach(button => button.addEventListener('click', () => dialog.close()));
-    dialog.addEventListener('click', event => {
-        if (event.target === dialog) dialog.close();
+    if (dialog instanceof HTMLDialogElement && openButton instanceof HTMLButtonElement) {
+        openButton.addEventListener('click', () => openDialog(dialog));
+        if (dialog.querySelector('.task-dialog-error')) openDialog(dialog);
+    }
+
+    document.querySelectorAll('[data-open-task-edit]').forEach(button => {
+        if (!(button instanceof HTMLButtonElement)) return;
+
+        button.addEventListener('click', () => {
+            const targetId = button.dataset.dialogTarget;
+            const editDialog = targetId ? document.getElementById(targetId) : null;
+            if (editDialog instanceof HTMLDialogElement) openDialog(editDialog);
+        });
     });
 
-    if (dialog.querySelector('.task-dialog-error')) openDialog();
+    document.querySelectorAll('.task-create-dialog, .task-edit-dialog').forEach(taskDialog => {
+        if (!(taskDialog instanceof HTMLDialogElement)) return;
+
+        taskDialog.querySelectorAll('[data-close-task-dialog]').forEach(button => {
+            button.addEventListener('click', () => taskDialog.close());
+        });
+        taskDialog.addEventListener('click', event => {
+            if (event.target === taskDialog) taskDialog.close();
+        });
+        if (taskDialog.hasAttribute('data-reopen')) openDialog(taskDialog);
+    });
 })();
 </script>
 @endpush
