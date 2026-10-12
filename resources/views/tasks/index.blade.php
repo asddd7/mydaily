@@ -3,7 +3,7 @@
 @section('title', 'Tugas - MyDaily')
 
 @push('styles')
-    <link rel="stylesheet" href="{{ asset('tasks.css') }}">
+    @vite('resources/css/tasks.css')
 @endpush
 
 @section('content')

@@ -8,17 +8,20 @@ are Blade files under `resources/views`.
 ## Local setup
 
 1. Use PHP 8.3 or newer with `pdo_mysql`, `mysqli`, and `gd` enabled.
-2. Run `composer install`.
-3. Copy `.env.example` to `.env`, then set the database connection values for
+2. Install Node.js and npm, then run `npm install`.
+3. Run `composer install`.
+4. Copy `.env.example` to `.env`, then set the database connection values for
    the existing `daily` database.
-4. Run `php artisan key:generate`.
-5. Start the application with `php artisan serve`, or configure Apache/Laragon
-   to use the project's `public` directory as its document root.
+5. Run `php artisan key:generate`.
+6. For local development, run `npm run dev` in one terminal and start the
+   application with `php artisan serve` in another. For a production build,
+   run `npm run build` before serving the application.
 
 The Laravel bootstrap connects to the existing `daily` database; it does not
 create, migrate, or delete application tables. Keep a database backup before
-future schema changes. Static styles and the favicon are served from `public/`;
-the root Apache rewrite also supports a Laragon document root at the project
+future schema changes. Vite compiles frontend assets from `resources/` into
+`public/build/`; the favicon and other static files remain in `public/`. The
+root Apache rewrite also supports a Laragon document root at the project
 directory. Existing accounts and application data remain in place, but users
 must sign in again because Laravel uses its own session format.
 
