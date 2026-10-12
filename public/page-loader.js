@@ -2,7 +2,28 @@
     const loader = document.getElementById('pageLoader');
     if (!loader) return;
 
-    const showLoader = () => {
+    const loaderActions = new Set([
+        'navigate',
+        'create',
+        'update',
+        'delete',
+        'toggle',
+        'copy',
+        'import',
+        'subtask-create',
+        'subtask-update',
+        'subtask-delete',
+    ]);
+
+    const setLoaderAction = (action) => {
+        [...loader.classList].forEach(className => {
+            if (className.startsWith('page-loader--')) loader.classList.remove(className);
+        });
+        loader.classList.add(`page-loader--${loaderActions.has(action) ? action : 'navigate'}`);
+    };
+
+    const showLoader = (action = 'navigate') => {
+        setLoaderAction(action);
         loader.hidden = false;
         loader.setAttribute('aria-hidden', 'false');
         loader.classList.add('is-visible');
@@ -57,11 +78,14 @@
 
         if (form.method.toLowerCase() === 'dialog' || target && target !== '_self') return;
 
-        showLoader();
+        showLoader(form.dataset.loaderAction);
     });
 
     window.addEventListener('pageshow', () => {
         loader.classList.remove('is-visible');
+        [...loader.classList].forEach(className => {
+            if (className.startsWith('page-loader--')) loader.classList.remove(className);
+        });
         loader.hidden = true;
         loader.setAttribute('aria-hidden', 'true');
     });

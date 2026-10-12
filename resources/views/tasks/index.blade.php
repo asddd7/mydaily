@@ -53,7 +53,7 @@
             <a class="task-template-link" href="{{ asset('template_import.xlsx') }}">
                 <i class="fa-solid fa-download" aria-hidden="true"></i> Download template Excel
             </a>
-            <form method="post" action="{{ route('tasks.import') }}" enctype="multipart/form-data" class="task-import-form">
+            <form method="post" action="{{ route('tasks.import') }}" enctype="multipart/form-data" class="task-import-form" data-loader-action="import">
                 @csrf
                 <label class="task-field">Pilih file Excel
                     <input type="file" name="file_excel" accept=".xlsx,.xls" required>
@@ -77,7 +77,7 @@
         @if ($errors->any() && old('_form') === 'task_create')
             <p class="task-dialog-error" role="alert">{{ $errors->first() }}</p>
         @endif
-        <form method="post" action="{{ route('tasks.store') }}" class="task-form">
+        <form method="post" action="{{ route('tasks.store') }}" class="task-form" data-loader-action="create">
             @csrf
             <input type="hidden" name="_form" value="task_create">
             <label class="task-field task-field-wide">Nama tugas
@@ -117,7 +117,7 @@
         @forelse ($tasks as $task)
             <article class="card task-card">
                 <div class="task-card-main">
-                    <form method="post" action="{{ route('tasks.toggle', $task->id) }}" class="task-check-form">
+                    <form method="post" action="{{ route('tasks.toggle', $task->id) }}" class="task-check-form" data-loader-action="toggle">
                         @csrf
                         <input type="hidden" name="selesai" value="0">
                         <input
@@ -143,7 +143,7 @@
                         </div>
                     </div>
                     <div class="task-actions">
-                        <form method="post" action="{{ route('tasks.copy', $task->id) }}">
+                        <form method="post" action="{{ route('tasks.copy', $task->id) }}" data-loader-action="copy">
                             @csrf
                             <button class="task-icon-button" type="submit" aria-label="Salin tugas {{ $task->nama_tugas }}" title="Salin tugas">
                                 <i class="fa-regular fa-copy" aria-hidden="true"></i>
@@ -160,7 +160,7 @@
                         >
                             <i class="fa-regular fa-pen-to-square" aria-hidden="true"></i>
                         </button>
-                        <form method="post" action="{{ route('tasks.destroy', $task->id) }}" onsubmit="return confirm('Hapus tugas dan seluruh subtugas?')">
+                        <form method="post" action="{{ route('tasks.destroy', $task->id) }}" data-loader-action="delete" onsubmit="return confirm('Hapus tugas dan seluruh subtugas?')">
                             @csrf
                             @method('delete')
                             <button class="task-icon-button task-delete-button" type="submit" aria-label="Hapus tugas {{ $task->nama_tugas }}" title="Hapus tugas">
@@ -191,7 +191,7 @@
                     @if ($isEditError)
                         <p class="task-dialog-error" role="alert">{{ $errors->first() }}</p>
                     @endif
-                    <form method="post" action="{{ route('tasks.update', $task->id) }}" class="task-form">
+                    <form method="post" action="{{ route('tasks.update', $task->id) }}" class="task-form" data-loader-action="update">
                         @csrf
                         @method('put')
                         <input type="hidden" name="_form" value="task_edit">
@@ -228,7 +228,7 @@
                         <ul class="task-subtask-list">
                             @foreach ($subtasks->get($task->id, collect()) as $subtask)
                                 <li class="task-subtask">
-                                    <form method="post" action="{{ route('tasks.subtasks.update', $subtask->id) }}" class="task-subtask-check">
+                                    <form method="post" action="{{ route('tasks.subtasks.update', $subtask->id) }}" class="task-subtask-check" data-loader-action="subtask-update">
                                         @csrf
                                         @method('put')
                                         <input type="hidden" name="nama_tugas" value="{{ $subtask->nama_tugas }}">
@@ -244,7 +244,7 @@
                                         >
                                         <span class="{{ $subtask->selesai ? 'is-complete' : '' }}">{{ $subtask->nama_tugas }}</span>
                                     </form>
-                                    <form method="post" action="{{ route('tasks.subtasks.destroy', $subtask->id) }}" onsubmit="return confirm('Hapus subtugas ini?')">
+                                    <form method="post" action="{{ route('tasks.subtasks.destroy', $subtask->id) }}" data-loader-action="subtask-delete" onsubmit="return confirm('Hapus subtugas ini?')">
                                         @csrf
                                         @method('delete')
                                         <button class="task-subtask-delete" type="submit" aria-label="Hapus subtugas {{ $subtask->nama_tugas }}" title="Hapus subtugas">
@@ -258,7 +258,7 @@
                         <p class="task-no-subtasks">Belum ada subtugas.</p>
                     @endif
 
-                    <form method="post" action="{{ route('tasks.subtasks.store', $task->id) }}" class="task-add-subtask">
+                    <form method="post" action="{{ route('tasks.subtasks.store', $task->id) }}" class="task-add-subtask" data-loader-action="subtask-create">
                         @csrf
                         <label class="task-field">Tambah subtugas
                             <input name="nama_subtask" maxlength="100" placeholder="Tulis subtugas..." required>
