@@ -3573,6 +3573,26 @@ body.login-page::after {
   box-shadow: 0 14px 30px rgba(37, 99, 235, 0.28);
 }
 
+.login-container .login-form.is-loading button[type="submit"] {
+  color: transparent;
+  cursor: wait;
+  pointer-events: none;
+}
+
+.login-container .login-form.is-loading button[type="submit"]::after {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(255, 255, 255, 0.45);
+  border-top-color: #fff;
+  border-radius: 50%;
+  content: "";
+  transform: translate(-50%, -50%);
+  animation: login-submit-spin 700ms linear infinite;
+}
+
 .login-container button:focus-visible,
 .login-container a:focus-visible {
   outline: 3px solid rgba(37, 99, 235, 0.65);
@@ -3625,6 +3645,10 @@ body.login-page::after {
 
 .login-container a:hover {
   color: #0369a1;
+}
+
+@keyframes login-submit-spin {
+  to { transform: translate(-50%, -50%) rotate(360deg); }
 }
 
 .login-container > p {

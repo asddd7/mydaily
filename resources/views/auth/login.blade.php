@@ -19,7 +19,7 @@
         <p class="error-msg">{{ $errors->first() }}</p>
     @endif
 
-    <form method="post" action="{{ route('login.store') }}" class="login-form">
+    <form method="post" action="{{ route('login.store') }}" class="login-form" data-loader-action="login">
         @csrf
         <div class="input-group">
             <input type="email" name="email" placeholder="Email"

@@ -78,6 +78,13 @@
 
         if (form.method.toLowerCase() === 'dialog' || target && target !== '_self') return;
 
+        if (form.dataset.loaderAction === 'login') {
+            form.classList.add('is-loading');
+            form.setAttribute('aria-busy', 'true');
+            form.querySelector('button[type="submit"]')?.setAttribute('aria-busy', 'true');
+            return;
+        }
+
         showLoader(form.dataset.loaderAction);
     });
 
@@ -88,5 +95,10 @@
         });
         loader.hidden = true;
         loader.setAttribute('aria-hidden', 'true');
+        document.querySelectorAll('form.login-form.is-loading').forEach(form => {
+            form.classList.remove('is-loading');
+            form.removeAttribute('aria-busy');
+            form.querySelector('button[type="submit"]')?.removeAttribute('aria-busy');
+        });
     });
 })();
