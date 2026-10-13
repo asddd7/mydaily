@@ -8,13 +8,13 @@
 
 @section('content')
 <div class="money-page">
-    <header class="money-heading">
+    <div class="money-heading">
         <div>
             <p class="money-eyebrow">Ringkasan keuangan</p>
             <h1>Pengatur Keuangan</h1>
             <p>Pantau saldo dan riwayat transaksi dalam satu tempat.</p>
         </div>
-    </header>
+    </div>
 
     <section class="money-balance-grid" aria-label="Ringkasan saldo">
         <article class="money-balance-card money-balance-card-primary">
