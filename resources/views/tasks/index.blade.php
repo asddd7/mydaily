@@ -7,7 +7,7 @@
 @endpush
 
 @section('content')
-<div class="tasks-page">
+<div class="tasks-page" data-preserve-scroll>
     <div class="tasks-heading">
         <div>
             <p class="tasks-eyebrow">Perencanaan harian</p>

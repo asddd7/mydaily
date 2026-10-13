@@ -78,6 +78,11 @@
 
         if (form.method.toLowerCase() === 'dialog' || target && target !== '_self') return;
 
+        if (form.closest('[data-preserve-scroll]')) {
+            sessionStorage.setItem('tasks:scroll-path', window.location.pathname);
+            sessionStorage.setItem('tasks:scroll-y', String(window.scrollY));
+        }
+
         if (form.dataset.loaderAction === 'login') {
             form.classList.add('is-loading');
             form.setAttribute('aria-busy', 'true');
@@ -95,6 +100,19 @@
         });
         loader.hidden = true;
         loader.setAttribute('aria-hidden', 'true');
+
+        const savedPath = sessionStorage.getItem('tasks:scroll-path');
+        const savedScrollY = sessionStorage.getItem('tasks:scroll-y');
+        sessionStorage.removeItem('tasks:scroll-path');
+        sessionStorage.removeItem('tasks:scroll-y');
+
+        if (document.querySelector('[data-preserve-scroll]') && savedPath === window.location.pathname && savedScrollY !== null) {
+            const scrollY = Number(savedScrollY);
+            if (Number.isFinite(scrollY)) {
+                window.requestAnimationFrame(() => window.scrollTo({ top: scrollY, behavior: 'instant' }));
+            }
+        }
+
         document.querySelectorAll('form.login-form.is-loading').forEach(form => {
             form.classList.remove('is-loading');
             form.removeAttribute('aria-busy');
