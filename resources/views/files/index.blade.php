@@ -8,7 +8,7 @@
     <p>Ukuran maksimum 50 MB. Format yang didukung mencakup gambar, video, dokumen, arsip, dan teks.</p>
     <form method="post" action="{{ route('files.store') }}" enctype="multipart/form-data">
         @csrf
-        <input type="file" name="file" required>
+        <input type="file" name="file" id="fileUploadInput" required>
         <button type="submit">Upload file</button>
     </form>
 </section>

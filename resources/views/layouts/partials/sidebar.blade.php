@@ -22,9 +22,6 @@
     <a href="{{ route('files.index') }}" @class(['active' => request()->routeIs('files.*')])>
         <i class="fa-solid fa-folder"></i><span>File Manager</span>
     </a>
-    <a href="{{ route('calendar.index') }}" @class(['active' => request()->routeIs('calendar.*')])>
-        <i class="fa-solid fa-calendar-days"></i><span>Kalender</span>
-    </a>
     <div class="sidebar-section">PENGATURAN</div>
     <a href="{{ route('clock.edit') }}" @class(['active' => request()->routeIs('clock.*')])>
         <i class="fa-solid fa-clock"></i><span>Pengaturan Jam</span>

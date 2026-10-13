@@ -5,7 +5,7 @@
 @section('content')
 <section class="card">
     <h1>Catatan</h1>
-    <form method="post" action="{{ route('notes.store') }}" enctype="multipart/form-data">
+    <form method="post" action="{{ route('notes.store') }}" enctype="multipart/form-data" id="noteCreateForm">
         @csrf
         <label>Judul <input name="title" maxlength="255" required></label>
         <label>Isi <textarea name="content" rows="8" required></textarea></label>

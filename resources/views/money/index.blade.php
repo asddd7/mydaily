@@ -14,7 +14,7 @@
 
 <section class="card">
     <h2>Tambah transaksi</h2>
-    <form method="post" action="{{ route('money.store') }}" class="form-grid">
+    <form method="post" action="{{ route('money.store') }}" class="form-grid" id="moneyCreateForm">
         @csrf
         <label>Jenis
             <select name="type" required><option value="income">Pemasukan</option><option value="expense">Pengeluaran</option></select>

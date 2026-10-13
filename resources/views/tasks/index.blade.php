@@ -282,14 +282,15 @@
 <script>
 (() => {
     const dialog = document.querySelector('[data-task-dialog]');
-    const openButton = document.querySelector('[data-open-task-dialog]');
     const openDialog = (targetDialog) => {
         if (!targetDialog.open) targetDialog.showModal();
         targetDialog.querySelector('[name="nama_tugas"]')?.focus();
     };
 
-    if (dialog instanceof HTMLDialogElement && openButton instanceof HTMLButtonElement) {
-        openButton.addEventListener('click', () => openDialog(dialog));
+    if (dialog instanceof HTMLDialogElement) {
+        document.querySelectorAll('[data-open-task-dialog]').forEach(openButton => {
+            openButton.addEventListener('click', () => openDialog(dialog));
+        });
         if (dialog.querySelector('.task-dialog-error')) openDialog(dialog);
     }
 

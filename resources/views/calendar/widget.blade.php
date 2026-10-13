@@ -294,6 +294,7 @@
         dialog.showModal();
         form.elements.title.focus();
     };
+    document.addEventListener('calendar:open-create', () => openForDate(toDateString(new Date())));
 
     const applyCalendarData = (year, month, marks = [], holidays = [], tasks = []) => {
         const marksByDate = groupByDate(marks);

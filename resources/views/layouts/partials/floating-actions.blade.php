@@ -1,24 +1,66 @@
+@php
+    $fabContext = match (request()->route()?->getName()) {
+        'tasks.index' => ['label' => 'Tambah tugas', 'icon' => 'fa-list-check', 'action' => 'task'],
+        'money.index' => ['label' => 'Tambah transaksi', 'icon' => 'fa-wallet', 'action' => 'money'],
+        'notes.index' => ['label' => 'Tambah catatan', 'icon' => 'fa-note-sticky', 'action' => 'note'],
+        'files.index' => ['label' => 'Upload file', 'icon' => 'fa-folder-plus', 'action' => 'file'],
+        'calendar.index' => ['label' => 'Tambah penanda', 'icon' => 'fa-calendar-plus', 'action' => 'calendar'],
+        default => null,
+    };
+@endphp
+
 <div class="fab-container">
-    <button class="fab-main" id="fabToggle" type="button" aria-label="Buka akses cepat">
-        <i class="fa-solid fa-plus"></i>
+    <button
+        class="fab-main{{ $fabContext ? ' fab-main--action' : '' }}"
+        id="fabToggle"
+        type="button"
+        @if ($fabContext)
+            data-fab-action="{{ $fabContext['action'] }}"
+            aria-label="{{ $fabContext['label'] }}"
+        @else
+            aria-label="Buka akses cepat"
+        @endif
+    >
+        <i class="fa-solid {{ $fabContext ? $fabContext['icon'] : 'fa-plus' }}" aria-hidden="true"></i>
+        @if ($fabContext)
+            <span>{{ $fabContext['label'] }}</span>
+        @endif
     </button>
-    <nav class="fab-menu" id="fabMenu" aria-label="Akses cepat">
-        <a href="{{ route('tasks.index') }}" class="fab-item"><i class="fa-solid fa-list-check"></i><span>Tugas</span></a>
-        <a href="{{ route('money.index') }}" class="fab-item"><i class="fa-solid fa-wallet"></i><span>Keuangan</span></a>
-        <a href="{{ route('notes.index') }}" class="fab-item"><i class="fa-solid fa-note-sticky"></i><span>Catatan</span></a>
-        <a href="{{ route('files.index') }}" class="fab-item"><i class="fa-solid fa-folder"></i><span>File</span></a>
-    </nav>
+    @unless ($fabContext)
+        <nav class="fab-menu" id="fabMenu" aria-label="Akses cepat">
+            <a href="{{ route('tasks.index') }}" class="fab-item"><i class="fa-solid fa-list-check"></i><span>Tugas</span></a>
+            <a href="{{ route('money.index') }}" class="fab-item"><i class="fa-solid fa-wallet"></i><span>Keuangan</span></a>
+            <a href="{{ route('notes.index') }}" class="fab-item"><i class="fa-solid fa-note-sticky"></i><span>Catatan</span></a>
+            <a href="{{ route('files.index') }}" class="fab-item"><i class="fa-solid fa-folder"></i><span>File</span></a>
+        </nav>
+    @endunless
 </div>
 
 <script>
 (() => {
     const toggle = document.getElementById('fabToggle');
     const menu = document.getElementById('fabMenu');
-    toggle.addEventListener('click', event => {
-        event.stopPropagation();
-        menu.classList.toggle('show');
-    });
-    document.addEventListener('click', () => menu.classList.remove('show'));
+    if (toggle.dataset.fabAction) {
+        toggle.addEventListener('click', () => {
+            if (toggle.dataset.fabAction === 'task') {
+                document.querySelector('[data-open-task-dialog]')?.click();
+            } else if (toggle.dataset.fabAction === 'money' || toggle.dataset.fabAction === 'note') {
+                const target = document.getElementById(toggle.dataset.fabAction === 'money' ? 'moneyCreateForm' : 'noteCreateForm');
+                target?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                target?.querySelector('input:not([type="file"]), textarea, select')?.focus({ preventScroll: true });
+            } else if (toggle.dataset.fabAction === 'file') {
+                document.getElementById('fileUploadInput')?.click();
+            } else if (toggle.dataset.fabAction === 'calendar') {
+                document.dispatchEvent(new CustomEvent('calendar:open-create'));
+            }
+        });
+    } else {
+        toggle.addEventListener('click', event => {
+            event.stopPropagation();
+            menu.classList.toggle('show');
+        });
+        document.addEventListener('click', () => menu.classList.remove('show'));
+    }
 
     const clock = document.getElementById('floatingClock');
     const mode = @json(request()->attributes->get('currentUser')->clock_mode ?: 'clock');
