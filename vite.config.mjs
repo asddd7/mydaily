@@ -8,6 +8,7 @@ export default defineConfig({
                 'resources/css/style.css',
                 'resources/css/app.css',
                 'resources/css/tasks.css',
+                'resources/css/money.css',
                 'resources/js/page-loader.js',
             ],
             refresh: true,
