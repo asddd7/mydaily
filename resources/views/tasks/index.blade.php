@@ -219,12 +219,32 @@
                     </form>
                 </dialog>
 
-                <details class="task-subtasks">
+                <details class="task-subtasks" data-subtask-parent-id="{{ $task->id }}">
                     <summary class="task-subtasks-heading">
                         <span>Subtugas</span>
                         <span class="task-subtask-count">{{ $subtasks->get($task->id, collect())->count() }}</span>
                     </summary>
                     @if ($subtasks->get($task->id, collect())->isNotEmpty())
+                        <div class="task-subtask-toolbar">
+                            <label class="task-subtask-select-all">
+                                <input type="checkbox" data-select-all-subtasks aria-label="Pilih semua subtugas {{ $task->nama_tugas }}">
+                                <span>Pilih semua</span>
+                            </label>
+                            <form
+                                method="post"
+                                action="{{ route('tasks.subtasks.bulk-destroy', $task->id) }}"
+                                id="deleteSubtasksForm{{ $task->id }}"
+                                data-loader-action="subtask-delete"
+                                onsubmit="return confirm('Hapus subtugas yang dipilih?')"
+                            >
+                                @csrf
+                                @method('delete')
+                                <button class="task-subtask-bulk-delete" type="submit" data-delete-selected-subtasks disabled>
+                                    <i class="fa-regular fa-trash-can" aria-hidden="true"></i>
+                                    Hapus terpilih (<span data-selected-subtask-count>0</span>)
+                                </button>
+                            </form>
+                        </div>
                         <ul class="task-subtask-list">
                             @foreach ($subtasks->get($task->id, collect()) as $subtask)
                                 <li class="task-subtask">
@@ -233,6 +253,14 @@
                                         @method('put')
                                         <input type="hidden" name="nama_tugas" value="{{ $subtask->nama_tugas }}">
                                         <input type="hidden" name="selesai" value="0">
+                                        <input
+                                            class="task-subtask-select"
+                                            type="checkbox"
+                                            name="subtask_ids[]"
+                                            value="{{ $subtask->id }}"
+                                            form="deleteSubtasksForm{{ $task->id }}"
+                                            aria-label="Pilih subtugas {{ $subtask->nama_tugas }}"
+                                        >
                                         <input
                                             class="task-checkbox"
                                             type="checkbox"
@@ -314,6 +342,29 @@
             if (event.target === taskDialog) taskDialog.close();
         });
         if (taskDialog.hasAttribute('data-reopen')) openDialog(taskDialog);
+    });
+
+    document.querySelectorAll('.task-subtasks').forEach(details => {
+        const selectAll = details.querySelector('[data-select-all-subtasks]');
+        const selections = [...details.querySelectorAll('.task-subtask-select')];
+        const deleteButton = details.querySelector('[data-delete-selected-subtasks]');
+        const selectedCount = details.querySelector('[data-selected-subtask-count]');
+
+        if (!(selectAll instanceof HTMLInputElement) || !(deleteButton instanceof HTMLButtonElement)) return;
+
+        const updateSelection = () => {
+            const selected = selections.filter(checkbox => checkbox.checked).length;
+            selectAll.checked = selected === selections.length;
+            selectAll.indeterminate = selected > 0 && selected < selections.length;
+            deleteButton.disabled = selected === 0;
+            if (selectedCount) selectedCount.textContent = String(selected);
+        };
+
+        selectAll.addEventListener('change', () => {
+            selections.forEach(checkbox => { checkbox.checked = selectAll.checked; });
+            updateSelection();
+        });
+        selections.forEach(checkbox => checkbox.addEventListener('change', updateSelection));
     });
 })();
 </script>

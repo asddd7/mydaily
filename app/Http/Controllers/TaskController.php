@@ -254,6 +254,37 @@ class TaskController extends Controller
         return redirect()->route('tasks.index')->with('status', 'Subtugas dihapus.');
     }
 
+    public function destroySubtasks(Request $request, int $task): RedirectResponse
+    {
+        $data = $request->validate([
+            'subtask_ids' => ['required', 'array', 'min:1'],
+            'subtask_ids.*' => ['required', 'integer', 'min:1', 'distinct'],
+        ]);
+        $userId = $request->attributes->get('currentUser')->id;
+        $parentExists = DB::table('tugas')
+            ->where('id', $task)
+            ->where('user_id', $userId)
+            ->whereNull('parent_id')
+            ->exists();
+        abort_unless($parentExists, 404);
+
+        $selectedIds = $data['subtask_ids'];
+        $ownedSubtaskIds = DB::table('tugas')
+            ->where('user_id', $userId)
+            ->where('parent_id', $task)
+            ->whereIn('id', $selectedIds)
+            ->pluck('id');
+        abort_unless($ownedSubtaskIds->count() === count($selectedIds), 404);
+
+        DB::table('tugas')
+            ->where('user_id', $userId)
+            ->where('parent_id', $task)
+            ->whereIn('id', $selectedIds)
+            ->delete();
+
+        return redirect()->route('tasks.index')->with('status', 'Subtugas terpilih berhasil dihapus.');
+    }
+
     public function reorder(Request $request): RedirectResponse
     {
         $data = $request->validate(['task_ids' => ['required', 'array'], 'task_ids.*' => ['integer']]);

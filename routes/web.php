@@ -36,6 +36,7 @@ Route::delete('/tasks/{task}', [TaskController::class, 'destroy'])->name('tasks.
 Route::post('/tasks/{task}/toggle', [TaskController::class, 'toggle'])->name('tasks.toggle');
 Route::post('/tasks/{task}/copy', [TaskController::class, 'copy'])->name('tasks.copy');
 Route::post('/tasks/{task}/subtasks', [TaskController::class, 'storeSubtask'])->name('tasks.subtasks.store');
+Route::delete('/tasks/{task}/subtasks', [TaskController::class, 'destroySubtasks'])->name('tasks.subtasks.bulk-destroy');
 Route::put('/subtasks/{task}', [TaskController::class, 'updateSubtask'])->name('tasks.subtasks.update');
 Route::delete('/subtasks/{task}', [TaskController::class, 'destroySubtask'])->name('tasks.subtasks.destroy');
 Route::post('/tasks/reorder', [TaskController::class, 'reorder'])->name('tasks.reorder');

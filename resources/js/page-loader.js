@@ -81,6 +81,11 @@
         if (form.closest('[data-preserve-scroll]')) {
             sessionStorage.setItem('tasks:scroll-path', window.location.pathname);
             sessionStorage.setItem('tasks:scroll-y', String(window.scrollY));
+
+            const openSubtasks = form.closest('[data-subtask-parent-id]');
+            if (openSubtasks) {
+                sessionStorage.setItem('tasks:open-subtask-parent', openSubtasks.dataset.subtaskParentId);
+            }
         }
 
         if (form.dataset.loaderAction === 'login') {
@@ -103,8 +108,18 @@
 
         const savedPath = sessionStorage.getItem('tasks:scroll-path');
         const savedScrollY = sessionStorage.getItem('tasks:scroll-y');
+        const openSubtaskParent = sessionStorage.getItem('tasks:open-subtask-parent');
         sessionStorage.removeItem('tasks:scroll-path');
         sessionStorage.removeItem('tasks:scroll-y');
+        sessionStorage.removeItem('tasks:open-subtask-parent');
+
+        if (document.querySelector('[data-preserve-scroll]') && savedPath === window.location.pathname) {
+            if (openSubtaskParent !== null) {
+                const details = [...document.querySelectorAll('[data-subtask-parent-id]')]
+                    .find(item => item.dataset.subtaskParentId === openSubtaskParent);
+                if (details instanceof HTMLDetailsElement) details.open = true;
+            }
+        }
 
         if (document.querySelector('[data-preserve-scroll]') && savedPath === window.location.pathname && savedScrollY !== null) {
             const scrollY = Number(savedScrollY);
