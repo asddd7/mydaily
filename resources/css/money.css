@@ -437,6 +437,11 @@
     width: 100%;
 }
 
+.content .money-page .money-heading > button.money-primary-button {
+    width: auto;
+    white-space: nowrap;
+}
+
 .content .money-page button.money-secondary-button {
     align-self: end;
     width: 100%;
@@ -662,14 +667,14 @@
         align-items: flex-start;
     }
 
-    .content .money-heading > button.money-primary-button {
+    .content .money-page .money-heading > button.money-primary-button {
         width: 42px;
         min-width: 42px;
         padding: 0;
         font-size: 0;
     }
 
-    .content .money-heading > button.money-primary-button i {
+    .content .money-page .money-heading > button.money-primary-button i {
         font-size: 15px;
     }
 
