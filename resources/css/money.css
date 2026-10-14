@@ -247,6 +247,95 @@
     font-size: 12px;
 }
 
+.content .money-receipt-scan {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: end;
+    gap: 11px;
+    margin-bottom: 18px;
+    padding: 13px;
+    border: 1px dashed #bfdbfe;
+    border-radius: 11px;
+    background: #f8fbff;
+}
+
+.content .money-page .money-receipt-scan label {
+    display: block;
+    min-width: 0;
+    color: #475569;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.content .money-page .money-receipt-scan input[type="file"] {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    margin-top: 6px;
+    color: #475569;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+}
+
+.content .money-page button.money-scan-button {
+    display: inline-flex;
+    min-height: 39px;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    padding: 8px 12px;
+    border: 1px solid #bfdbfe;
+    border-radius: 9px;
+    background: #eff6ff;
+    color: #1d4ed8;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.content .money-page button.money-scan-button:hover:not(:disabled) {
+    border-color: #93c5fd;
+    background: #dbeafe;
+}
+
+.content .money-page button.money-scan-button:disabled {
+    cursor: wait;
+    opacity: .65;
+}
+
+.content .money-scan-status,
+.content .money-ocr-text {
+    grid-column: 1 / -1;
+}
+
+.content .money-scan-status {
+    margin: 0;
+    color: #475569;
+    font-size: 11px;
+    line-height: 1.5;
+}
+
+.content .money-ocr-text {
+    max-height: 150px;
+    overflow: auto;
+    color: #475569;
+    font-size: 11px;
+}
+
+.content .money-ocr-text summary {
+    color: #1d4ed8;
+    cursor: pointer;
+    font-weight: 700;
+}
+
+.content .money-ocr-text pre {
+    margin: 8px 0 0;
+    overflow-wrap: anywhere;
+    white-space: pre-wrap;
+}
+
 .content .money-dialog-actions {
     display: flex;
     justify-content: flex-end;
@@ -586,6 +675,14 @@
 
     .content .money-create-dialog {
         padding: 19px;
+    }
+
+    .content .money-receipt-scan {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .content .money-page button.money-scan-button {
+        width: 100%;
     }
 
     .content .money-entry-form,

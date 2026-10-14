@@ -35,6 +35,19 @@ subtasks and Excel import), finance, notes, profile, file manager, calendar
 marks, clock settings, and admin database-structure screens use Laravel routes,
 Blade views, validation, sessions and database queries.
 
+## Receipt scanning
+
+The finance page uses Tesseract.js to read receipt images in the user's
+browser. No Tesseract executable or OCR PHP extension is required on the web
+server. Receipt scans accept JPEG, PNG, and WebP images up to 10 MB. The image
+is processed locally and is not uploaded to Laravel; Tesseract.js downloads
+its worker, OCR core, and Indonesian/English language data from jsDelivr on
+first use and caches language data in the browser. The browser needs internet
+access for the initial download.
+
+OCR only fills suggestions in the transaction form. Users must review the
+fields and submit the form to save a transaction.
+
 The old daily-quest toggle endpoint has no corresponding tables in the active
 database (`daily_quest` and `achievements` are absent), so it is not exposed as
 a working Laravel feature without its intended schema.

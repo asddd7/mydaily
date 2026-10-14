@@ -22,5 +22,8 @@
   "devDependencies": {
     "laravel-vite-plugin": "^3.2.0",
     "vite": "^8.3.2"
+  },
+  "dependencies": {
+    "tesseract.js": "^7.0.0"
   }
 }

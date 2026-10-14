@@ -79,6 +79,19 @@
         @if ($errors->any() && old('_form') === 'money_create')
             <p class="money-dialog-error" role="alert">{{ $errors->first() }}</p>
         @endif
+        <div class="money-receipt-scan" data-receipt-scan>
+            <label for="receiptImage">Foto struk
+                <input id="receiptImage" type="file" accept="image/jpeg,image/png,image/webp" capture="environment">
+            </label>
+            <button type="button" class="money-scan-button" data-scan-submit>
+                <i class="fa-solid fa-camera" aria-hidden="true"></i> Baca struk
+            </button>
+            <p class="money-scan-status" data-scan-status role="status" aria-live="polite"></p>
+            <details class="money-ocr-text" data-ocr-text-container hidden>
+                <summary>Teks hasil pembacaan</summary>
+                <pre data-ocr-text></pre>
+            </details>
+        </div>
         <form method="post" action="{{ route('money.store') }}" class="money-entry-form" id="moneyCreateForm">
             @csrf
             <input type="hidden" name="_form" value="money_create">
@@ -198,6 +211,7 @@
 @endsection
 
 @push('scripts')
+    @vite('resources/js/money-receipt-ocr.js')
 <script>
 (() => {
     const dialog = document.querySelector('[data-money-dialog]');
@@ -217,6 +231,7 @@
     dialog.addEventListener('click', event => {
         if (event.target === dialog) dialog.close();
     });
+
     if (dialog.hasAttribute('data-reopen')) openDialog();
 })();
 </script>
