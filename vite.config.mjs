@@ -11,6 +11,7 @@ export default defineConfig({
                 'resources/css/money.css',
                 'resources/js/page-loader.js',
                 'resources/js/money-receipt-ocr.js',
+                'resources/js/money-transaction-items.js',
             ],
             refresh: true,
         }),

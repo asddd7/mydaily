@@ -88,29 +88,56 @@
         <form method="post" action="{{ route('money.store') }}" class="money-entry-form" id="moneyCreateForm">
             @csrf
             <input type="hidden" name="_form" value="money_create">
-            <label>Jenis
+            <label>Tanggal transaksi
+                <input type="date" name="tanggal" value="{{ old('tanggal', today()->toDateString()) }}" required>
+            </label>
+            <label>Jenis transaksi
                 <select name="type" required>
                     <option value="income" @selected(old('type', 'income') === 'income')>Pemasukan</option>
                     <option value="expense" @selected(old('type') === 'expense')>Pengeluaran</option>
                 </select>
             </label>
-            <label>Tanggal
-                <input type="date" name="tanggal" value="{{ old('tanggal', today()->toDateString()) }}" required>
-            </label>
-            <label>Kategori
-                <input name="category" value="{{ old('category') }}" maxlength="100" required>
-            </label>
-            <label>Nominal
-                <input type="number" name="amount" min="0.01" step="0.01" value="{{ old('amount') }}" placeholder="0" required>
-            </label>
-            <label class="money-field-wide">Keterangan
-                <input name="description" value="{{ old('description') }}" maxlength="1000" placeholder="Opsional">
-            </label>
-            <label class="money-field-wide">Metode pembayaran
+            <label>Metode pembayaran
                 <select name="payment_method" required>
                     <option value="cash" @selected(old('payment_method', 'cash') === 'cash')>Cash</option>
                     <option value="online" @selected(old('payment_method') === 'online')>Saldo online</option>
                 </select>
+            </label>
+            <label class="money-field-wide">Transaksi
+                <input name="category" value="{{ old('category') }}" maxlength="100" placeholder="Contoh: Beli makan" required>
+            </label>
+            <label class="money-field-wide">Keterangan tambahan
+                <textarea name="description" maxlength="1000" rows="2" placeholder="Catatan transaksi (opsional)">{{ old('description') }}</textarea>
+            </label>
+            <section class="money-line-items money-field-wide" data-line-items>
+                <div class="money-line-items-heading">
+                    <div>
+                        <h3>Rincian barang <span>(opsional)</span></h3>
+                        <p>Tambahkan nama barang dan harganya untuk menghitung grand total.</p>
+                    </div>
+                    <button type="button" class="money-add-item-button" data-add-item>
+                        <i class="fa-solid fa-plus" aria-hidden="true"></i> Tambah barang
+                    </button>
+                </div>
+                <div class="money-line-item-list" data-item-list>
+                    @foreach (old('items', []) as $index => $item)
+                        <div class="money-line-item" data-item-row>
+                            <label>Nama barang
+                                <input name="items[{{ $index }}][name]" value="{{ $item['name'] ?? '' }}" maxlength="150" placeholder="Contoh: Nasi goreng" required>
+                            </label>
+                            <label>Harga
+                                <input name="items[{{ $index }}][amount]" type="number" min="0.01" max="9999999999" step="0.01" value="{{ $item['amount'] ?? '' }}" placeholder="0" required data-item-amount>
+                            </label>
+                            <button type="button" class="money-remove-item-button" data-remove-item aria-label="Hapus barang">
+                                <i class="fa-solid fa-trash-can" aria-hidden="true"></i>
+                            </button>
+                        </div>
+                    @endforeach
+                </div>
+            </section>
+            <label class="money-field-wide money-grand-total">Grand total
+                <input type="number" name="amount" min="0.01" max="9999999999" step="0.01" value="{{ old('amount') }}" placeholder="Isi total atau tambahkan rincian barang" required data-grand-total>
+                <small data-total-hint>Isi grand total secara manual, atau tambahkan rincian barang agar total dihitung otomatis.</small>
             </label>
             <div class="money-dialog-actions money-field-wide">
                 <button class="money-dialog-cancel" type="button" data-close-money-dialog>Batal</button>
@@ -191,7 +218,7 @@
                     <tr>
                         <th scope="col">Tanggal</th>
                         <th scope="col">Jenis</th>
-                        <th scope="col">Kategori</th>
+                        <th scope="col">Transaksi</th>
                         <th scope="col">Jumlah</th>
                         <th scope="col">Metode</th>
                         <th scope="col">Aksi</th>
@@ -206,7 +233,23 @@
                                     {{ $transaction->type === 'income' ? 'Pemasukan' : 'Pengeluaran' }}
                                 </span>
                             </td>
-                            <td data-label="Kategori">{{ $transaction->category }}</td>
+                            <td data-label="Transaksi" class="money-history-description">
+                                <span class="money-history-category" title="{{ $transaction->category }}">{{ $transaction->category }}</span>
+                                @if ($transaction->description)
+                                    <small>{{ $transaction->description }}</small>
+                                @endif
+                                @php($items = $transactionItems->get($transaction->id, collect()))
+                                @if ($items->isNotEmpty())
+                                    <details class="money-history-items">
+                                        <summary>{{ $items->count() }} barang</summary>
+                                        <ul>
+                                            @foreach ($items as $item)
+                                                <li><span>{{ $item->name }}</span><strong>Rp {{ number_format((float) $item->amount, 0, ',', '.') }}</strong></li>
+                                            @endforeach
+                                        </ul>
+                                    </details>
+                                @endif
+                            </td>
                             <td data-label="Jumlah" class="money-amount">Rp {{ number_format((float) $transaction->amount, 0, ',', '.') }}</td>
                             <td data-label="Metode">{{ $transaction->payment_method === 'cash' ? 'Cash' : 'Online' }}</td>
                             <td data-label="Aksi">
@@ -237,6 +280,7 @@
 
 @push('scripts')
     @vite('resources/js/money-receipt-ocr.js')
+    @vite('resources/js/money-transaction-items.js')
 <script>
 (() => {
     const dialog = document.querySelector('[data-money-dialog]');

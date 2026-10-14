@@ -32,6 +32,11 @@ class MoneyPlanController extends Controller
             ->orderByDesc('tanggal')
             ->orderByDesc('id')
             ->get();
+        $transactionItems = DB::table('money_plan_items')
+            ->whereIn('money_plan_id', $transactions->pluck('id'))
+            ->orderBy('id')
+            ->get()
+            ->groupBy('money_plan_id');
         $monthly = DB::table('money_plan')->where('username', $username)
             ->whereMonth('tanggal', $month)
             ->whereYear('tanggal', $year)
@@ -39,7 +44,7 @@ class MoneyPlanController extends Controller
             ->selectRaw("SUM(CASE WHEN type = 'expense' THEN amount ELSE 0 END) AS expense")
             ->first();
 
-        return view('money.index', compact('month', 'year', 'totals', 'transactions', 'monthly'));
+        return view('money.index', compact('month', 'year', 'totals', 'transactions', 'transactionItems', 'monthly'));
     }
 
     public function store(Request $request): RedirectResponse
@@ -47,13 +52,45 @@ class MoneyPlanController extends Controller
         $data = $request->validate([
             'type' => ['required', 'in:income,expense'],
             'category' => ['required', 'string', 'max:100'],
-            'amount' => ['required', 'numeric', 'min:0.01', 'max:9999999999'],
+            'amount' => ['required_without:items', 'nullable', 'numeric', 'min:0.01', 'max:9999999999'],
             'description' => ['nullable', 'string', 'max:1000'],
             'tanggal' => ['required', 'date'],
             'payment_method' => ['required', 'in:cash,online'],
+            'items' => ['nullable', 'array', 'max:100'],
+            'items.*.name' => ['required', 'string', 'max:150'],
+            'items.*.amount' => ['required', 'numeric', 'min:0.01', 'max:9999999999'],
         ]);
+        $items = $data['items'] ?? [];
+        unset($data['items']);
+
+        if ($items !== []) {
+            $totalCents = array_sum(array_map(
+                static fn (array $item): int => (int) round((float) $item['amount'] * 100),
+                $items
+            ));
+            $total = $totalCents / 100;
+            validator(
+                ['amount' => $total],
+                ['amount' => ['required', 'numeric', 'min:0.01', 'max:9999999999']],
+                ['amount.max' => 'Total harga barang melebihi batas yang diizinkan.']
+            )->validate();
+            $data['amount'] = number_format($total, 2, '.', '');
+        }
+
         $data['username'] = $request->attributes->get('currentUser')->username;
-        DB::table('money_plan')->insert($data);
+        DB::transaction(function () use ($data, $items): void {
+            $transactionId = DB::table('money_plan')->insertGetId($data);
+            if ($items !== []) {
+                DB::table('money_plan_items')->insert(array_map(
+                    static fn (array $item): array => [
+                        'money_plan_id' => $transactionId,
+                        'name' => $item['name'],
+                        'amount' => number_format((float) $item['amount'], 2, '.', ''),
+                    ],
+                    $items
+                ));
+            }
+        });
 
         return redirect()->route('money.index')->with('status', 'Transaksi berhasil ditambahkan.');
     }

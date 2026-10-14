@@ -380,6 +380,7 @@
 
 .content .money-page .money-entry-form input,
 .content .money-page .money-entry-form select,
+.content .money-page .money-entry-form textarea,
 .content .money-page .money-adjust-form input,
 .content .money-page .money-filter-form input {
     display: block;
@@ -396,8 +397,103 @@
     font-size: 13px;
 }
 
+.content .money-page .money-entry-form textarea {
+    min-height: 68px;
+    resize: vertical;
+}
+
+.content .money-page .money-line-items {
+    padding: 14px;
+    border: 1px solid #e7edf5;
+    border-radius: 11px;
+    background: #f8fafc;
+}
+
+.content .money-line-items-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.content .money-line-items-heading h3 {
+    margin: 0;
+    color: #172033;
+    font-size: 13px;
+    font-weight: 800;
+}
+
+.content .money-line-items-heading h3 span,
+.content .money-line-items-heading p,
+.content .money-grand-total small {
+    color: #64748b;
+    font-size: 11px;
+    font-weight: 400;
+}
+
+.content .money-line-items-heading p {
+    margin: 4px 0 0;
+}
+
+.content .money-page button.money-add-item-button,
+.content .money-page button.money-remove-item-button {
+    display: inline-flex;
+    min-height: 34px;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 7px 10px;
+    border: 1px solid #bfdbfe;
+    border-radius: 8px;
+    background: #fff;
+    color: #1d4ed8;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.content .money-page button.money-add-item-button:hover {
+    background: #eff6ff;
+}
+
+.content .money-page button.money-remove-item-button {
+    width: 34px;
+    padding: 0;
+    border-color: #fee2e2;
+    color: #b91c1c;
+}
+
+.content .money-page button.money-remove-item-button:hover {
+    background: #fef2f2;
+}
+
+.content .money-line-item-list {
+    display: grid;
+    gap: 9px;
+}
+
+.content .money-line-item {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(130px, .55fr) 34px;
+    align-items: end;
+    gap: 9px;
+}
+
+.content .money-grand-total small {
+    display: block;
+    margin-top: 5px;
+}
+
+.content .money-page .money-entry-form input[readonly] {
+    background: #f1f5f9;
+    color: #475569 !important;
+}
+
 .content .money-page .money-entry-form input:focus,
 .content .money-page .money-entry-form select:focus,
+.content .money-page .money-entry-form textarea:focus,
 .content .money-page .money-adjust-form input:focus,
 .content .money-page .money-filter-form input:focus {
     border-color: #93c5fd !important;
@@ -592,6 +688,62 @@
     white-space: nowrap;
 }
 
+.content .money-history-category {
+    display: block;
+    max-width: 180px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.content .money-page table.money-table td.money-history-description {
+    max-width: 260px;
+    text-align: left;
+}
+
+.content .money-history-description > small {
+    display: block;
+    margin-top: 4px;
+    color: #64748b;
+    overflow-wrap: anywhere;
+}
+
+.content .money-history-items {
+    margin-top: 5px;
+    color: #475569;
+    font-size: 10px;
+}
+
+.content .money-history-items summary {
+    color: #2563eb;
+    cursor: pointer;
+    font-weight: 700;
+}
+
+.content .money-history-items ul {
+    display: grid;
+    gap: 4px;
+    margin: 7px 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.content .money-history-items li {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.content .money-history-items li span {
+    overflow-wrap: anywhere;
+}
+
+.content .money-history-items li strong {
+    flex: 0 0 auto;
+    color: #172033;
+    font-weight: 700;
+}
+
 .content .money-page table.money-table td form {
     margin: 0;
 }
@@ -779,6 +931,36 @@
 
     .content .money-page table.money-table td.money-amount {
         white-space: normal;
+    }
+
+    .content .money-history-category {
+        max-width: 65%;
+        margin-left: auto;
+        text-align: right;
+    }
+
+    .content .money-line-items-heading {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .content .money-line-item {
+        grid-template-columns: minmax(0, 1fr) minmax(100px, .7fr) 34px;
+    }
+
+    .content .money-page table.money-table td.money-history-description {
+        display: block;
+        max-width: none;
+        text-align: right;
+    }
+
+    .content .money-history-description .money-history-category {
+        margin-left: auto;
+        text-align: right;
+    }
+
+    .content .money-history-items li {
+        justify-content: flex-end;
     }
 
     .content .money-page table.money-table tr.money-empty-row td {

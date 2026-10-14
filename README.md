@@ -48,6 +48,15 @@ access for the initial download.
 OCR only fills suggestions in the transaction form. Users must review the
 fields and submit the form to save a transaction.
 
+Money transactions can optionally include item names and prices. The browser
+calculates the grand total, and the server recalculates it before saving the
+transaction and its item details. Apply the new item-table migration when
+deploying this change:
+
+```sh
+php artisan migrate --path=database/migrations/2026_10_14_000001_create_money_plan_items_table.php
+```
+
 The old daily-quest toggle endpoint has no corresponding tables in the active
 database (`daily_quest` and `achievements` are absent), so it is not exposed as
 a working Laravel feature without its intended schema.
