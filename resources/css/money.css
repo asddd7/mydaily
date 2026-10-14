@@ -447,6 +447,11 @@
     width: 100%;
 }
 
+.content .money-adjust-panel button.money-secondary-button {
+    width: auto;
+    padding: 10px 14px;
+}
+
 .content .money-history-panel {
     padding-bottom: 0;
 }

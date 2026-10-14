@@ -52,16 +52,9 @@
                     <p>Samakan catatan dengan saldo yang tersedia.</p>
                 </div>
             </div>
-            <form method="post" action="{{ route('money.adjust') }}" class="money-adjust-form">
-                @csrf
-                <label>Cash saat ini
-                    <input type="number" name="real_cash" min="0" step="0.01" placeholder="0" required>
-                </label>
-                <label>Saldo online saat ini
-                    <input type="number" name="real_online" min="0" step="0.01" placeholder="0" required>
-                </label>
-                <button class="money-secondary-button" type="submit">Sesuaikan saldo</button>
-            </form>
+            <button class="money-secondary-button" type="button" data-open-money-adjust-dialog aria-haspopup="dialog">
+                <i class="fa-solid fa-scale-balanced" aria-hidden="true"></i> Sesuaikan saldo
+            </button>
         </section>
     </div>
 
@@ -123,6 +116,38 @@
                 <button class="money-dialog-cancel" type="button" data-close-money-dialog>Batal</button>
                 <button class="money-primary-button" type="submit">
                     <i class="fa-solid fa-floppy-disk" aria-hidden="true"></i> Simpan transaksi
+                </button>
+            </div>
+        </form>
+    </dialog>
+
+    <dialog class="money-create-dialog money-adjust-dialog" data-money-adjust-dialog aria-labelledby="money-adjust-dialog-title" aria-describedby="money-adjust-dialog-description" @if ($errors->any() && old('_form') === 'money_adjust') data-reopen @endif>
+        <div class="money-dialog-heading">
+            <div>
+                <p class="money-eyebrow">Saldo aktual</p>
+                <h2 id="money-adjust-dialog-title">Sesuaikan saldo</h2>
+                <p id="money-adjust-dialog-description">Masukkan saldo yang tersedia saat ini.</p>
+            </div>
+            <button class="money-dialog-close" type="button" data-close-money-adjust-dialog aria-label="Tutup dialog">
+                <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+            </button>
+        </div>
+        @if ($errors->any() && old('_form') === 'money_adjust')
+            <p class="money-dialog-error" role="alert">{{ $errors->first() }}</p>
+        @endif
+        <form method="post" action="{{ route('money.adjust') }}" class="money-adjust-form">
+            @csrf
+            <input type="hidden" name="_form" value="money_adjust">
+            <label>Cash saat ini
+                <input type="number" name="real_cash" min="0" step="0.01" value="{{ old('real_cash') }}" placeholder="0" required>
+            </label>
+            <label>Saldo online saat ini
+                <input type="number" name="real_online" min="0" step="0.01" value="{{ old('real_online') }}" placeholder="0" required>
+            </label>
+            <div class="money-dialog-actions money-field-wide">
+                <button class="money-dialog-cancel" type="button" data-close-money-adjust-dialog>Batal</button>
+                <button class="money-primary-button" type="submit">
+                    <i class="fa-solid fa-scale-balanced" aria-hidden="true"></i> Simpan saldo
                 </button>
             </div>
         </form>
@@ -215,24 +240,44 @@
 <script>
 (() => {
     const dialog = document.querySelector('[data-money-dialog]');
-    if (!(dialog instanceof HTMLDialogElement)) return;
+    if (dialog instanceof HTMLDialogElement) {
+        const openDialog = () => {
+            if (!dialog.open) dialog.showModal();
+            dialog.querySelector('[name="type"]')?.focus();
+        };
 
-    const openDialog = () => {
-        if (!dialog.open) dialog.showModal();
-        dialog.querySelector('[name="type"]')?.focus();
+        document.querySelectorAll('[data-open-money-dialog]').forEach(button => {
+            button.addEventListener('click', openDialog);
+        });
+        dialog.querySelectorAll('[data-close-money-dialog]').forEach(button => {
+            button.addEventListener('click', () => dialog.close());
+        });
+        dialog.addEventListener('click', event => {
+            if (event.target === dialog) dialog.close();
+        });
+
+        if (dialog.hasAttribute('data-reopen')) openDialog();
+    }
+
+    const adjustDialog = document.querySelector('[data-money-adjust-dialog]');
+    if (!(adjustDialog instanceof HTMLDialogElement)) return;
+
+    const openAdjustDialog = () => {
+        if (!adjustDialog.open) adjustDialog.showModal();
+        adjustDialog.querySelector('[name="real_cash"]')?.focus();
     };
 
-    document.querySelectorAll('[data-open-money-dialog]').forEach(button => {
-        button.addEventListener('click', openDialog);
+    document.querySelectorAll('[data-open-money-adjust-dialog]').forEach(button => {
+        button.addEventListener('click', openAdjustDialog);
     });
-    dialog.querySelectorAll('[data-close-money-dialog]').forEach(button => {
-        button.addEventListener('click', () => dialog.close());
+    adjustDialog.querySelectorAll('[data-close-money-adjust-dialog]').forEach(button => {
+        button.addEventListener('click', () => adjustDialog.close());
     });
-    dialog.addEventListener('click', event => {
-        if (event.target === dialog) dialog.close();
+    adjustDialog.addEventListener('click', event => {
+        if (event.target === adjustDialog) adjustDialog.close();
     });
 
-    if (dialog.hasAttribute('data-reopen')) openDialog();
+    if (adjustDialog.hasAttribute('data-reopen')) openAdjustDialog();
 })();
 </script>
 @endpush
