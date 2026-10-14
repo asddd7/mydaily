@@ -11,6 +11,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
+    gap: 16px;
 }
 
 .content .money-heading h1,
@@ -31,6 +32,29 @@
     margin: 6px 0 0;
     color: #64748b;
     font-size: 13px;
+}
+
+.content .money-heading > button.money-primary-button {
+    display: inline-flex;
+    min-height: 42px;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 15px;
+    border: 1px solid #2563eb;
+    border-radius: 9px;
+    background: #2563eb;
+    color: #fff;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.content .money-heading > button.money-primary-button:hover {
+    border-color: #1d4ed8;
+    background: #1d4ed8;
 }
 
 .content .money-eyebrow {
@@ -105,9 +129,7 @@
 
 .content .money-form-grid {
     display: grid;
-    grid-template-columns: minmax(0, 1.35fr) minmax(280px, .85fr);
-    align-items: start;
-    gap: 16px;
+    grid-template-columns: minmax(0, 1fr);
 }
 
 .content .money-panel {
@@ -146,6 +168,115 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
     align-items: end;
     gap: 13px;
+}
+
+.content .money-create-dialog {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    width: min(560px, calc(100vw - 32px));
+    max-width: none;
+    max-height: min(90vh, 760px);
+    margin: 0;
+    padding: 24px;
+    overflow-y: auto;
+    box-sizing: border-box;
+    border: 1px solid #e2e8f0;
+    border-radius: 18px;
+    background: #fff;
+    color: #172033;
+    box-shadow: 0 24px 70px rgba(15, 23, 42, .22);
+    transform: translate(-50%, -50%);
+}
+
+.content .money-create-dialog::backdrop {
+    background: rgba(15, 23, 42, .48);
+    backdrop-filter: blur(3px);
+}
+
+.content .money-dialog-heading {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.content .money-dialog-heading h2 {
+    margin: 0;
+    color: #172033;
+    font-family: 'Syne', sans-serif;
+    font-size: 21px;
+    font-weight: 800;
+    letter-spacing: -.03em;
+}
+
+.content .money-dialog-heading p:last-child {
+    margin: 6px 0 0;
+    color: #64748b;
+    font-size: 12px;
+}
+
+.content .money-page button.money-dialog-close {
+    display: grid;
+    width: 36px;
+    height: 36px;
+    min-height: 36px;
+    flex: 0 0 auto;
+    place-items: center;
+    padding: 0;
+    border: 1px solid #e2e8f0;
+    border-radius: 9px;
+    background: #fff;
+    color: #64748b;
+    cursor: pointer;
+}
+
+.content .money-page button.money-dialog-close:hover {
+    background: #f8fafc;
+    color: #172033;
+}
+
+.content .money-dialog-error {
+    margin: 0 0 16px;
+    padding: 10px 12px;
+    border: 1px solid #fecaca;
+    border-radius: 9px;
+    background: #fef2f2;
+    color: #b91c1c;
+    font-size: 12px;
+}
+
+.content .money-dialog-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 9px;
+    margin-top: 5px;
+}
+
+.content .money-page button.money-dialog-cancel {
+    display: inline-flex;
+    min-height: 41px;
+    align-items: center;
+    justify-content: center;
+    padding: 9px 14px;
+    border: 1px solid #dbe3ef;
+    border-radius: 9px;
+    background: #fff;
+    color: #475569;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.content .money-page button.money-dialog-cancel:hover {
+    background: #f8fafc;
+}
+
+.content .money-dialog-actions .money-primary-button {
+    width: auto;
+    padding: 9px 14px;
 }
 
 .content .money-page .money-entry-form label,
@@ -413,9 +544,7 @@
 }
 
 @media (max-width: 850px) {
-    .content .money-form-grid {
-        grid-template-columns: minmax(0, 1fr);
-    }
+    .content .money-form-grid { grid-template-columns: minmax(0, 1fr); }
 }
 
 @media (max-width: 640px) {
@@ -438,6 +567,25 @@
 
     .content .money-panel {
         padding: 16px;
+    }
+
+    .content .money-heading {
+        align-items: flex-start;
+    }
+
+    .content .money-heading > button.money-primary-button {
+        width: 42px;
+        min-width: 42px;
+        padding: 0;
+        font-size: 0;
+    }
+
+    .content .money-heading > button.money-primary-button i {
+        font-size: 15px;
+    }
+
+    .content .money-create-dialog {
+        padding: 19px;
     }
 
     .content .money-entry-form,
@@ -539,12 +687,10 @@
 }
 
 @media (max-width: 420px) {
-    .content .money-entry-form,
     .content .money-adjust-form {
         grid-template-columns: minmax(0, 1fr);
     }
 
-    .content .money-page .money-field-wide {
-        grid-column: auto;
-    }
+    .content .money-dialog-actions { flex-wrap: wrap; }
+    .content .money-dialog-actions > button { flex: 1 1 auto; }
 }

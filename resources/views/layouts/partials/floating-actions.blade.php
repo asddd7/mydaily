@@ -44,8 +44,10 @@
         toggle.addEventListener('click', () => {
             if (toggle.dataset.fabAction === 'task') {
                 document.querySelector('[data-open-task-dialog]')?.click();
-            } else if (toggle.dataset.fabAction === 'money' || toggle.dataset.fabAction === 'note') {
-                const target = document.getElementById(toggle.dataset.fabAction === 'money' ? 'moneyCreateForm' : 'noteCreateForm');
+            } else if (toggle.dataset.fabAction === 'money') {
+                document.querySelector('[data-open-money-dialog]')?.click();
+            } else if (toggle.dataset.fabAction === 'note') {
+                const target = document.getElementById('noteCreateForm');
                 target?.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 target?.querySelector('input:not([type="file"]), textarea, select')?.focus({ preventScroll: true });
             } else if (toggle.dataset.fabAction === 'file') {

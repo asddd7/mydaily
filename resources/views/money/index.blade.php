@@ -14,6 +14,9 @@
             <h1>Pengatur Keuangan</h1>
             <p>Pantau saldo dan riwayat transaksi dalam satu tempat.</p>
         </div>
+        <button class="money-primary-button" type="button" data-open-money-dialog aria-haspopup="dialog">
+            <i class="fa-solid fa-plus" aria-hidden="true"></i> Tambah transaksi
+        </button>
     </div>
 
     <section class="money-balance-grid" aria-label="Ringkasan saldo">
@@ -41,46 +44,6 @@
     </section>
 
     <div class="money-form-grid">
-        <section class="money-panel">
-            <div class="money-panel-heading">
-                <span class="money-panel-icon" aria-hidden="true"><i class="fa-solid fa-plus"></i></span>
-                <div>
-                    <h2>Tambah transaksi</h2>
-                    <p>Catat pemasukan atau pengeluaran baru.</p>
-                </div>
-            </div>
-            <form method="post" action="{{ route('money.store') }}" class="money-entry-form" id="moneyCreateForm">
-                @csrf
-                <label>Jenis
-                    <select name="type" required>
-                        <option value="income">Pemasukan</option>
-                        <option value="expense">Pengeluaran</option>
-                    </select>
-                </label>
-                <label>Tanggal
-                    <input type="date" name="tanggal" value="{{ today()->toDateString() }}" required>
-                </label>
-                <label>Kategori
-                    <input name="category" maxlength="100" required>
-                </label>
-                <label>Nominal
-                    <input type="number" name="amount" min="0.01" step="0.01" placeholder="0" required>
-                </label>
-                <label class="money-field-wide">Keterangan
-                    <input name="description" maxlength="1000" placeholder="Opsional">
-                </label>
-                <label class="money-field-wide">Metode pembayaran
-                    <select name="payment_method" required>
-                        <option value="cash">Cash</option>
-                        <option value="online">Saldo online</option>
-                    </select>
-                </label>
-                <button class="money-primary-button money-field-wide" type="submit">
-                    <i class="fa-solid fa-floppy-disk" aria-hidden="true"></i> Simpan transaksi
-                </button>
-            </form>
-        </section>
-
         <section class="money-panel money-adjust-panel">
             <div class="money-panel-heading">
                 <span class="money-panel-icon money-panel-icon-adjust" aria-hidden="true"><i class="fa-solid fa-scale-balanced"></i></span>
@@ -101,6 +64,56 @@
             </form>
         </section>
     </div>
+
+    <dialog class="money-create-dialog" data-money-dialog aria-labelledby="money-dialog-title" aria-describedby="money-dialog-description" @if ($errors->any() && old('_form') === 'money_create') data-reopen @endif>
+        <div class="money-dialog-heading">
+            <div>
+                <p class="money-eyebrow">Transaksi baru</p>
+                <h2 id="money-dialog-title">Tambah transaksi</h2>
+                <p id="money-dialog-description">Catat pemasukan atau pengeluaran baru.</p>
+            </div>
+            <button class="money-dialog-close" type="button" data-close-money-dialog aria-label="Tutup dialog">
+                <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+            </button>
+        </div>
+        @if ($errors->any() && old('_form') === 'money_create')
+            <p class="money-dialog-error" role="alert">{{ $errors->first() }}</p>
+        @endif
+        <form method="post" action="{{ route('money.store') }}" class="money-entry-form" id="moneyCreateForm">
+            @csrf
+            <input type="hidden" name="_form" value="money_create">
+            <label>Jenis
+                <select name="type" required>
+                    <option value="income" @selected(old('type', 'income') === 'income')>Pemasukan</option>
+                    <option value="expense" @selected(old('type') === 'expense')>Pengeluaran</option>
+                </select>
+            </label>
+            <label>Tanggal
+                <input type="date" name="tanggal" value="{{ old('tanggal', today()->toDateString()) }}" required>
+            </label>
+            <label>Kategori
+                <input name="category" value="{{ old('category') }}" maxlength="100" required>
+            </label>
+            <label>Nominal
+                <input type="number" name="amount" min="0.01" step="0.01" value="{{ old('amount') }}" placeholder="0" required>
+            </label>
+            <label class="money-field-wide">Keterangan
+                <input name="description" value="{{ old('description') }}" maxlength="1000" placeholder="Opsional">
+            </label>
+            <label class="money-field-wide">Metode pembayaran
+                <select name="payment_method" required>
+                    <option value="cash" @selected(old('payment_method', 'cash') === 'cash')>Cash</option>
+                    <option value="online" @selected(old('payment_method') === 'online')>Saldo online</option>
+                </select>
+            </label>
+            <div class="money-dialog-actions money-field-wide">
+                <button class="money-dialog-cancel" type="button" data-close-money-dialog>Batal</button>
+                <button class="money-primary-button" type="submit">
+                    <i class="fa-solid fa-floppy-disk" aria-hidden="true"></i> Simpan transaksi
+                </button>
+            </div>
+        </form>
+    </dialog>
 
     <section class="money-panel money-history-panel">
         <div class="money-panel-heading money-history-heading">
@@ -183,3 +196,28 @@
     </section>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+(() => {
+    const dialog = document.querySelector('[data-money-dialog]');
+    if (!(dialog instanceof HTMLDialogElement)) return;
+
+    const openDialog = () => {
+        if (!dialog.open) dialog.showModal();
+        dialog.querySelector('[name="type"]')?.focus();
+    };
+
+    document.querySelectorAll('[data-open-money-dialog]').forEach(button => {
+        button.addEventListener('click', openDialog);
+    });
+    dialog.querySelectorAll('[data-close-money-dialog]').forEach(button => {
+        button.addEventListener('click', () => dialog.close());
+    });
+    dialog.addEventListener('click', event => {
+        if (event.target === dialog) dialog.close();
+    });
+    if (dialog.hasAttribute('data-reopen')) openDialog();
+})();
+</script>
+@endpush
