@@ -9,6 +9,7 @@ export const normalizeRupiahAmount = value => {
     let amount = String(value ?? '').trim().replace(/[^0-9.,]/gu, '');
     if (!amount) return '';
 
+    const usesThousandsSuffix = /k$/iu.test(String(value ?? '').trim());
     if (amount.includes(',')) {
         amount = amount.replace(/\./gu, '').replace(',', '.');
     } else if (/^\d{1,3}(?:\.\d{3})+$/u.test(amount)) {
@@ -16,7 +17,9 @@ export const normalizeRupiahAmount = value => {
     }
 
     const parsed = Number(amount);
-    return Number.isFinite(parsed) ? parsed.toFixed(2) : '';
+    if (!Number.isFinite(parsed)) return '';
+
+    return (usesThousandsSuffix ? parsed * 1000 : parsed).toFixed(2);
 };
 
 const formatRupiah = value => {
