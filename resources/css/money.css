@@ -688,6 +688,49 @@
     white-space: nowrap;
 }
 
+.content .money-page table.money-table td.money-history-date {
+    white-space: nowrap;
+}
+
+.content .money-history-date-content {
+    display: grid;
+    justify-items: start;
+    gap: 6px;
+}
+
+.content .money-page button.money-history-detail-toggle {
+    display: inline-flex;
+    min-height: 0;
+    align-items: center;
+    gap: 5px;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    color: #2563eb;
+    font: inherit;
+    font-size: 10px;
+    font-weight: 700;
+    box-shadow: none;
+    transform: none;
+    cursor: pointer;
+}
+
+.content .money-page button.money-history-detail-toggle:hover {
+    border-color: transparent;
+    background: transparent;
+    box-shadow: none;
+    transform: none;
+}
+
+.content .money-page button.money-history-detail-toggle i {
+    transition: transform .2s ease;
+}
+
+.content .money-page button.money-history-detail-toggle[aria-expanded="true"] i {
+    transform: rotate(180deg);
+}
+
 .content .money-history-category {
     display: block;
     max-width: 180px;
@@ -708,15 +751,18 @@
     overflow-wrap: anywhere;
 }
 
+.content .money-history-detail-content {
+    padding: 5px 0;
+}
+
 .content .money-history-items {
     margin-top: 5px;
     color: #475569;
     font-size: 10px;
 }
 
-.content .money-history-items summary {
-    color: #2563eb;
-    cursor: pointer;
+.content .money-history-items > strong {
+    color: #64748b;
     font-weight: 700;
 }
 
@@ -931,6 +977,18 @@
 
     .content .money-page table.money-table td.money-amount {
         white-space: normal;
+    }
+
+    .content .money-page table.money-table td.money-history-date {
+        white-space: normal;
+    }
+
+    .content .money-history-date-content {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex: 1;
+        gap: 10px;
     }
 
     .content .money-history-category {

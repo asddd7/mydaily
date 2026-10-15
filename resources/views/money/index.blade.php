@@ -227,28 +227,45 @@
                 <tbody>
                     @forelse ($transactions as $transaction)
                         <tr>
-                            <td data-label="Tanggal">{{ $transaction->tanggal }}</td>
+                            <td data-label="Tanggal" class="money-history-date">
+                                <div class="money-history-date-content">
+                                    <span>{{ $transaction->tanggal }}</span>
+                                    <button
+                                        class="money-history-detail-toggle"
+                                        type="button"
+                                        aria-expanded="false"
+                                        aria-controls="money-transaction-detail-{{ $transaction->id }}"
+                                        aria-label="Tampilkan detail transaksi {{ $transaction->category }}"
+                                        data-money-detail-toggle
+                                    >
+                                        <span data-money-detail-toggle-label>Detail</span>
+                                        <i class="fa-solid fa-chevron-down" aria-hidden="true"></i>
+                                    </button>
+                                </div>
+                            </td>
                             <td data-label="Jenis">
                                 <span class="money-type-badge {{ $transaction->type === 'income' ? 'money-type-income' : 'money-type-expense' }}">
                                     {{ $transaction->type === 'income' ? 'Pemasukan' : 'Pengeluaran' }}
                                 </span>
                             </td>
                             <td data-label="Transaksi" class="money-history-description">
-                                <span class="money-history-category" title="{{ $transaction->category }}">{{ $transaction->category }}</span>
-                                @if ($transaction->description)
-                                    <small>{{ $transaction->description }}</small>
-                                @endif
                                 @php($items = $transactionItems->get($transaction->id, collect()))
-                                @if ($items->isNotEmpty())
-                                    <details class="money-history-items">
-                                        <summary>{{ $items->count() }} barang</summary>
-                                        <ul>
-                                            @foreach ($items as $item)
-                                                <li><span>{{ $item->name }}</span><strong>Rp {{ number_format((float) $item->amount, 0, ',', '.') }}</strong></li>
-                                            @endforeach
-                                        </ul>
-                                    </details>
-                                @endif
+                                <div class="money-history-detail-content" id="money-transaction-detail-{{ $transaction->id }}" hidden>
+                                    <span class="money-history-category" title="{{ $transaction->category }}">{{ $transaction->category }}</span>
+                                    @if ($transaction->description)
+                                        <small>{{ $transaction->description }}</small>
+                                    @endif
+                                    @if ($items->isNotEmpty())
+                                        <div class="money-history-items">
+                                            <strong>{{ $items->count() }} barang</strong>
+                                            <ul>
+                                                @foreach ($items as $item)
+                                                    <li><span>{{ $item->name }}</span><strong>Rp {{ number_format((float) $item->amount, 0, ',', '.') }}</strong></li>
+                                                @endforeach
+                                            </ul>
+                                        </div>
+                                    @endif
+                                </div>
                             </td>
                             <td data-label="Jumlah" class="money-amount">Rp {{ number_format((float) $transaction->amount, 0, ',', '.') }}</td>
                             <td data-label="Metode">{{ $transaction->payment_method === 'cash' ? 'Cash' : 'Online' }}</td>
@@ -283,6 +300,25 @@
     @vite('resources/js/money-transaction-items.js')
 <script>
 (() => {
+    document.querySelectorAll('[data-money-detail-toggle]').forEach(button => {
+        button.addEventListener('click', () => {
+            const detailId = button.getAttribute('aria-controls');
+            const detail = detailId ? document.getElementById(detailId) : null;
+            if (!(detail instanceof HTMLElement)) return;
+
+            const isExpanded = button.getAttribute('aria-expanded') === 'true';
+            button.setAttribute('aria-expanded', String(!isExpanded));
+            detail.hidden = isExpanded;
+
+            const label = button.querySelector('[data-money-detail-toggle-label]');
+            if (label) label.textContent = isExpanded ? 'Detail' : 'Minimalkan';
+            button.setAttribute(
+                'aria-label',
+                `${isExpanded ? 'Tampilkan' : 'Minimalkan'} detail transaksi ${button.closest('tr')?.querySelector('.money-history-category')?.textContent?.trim() ?? ''}`
+            );
+        });
+    });
+
     const dialog = document.querySelector('[data-money-dialog]');
     if (dialog instanceof HTMLDialogElement) {
         const openDialog = () => {
