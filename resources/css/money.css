@@ -707,10 +707,10 @@
     border: 0;
     border-radius: 0;
     background: transparent;
-    color: #2563eb;
+    color: #334155;
     font: inherit;
-    font-size: 10px;
-    font-weight: 700;
+    font-size: 12px;
+    font-weight: 600;
     box-shadow: none;
     transform: none;
     cursor: pointer;
@@ -724,6 +724,8 @@
 }
 
 .content .money-page button.money-history-detail-toggle i {
+    color: #2563eb;
+    font-size: 10px;
     transition: transform .2s ease;
 }
 
@@ -983,12 +985,23 @@
         white-space: normal;
     }
 
+    .content .money-page table.money-table tr.money-transaction-row.is-collapsed > td:not(.money-history-date) {
+        display: none;
+    }
+
     .content .money-history-date-content {
         display: flex;
         align-items: center;
         justify-content: space-between;
         flex: 1;
         gap: 10px;
+    }
+
+    .content .money-page button.money-history-detail-toggle {
+        justify-content: space-between;
+        flex: 1;
+        font-size: 12px;
+        text-align: left;
     }
 
     .content .money-history-category {

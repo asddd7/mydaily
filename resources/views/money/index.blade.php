@@ -226,19 +226,19 @@
                 </thead>
                 <tbody>
                     @forelse ($transactions as $transaction)
-                        <tr>
+                        <tr class="money-transaction-row is-collapsed">
                             <td data-label="Tanggal" class="money-history-date">
                                 <div class="money-history-date-content">
-                                    <span>{{ $transaction->tanggal }}</span>
                                     <button
                                         class="money-history-detail-toggle"
                                         type="button"
                                         aria-expanded="false"
                                         aria-controls="money-transaction-detail-{{ $transaction->id }}"
                                         aria-label="Tampilkan detail transaksi {{ $transaction->category }}"
+                                        title="Tampilkan detail transaksi"
                                         data-money-detail-toggle
                                     >
-                                        <span data-money-detail-toggle-label>Detail</span>
+                                        <span>{{ $transaction->tanggal }}</span>
                                         <i class="fa-solid fa-chevron-down" aria-hidden="true"></i>
                                     </button>
                                 </div>
@@ -300,22 +300,32 @@
     @vite('resources/js/money-transaction-items.js')
 <script>
 (() => {
-    document.querySelectorAll('[data-money-detail-toggle]').forEach(button => {
+    const detailToggles = document.querySelectorAll('[data-money-detail-toggle]');
+    const setDetailExpanded = (button, expanded) => {
+        const detailId = button.getAttribute('aria-controls');
+        const detail = detailId ? document.getElementById(detailId) : null;
+        if (!(detail instanceof HTMLElement)) return;
+
+        button.setAttribute('aria-expanded', String(expanded));
+        detail.hidden = !expanded;
+        button.closest('.money-transaction-row')?.classList.toggle('is-collapsed', !expanded);
+        const category = detail.querySelector('.money-history-category')?.textContent?.trim() ?? '';
+        button.title = `${expanded ? 'Minimalkan' : 'Tampilkan'} detail transaksi`;
+        button.setAttribute(
+            'aria-label',
+            `${expanded ? 'Minimalkan' : 'Tampilkan'} detail transaksi ${category}`
+        );
+    };
+
+    detailToggles.forEach(button => {
         button.addEventListener('click', () => {
-            const detailId = button.getAttribute('aria-controls');
-            const detail = detailId ? document.getElementById(detailId) : null;
-            if (!(detail instanceof HTMLElement)) return;
-
             const isExpanded = button.getAttribute('aria-expanded') === 'true';
-            button.setAttribute('aria-expanded', String(!isExpanded));
-            detail.hidden = isExpanded;
+            if (isExpanded) {
+                detailToggles.forEach(toggle => setDetailExpanded(toggle, false));
+                return;
+            }
 
-            const label = button.querySelector('[data-money-detail-toggle-label]');
-            if (label) label.textContent = isExpanded ? 'Detail' : 'Minimalkan';
-            button.setAttribute(
-                'aria-label',
-                `${isExpanded ? 'Tampilkan' : 'Minimalkan'} detail transaksi ${button.closest('tr')?.querySelector('.money-history-category')?.textContent?.trim() ?? ''}`
-            );
+            setDetailExpanded(button, true);
         });
     });
 
