@@ -397,6 +397,11 @@
     font-size: 13px;
 }
 
+.content .money-page .money-entry-form input[type="hidden"],
+.content .money-page .money-adjust-form input[type="hidden"] {
+    display: none !important;
+}
+
 .content .money-page .money-entry-form textarea {
     min-height: 68px;
     resize: vertical;

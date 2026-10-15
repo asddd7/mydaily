@@ -1,4 +1,5 @@
 import { createWorker } from 'tesseract.js';
+import { setRupiahInputValue } from './money-currency.js';
 
 const extractDate = text => {
     const patterns = [
@@ -170,7 +171,10 @@ const initializeReceiptScanner = () => {
             const fields = extractReceiptFields(text);
             if (fields.tanggal) transactionForm.elements.tanggal.value = fields.tanggal;
             if (fields.category) transactionForm.elements.category.value = fields.category;
-            if (fields.amount !== null) transactionForm.elements.amount.value = fields.amount.toFixed(2);
+            const amountInput = transactionForm.querySelector('[data-grand-total]');
+            if (fields.amount !== null && amountInput instanceof HTMLInputElement) {
+                setRupiahInputValue(amountInput, fields.amount);
+            }
             transactionForm.elements.type.value = 'expense';
 
             ocrText.textContent = text;

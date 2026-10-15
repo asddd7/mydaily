@@ -126,7 +126,8 @@
                                 <input name="items[{{ $index }}][name]" value="{{ $item['name'] ?? '' }}" maxlength="150" placeholder="Contoh: Nasi goreng" required>
                             </label>
                             <label>Harga
-                                <input name="items[{{ $index }}][amount]" type="number" min="0.01" max="9999999999" step="0.01" value="{{ $item['amount'] ?? '' }}" placeholder="0" required data-item-amount>
+                                <input type="text" inputmode="decimal" value="{{ $item['amount'] ?? '' }}" placeholder="Rp 0" required data-currency-input data-item-amount>
+                                <input type="hidden" name="items[{{ $index }}][amount]" value="{{ $item['amount'] ?? '' }}" data-currency-value>
                             </label>
                             <button type="button" class="money-remove-item-button" data-remove-item aria-label="Hapus barang">
                                 <i class="fa-solid fa-trash-can" aria-hidden="true"></i>
@@ -136,7 +137,8 @@
                 </div>
             </section>
             <label class="money-field-wide money-grand-total">Grand total
-                <input type="number" name="amount" min="0.01" max="9999999999" step="0.01" value="{{ old('amount') }}" placeholder="Isi total atau tambahkan rincian barang" required data-grand-total>
+                <input type="text" inputmode="decimal" value="{{ old('amount') }}" placeholder="Isi total atau tambahkan rincian barang" required data-currency-input data-grand-total>
+                <input type="hidden" name="amount" value="{{ old('amount') }}" data-currency-value>
                 <small data-total-hint>Isi grand total secara manual, atau tambahkan rincian barang agar total dihitung otomatis.</small>
             </label>
             <div class="money-dialog-actions money-field-wide">
@@ -166,10 +168,12 @@
             @csrf
             <input type="hidden" name="_form" value="money_adjust">
             <label>Cash saat ini
-                <input type="number" name="real_cash" min="0" step="0.01" value="{{ old('real_cash') }}" placeholder="0" required>
+                <input type="text" inputmode="decimal" value="{{ old('real_cash') }}" placeholder="Rp 0" required data-currency-input>
+                <input type="hidden" name="real_cash" value="{{ old('real_cash') }}" data-currency-value>
             </label>
             <label>Saldo online saat ini
-                <input type="number" name="real_online" min="0" step="0.01" value="{{ old('real_online') }}" placeholder="0" required>
+                <input type="text" inputmode="decimal" value="{{ old('real_online') }}" placeholder="Rp 0" required data-currency-input>
+                <input type="hidden" name="real_online" value="{{ old('real_online') }}" data-currency-value>
             </label>
             <div class="money-dialog-actions money-field-wide">
                 <button class="money-dialog-cancel" type="button" data-close-money-adjust-dialog>Batal</button>

@@ -1,3 +1,5 @@
+import { initializeRupiahInput, setRupiahInputValue } from './money-currency.js';
+
 const initializeTransactionItems = () => {
     const form = document.getElementById('moneyCreateForm');
     const section = form?.querySelector('[data-line-items]');
@@ -5,6 +7,7 @@ const initializeTransactionItems = () => {
     const addButton = section?.querySelector('[data-add-item]');
     const totalInput = form?.querySelector('[data-grand-total]');
     const totalHint = form?.querySelector('[data-total-hint]');
+    const totalValue = totalInput?.parentElement?.querySelector('[data-currency-value]');
 
     if (
         !(form instanceof HTMLFormElement)
@@ -12,8 +15,13 @@ const initializeTransactionItems = () => {
         || !(itemList instanceof HTMLElement)
         || !(addButton instanceof HTMLButtonElement)
         || !(totalInput instanceof HTMLInputElement)
+        || !(totalValue instanceof HTMLInputElement)
         || !(totalHint instanceof HTMLElement)
     ) return;
+
+    form.querySelectorAll('[data-currency-input]').forEach(input => {
+        if (input instanceof HTMLInputElement) initializeRupiahInput(input);
+    });
 
     const existingIndexes = [...itemList.querySelectorAll('[data-item-row] input[name]')]
         .map(input => input.name.match(/^items\[(\d+)\]/u)?.[1])
@@ -30,15 +38,16 @@ const initializeTransactionItems = () => {
             return;
         }
 
-        const amounts = rows.map(row => row.querySelector('[data-item-amount]')?.value ?? '');
+        const amounts = rows.map(row => row.querySelector('[data-currency-value]')?.value ?? '');
         if (amounts.some(amount => amount === '')) {
             totalInput.value = '';
+            totalValue.value = '';
             totalHint.textContent = 'Lengkapi harga setiap barang untuk menghitung grand total.';
             return;
         }
 
         const totalCents = amounts.reduce((sum, amount) => sum + Math.round(Number(amount) * 100), 0);
-        totalInput.value = (totalCents / 100).toFixed(2);
+        setRupiahInputValue(totalInput, (totalCents / 100).toFixed(2));
         totalHint.textContent = 'Grand total dihitung otomatis dari seluruh harga barang.';
     };
 
@@ -52,13 +61,16 @@ const initializeTransactionItems = () => {
                 <input name="items[${index}][name]" maxlength="150" placeholder="Contoh: Nasi goreng" required>
             </label>
             <label>Harga
-                <input name="items[${index}][amount]" type="number" min="0.01" max="9999999999" step="0.01" placeholder="0" required data-item-amount>
+                <input type="text" inputmode="decimal" placeholder="Rp 0" required data-currency-input data-item-amount>
+                <input type="hidden" name="items[${index}][amount]" data-currency-value>
             </label>
             <button type="button" class="money-remove-item-button" data-remove-item aria-label="Hapus barang">
                 <i class="fa-solid fa-trash-can" aria-hidden="true"></i>
             </button>
         `;
         itemList.append(row);
+        const itemAmount = row.querySelector('[data-currency-input]');
+        if (itemAmount instanceof HTMLInputElement) initializeRupiahInput(itemAmount);
         row.querySelector('input')?.focus();
         updateTotal();
     });
