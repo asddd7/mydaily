@@ -34,29 +34,6 @@
     font-size: 13px;
 }
 
-.content .money-heading > button.money-primary-button {
-    display: inline-flex;
-    min-height: 42px;
-    flex: 0 0 auto;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    padding: 10px 15px;
-    border: 1px solid #2563eb;
-    border-radius: 9px;
-    background: #2563eb;
-    color: #fff;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 12px;
-    font-weight: 700;
-    cursor: pointer;
-}
-
-.content .money-heading > button.money-primary-button:hover {
-    border-color: #1d4ed8;
-    background: #1d4ed8;
-}
-
 .content .money-eyebrow {
     margin: 0 0 5px;
     color: #2563eb;
@@ -538,11 +515,6 @@
     width: 100%;
 }
 
-.content .money-page .money-heading > button.money-primary-button {
-    width: auto;
-    white-space: nowrap;
-}
-
 .content .money-page button.money-secondary-button {
     align-self: end;
     width: 100%;
@@ -875,17 +847,6 @@
 
     .content .money-heading {
         align-items: flex-start;
-    }
-
-    .content .money-page .money-heading > button.money-primary-button {
-        width: 42px;
-        min-width: 42px;
-        padding: 0;
-        font-size: 0;
-    }
-
-    .content .money-page .money-heading > button.money-primary-button i {
-        font-size: 15px;
     }
 
     .content .money-create-dialog {
