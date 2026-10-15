@@ -34,22 +34,33 @@ const extractDate = text => {
     return null;
 };
 
-const normalizeAmount = number => {
+const normalizeAmount = (number, suffix = '') => {
     const lastSeparator = Math.max(number.lastIndexOf('.'), number.lastIndexOf(','));
-    if (lastSeparator === -1) return /^\d+$/.test(number) ? Number(number) : null;
+    if (lastSeparator === -1) {
+        const amount = /^\d+$/u.test(number) ? Number(number) : null;
+        if (amount === null) return null;
+        return suffix.toLocaleLowerCase('id') === 'k' ? amount * 1000 : amount;
+    }
 
-    const hasDecimal = number.length - lastSeparator - 1 === 2;
+    const decimalDigits = number.length - lastSeparator - 1;
+    const hasDecimal = suffix.toLocaleLowerCase('id') === 'k'
+        ? decimalDigits > 0 && decimalDigits <= 2
+        : decimalDigits === 2;
     let normalized = number.replace(/[.,]/g, '');
-    if (hasDecimal) normalized = `${normalized.slice(0, -2)}.${normalized.slice(-2)}`;
+    if (hasDecimal) {
+        normalized = `${normalized.slice(0, -decimalDigits)}.${normalized.slice(-decimalDigits)}`;
+    }
 
     const amount = Number(normalized);
-    return Number.isFinite(amount) ? amount : null;
+    if (!Number.isFinite(amount)) return null;
+
+    return suffix.toLocaleLowerCase('id') === 'k' ? amount * 1000 : amount;
 };
 
 const amountsFromLine = line => {
-    const matches = [...line.matchAll(/(?:Rp\.?\s*)?((?:\d{1,3}(?:[.,]\d{3})+|\d+)(?:[.,]\d{2})?)/giu)];
+    const matches = [...line.matchAll(/(?:Rp\.?\s*)?((?:\d{1,3}(?:[.,]\d{3})+|\d+)(?:[.,]\d{1,2})?)\s*([kK])?/giu)];
     return matches
-        .map(match => normalizeAmount(match[1]))
+        .map(match => normalizeAmount(match[1], match[2]))
         .filter(amount => amount !== null && amount > 0 && amount <= 9999999999);
 };
 
