@@ -43,7 +43,7 @@
     if (toggle.dataset.fabAction) {
         toggle.addEventListener('click', () => {
             if (toggle.dataset.fabAction === 'task') {
-                document.querySelector('[data-open-task-dialog]')?.click();
+                document.dispatchEvent(new CustomEvent('task:open-create'));
             } else if (toggle.dataset.fabAction === 'money') {
                 document.querySelector('[data-open-money-dialog]')?.click();
             } else if (toggle.dataset.fabAction === 'note') {

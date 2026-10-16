@@ -323,6 +323,7 @@
     };
 
     if (dialog instanceof HTMLDialogElement) {
+        document.addEventListener('task:open-create', () => openDialog(dialog));
         document.querySelectorAll('[data-open-task-dialog]').forEach(openButton => {
             openButton.addEventListener('click', () => openDialog(dialog));
         });
