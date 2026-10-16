@@ -1754,6 +1754,15 @@ body {
         height: 34px;
         min-width: 34px;
     }
+    .app-notification-dropdown {
+        position: fixed;
+        top: calc(var(--header-h) + 8px);
+        right: 12px;
+        left: 12px;
+        width: auto;
+        max-width: 350px;
+        margin-left: auto;
+    }
     .app-topbar .logout {
         min-height: 34px;
         padding: 7px 10px;
