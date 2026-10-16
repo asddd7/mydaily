@@ -243,11 +243,16 @@
 
 .content .tasks-page .task-list-section {
     display: grid;
-    gap: 13px;
+    gap: 0;
+    padding: 20px;
+    border: 1px solid #e7edf5;
+    border-radius: 16px;
+    background: #fff;
+    box-shadow: 0 6px 20px rgba(15, 23, 42, .035);
 }
 
 .content .tasks-page .task-list-heading {
-    margin-bottom: 2px;
+    margin-bottom: 14px;
 }
 
 .content .tasks-page .task-list-heading > span {
@@ -261,7 +266,7 @@
     grid-template-columns: minmax(0, 1fr) auto auto;
     align-items: center;
     gap: 10px;
-    margin: 0 0 2px;
+    margin: 0 0 8px;
     padding: 10px;
     border: 1px solid #e7edf5;
     border-radius: 13px;
@@ -367,17 +372,22 @@
     gap: 0;
     overflow: hidden;
     scroll-margin-top: calc(var(--header-h) + 20px);
-    padding: 0;
-    border: 1px solid #e6ebf2;
-    border-radius: 14px;
+    padding: 0 8px;
+    border: 0;
+    border-bottom: 1px solid #edf1f7;
+    border-radius: 0;
     background: #fff;
-    box-shadow: 0 3px 12px rgba(15, 23, 42, .04);
-    transition: border-color .18s ease, box-shadow .18s ease;
+    box-shadow: none;
+    transition: background-color .18s ease;
 }
 
 .content .tasks-page .card.task-card:hover {
-    border-color: #d5deeb;
-    box-shadow: 0 7px 20px rgba(15, 23, 42, .07);
+    background: #f8fafc;
+    box-shadow: none;
+}
+
+.content .tasks-page .card.task-card:last-of-type {
+    border-bottom: 0;
 }
 
 .content .tasks-page .task-card-main {
@@ -385,7 +395,7 @@
     min-width: 0;
     align-items: center;
     gap: 15px;
-    padding: 17px 20px;
+    padding: 14px 7px;
 }
 
 .content .tasks-page .task-check-form,
@@ -397,13 +407,43 @@
 }
 
 .content .tasks-page input.task-checkbox {
-    width: 18px;
-    height: 18px;
+    appearance: none;
+    display: grid;
+    width: 21px;
+    height: 21px;
     flex: 0 0 auto;
-    min-height: 18px;
+    min-height: 21px;
     margin: 0;
-    accent-color: #2563eb;
+    place-items: center;
+    border: 2px solid #cbd5e1;
+    border-radius: 50%;
+    background: #fff;
     cursor: pointer;
+    transition: border-color .16s ease, background-color .16s ease, box-shadow .16s ease;
+}
+
+.content .tasks-page input.task-checkbox::after {
+    content: "";
+    width: 5px;
+    height: 9px;
+    border: solid #fff;
+    border-width: 0 2px 2px 0;
+    opacity: 0;
+    transform: rotate(45deg) translate(-1px, -1px);
+}
+
+.content .tasks-page input.task-checkbox:checked {
+    border-color: #2563eb;
+    background: #2563eb;
+}
+
+.content .tasks-page input.task-checkbox:checked::after {
+    opacity: 1;
+}
+
+.content .tasks-page input.task-checkbox:focus-visible {
+    outline: 3px solid rgba(37, 99, 235, .2);
+    outline-offset: 2px;
 }
 
 .content .tasks-page .task-card-info {
@@ -510,9 +550,11 @@
 }
 
 .content .tasks-page .task-subtasks {
-    padding: 15px 20px 18px;
-    border-top: 1px solid #eef2f7;
-    background: #f8fafc;
+    margin: 0 7px 10px 35px;
+    padding: 10px 12px;
+    border: 1px solid #edf1f7;
+    border-radius: 10px;
+    background: #fbfdff;
 }
 
 .content .tasks-page .task-subtasks-heading {
@@ -696,6 +738,14 @@
     text-align: center;
 }
 
+.content .tasks-page .card.task-empty:last-child {
+    margin-top: 8px;
+    border: 1px dashed #dbe3ef;
+    border-radius: 12px;
+    background: #fbfdff;
+    box-shadow: none;
+}
+
 .content .tasks-page .task-empty-icon {
     display: grid;
     width: 50px;
@@ -839,7 +889,16 @@
     .content .tasks-page .task-card-main {
         align-items: center;
         gap: 11px;
-        padding: 14px 13px;
+        padding: 13px 4px;
+    }
+
+    .content .tasks-page .task-list-section {
+        padding: 15px 12px;
+    }
+
+    .content .tasks-page .task-subtasks {
+        margin-left: 28px;
+        padding: 9px;
     }
 
     .content .tasks-page .task-actions {
