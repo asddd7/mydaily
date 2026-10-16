@@ -57,6 +57,12 @@ deploying this change:
 php artisan migrate --path=database/migrations/2026_10_14_000001_create_money_plan_items_table.php
 ```
 
+Task images require this additive migration:
+
+```sh
+php artisan migrate --path=database/migrations/2026_10_16_000001_add_image_to_tugas_table.php
+```
+
 The old daily-quest toggle endpoint has no corresponding tables in the active
 database (`daily_quest` and `achievements` are absent), so it is not exposed as
 a working Laravel feature without its intended schema.

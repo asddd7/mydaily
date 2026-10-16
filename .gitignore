@@ -2,6 +2,10 @@
 /node_modules/
 /public/build/
 /public/hot
+/uploads/*
+!/uploads/files/
+/uploads/files/*
+!/uploads/files/.htaccess
 /.env
 /.env.*
 !.env.example

@@ -6,10 +6,12 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\File;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Shared\Date as ExcelDate;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class TaskController extends Controller
 {
@@ -72,17 +74,52 @@ class TaskController extends Controller
             'deadline' => ['required', 'date'],
             'recurring_type' => ['nullable', Rule::in(['none', 'daily', 'weekly', 'monthly', 'yearly'])],
             'kategori' => ['nullable', 'string', 'max:100'],
+            'image' => ['nullable', 'image', 'mimes:jpeg,png,gif,webp', 'max:5120'],
         ]);
 
-        DB::table('tugas')->insert([
-            'nama_tugas' => $data['nama_tugas'],
-            'deadline' => $data['deadline'],
-            'user_id' => $request->attributes->get('currentUser')->id,
-            'recurring_type' => $data['recurring_type'] ?? 'none',
-            'kategori' => $data['kategori'] ?? 'daily',
-        ]);
+        $imageName = $request->file('image')?->hashName();
+        $imagePath = null;
+        if ($imageName) {
+            $imageDirectory = base_path('uploads/tasks');
+            File::ensureDirectoryExists($imageDirectory);
+            $imagePath = $imageDirectory.'/'.$imageName;
+            $request->file('image')->move($imageDirectory, $imageName);
+        }
+
+        try {
+            DB::table('tugas')->insert([
+                'nama_tugas' => $data['nama_tugas'],
+                'deadline' => $data['deadline'],
+                'user_id' => $request->attributes->get('currentUser')->id,
+                'recurring_type' => $data['recurring_type'] ?? 'none',
+                'kategori' => $data['kategori'] ?? 'daily',
+                'image' => $imageName,
+            ]);
+        } catch (\Throwable $error) {
+            if ($imagePath && File::exists($imagePath) && !File::delete($imagePath)) {
+                throw new \RuntimeException('Unable to remove the task image after a failed task save.', 0, $error);
+            }
+
+            throw $error;
+        }
 
         return redirect()->route('tasks.index')->with('status', 'Tugas berhasil ditambahkan.');
+    }
+
+    public function image(Request $request, int $task): BinaryFileResponse
+    {
+        $record = DB::table('tugas')
+            ->where('id', $task)
+            ->where('user_id', $request->attributes->get('currentUser')->id)
+            ->whereNull('parent_id')
+            ->first(['image']);
+        abort_unless($record && $record->image, 404);
+
+        $path = base_path('uploads/tasks/'.basename($record->image));
+        abort_unless(File::isFile($path), 404);
+        abort_unless(in_array(File::mimeType($path), ['image/jpeg', 'image/png', 'image/gif', 'image/webp'], true), 404);
+
+        return response()->file($path, ['X-Content-Type-Options' => 'nosniff']);
     }
 
     public function update(Request $request, int $task): RedirectResponse
@@ -177,6 +214,7 @@ class TaskController extends Controller
                 'user_id' => $userId,
                 'recurring_type' => $item->recurring_type,
                 'kategori' => $item->kategori,
+                'image' => $item->image,
             ]);
 
             $children = DB::table('tugas')->where('parent_id', $task)->where('user_id', $userId)->get();
@@ -209,6 +247,7 @@ class TaskController extends Controller
                 'user_id' => $userId,
                 'recurring_type' => 'none',
                 'kategori' => $source->kategori,
+                'image' => $source->image,
             ]);
 
             $children = DB::table('tugas')->where('parent_id', $task)->where('user_id', $userId)->get();

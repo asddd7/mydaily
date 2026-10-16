@@ -420,6 +420,16 @@
     line-height: 1.5;
 }
 
+.content .tasks-page .task-image-preview {
+    display: block;
+    width: min(100%, 320px);
+    max-height: 220px;
+    margin-top: 10px;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    object-fit: cover;
+}
+
 .content .tasks-page .is-complete {
     color: #94a3b8;
     text-decoration: line-through;

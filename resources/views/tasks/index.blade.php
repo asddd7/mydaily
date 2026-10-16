@@ -64,7 +64,7 @@
         @if ($errors->any() && old('_form') === 'task_create')
             <p class="task-dialog-error" role="alert">{{ $errors->first() }}</p>
         @endif
-        <form method="post" action="{{ route('tasks.store') }}" class="task-form" data-loader-action="create">
+        <form method="post" action="{{ route('tasks.store') }}" class="task-form" enctype="multipart/form-data" data-loader-action="create">
             @csrf
             <input type="hidden" name="_form" value="task_create">
             <label class="task-field task-field-wide">Nama tugas
@@ -82,6 +82,9 @@
                         <option value="{{ $value }}" @selected(old('recurring_type', 'none') === $value)>{{ $label }}</option>
                     @endforeach
                 </select>
+            </label>
+            <label class="task-field task-field-wide">Gambar (opsional)
+                <input type="file" name="image" accept="image/jpeg,image/png,image/gif,image/webp">
             </label>
             <div class="task-dialog-actions task-field-wide">
                 <button class="task-secondary-button" type="button" data-close-task-dialog>Batal</button>
@@ -133,6 +136,9 @@
                     </form>
                     <div class="task-card-info">
                         <h3 class="task-name {{ $task->selesai ? 'is-complete' : '' }}">{{ $task->nama_tugas }}</h3>
+                        @if ($task->image)
+                            <img class="task-image-preview" src="{{ route('tasks.image', $task->id) }}" alt="Gambar untuk tugas {{ $task->nama_tugas }}" loading="lazy">
+                        @endif
                         <div class="task-meta">
                             <span><i class="fa-regular fa-calendar" aria-hidden="true"></i> {{ $task->deadline }}</span>
                             <span class="task-category">{{ $task->kategori ?? 'daily' }}</span>
