@@ -74,7 +74,7 @@
 
 .content .tasks-page .tasks-tools {
     display: grid;
-    grid-template-columns: minmax(0, 1.2fr) minmax(280px, .8fr);
+    grid-template-columns: minmax(0, 1fr);
     align-items: start;
     gap: 18px;
 }

@@ -21,19 +21,6 @@
     </div>
 
     <div class="tasks-tools">
-        <section class="card task-tool-card">
-            <div class="task-section-heading">
-                <span class="task-section-icon" aria-hidden="true"><i class="fa-solid fa-plus"></i></span>
-                <div>
-                    <h2>Buat tugas baru</h2>
-                    <p>Catat hal yang ingin kamu selesaikan.</p>
-                </div>
-            </div>
-            <button class="task-primary-button" type="button" data-open-task-dialog aria-haspopup="dialog">
-                <i class="fa-solid fa-plus" aria-hidden="true"></i> Tambah tugas
-            </button>
-        </section>
-
         <section class="card task-tool-card task-import-card">
             <div class="task-section-heading">
                 <span class="task-section-icon task-import-icon" aria-hidden="true"><i class="fa-solid fa-file-arrow-up"></i></span>
