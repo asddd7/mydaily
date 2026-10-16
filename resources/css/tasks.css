@@ -260,6 +260,7 @@
     display: grid;
     gap: 0;
     overflow: hidden;
+    scroll-margin-top: calc(var(--header-h) + 20px);
     padding: 0;
     border: 1px solid #e6ebf2;
     border-radius: 14px;

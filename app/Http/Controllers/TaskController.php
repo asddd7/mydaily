@@ -375,8 +375,20 @@ class TaskController extends Controller
             ->where('parent.selesai', 0)
             ->union($mainTasks);
         $count = DB::query()->fromSub($unfinishedParents, 'notifications')->count();
+        $taskIds = DB::query()->fromSub($unfinishedParents, 'notifications')->select('task_id');
+        $notifications = DB::table('tugas')
+            ->select('id', 'nama_tugas', 'deadline')
+            ->where('user_id', $userId)
+            ->whereIn('id', $taskIds)
+            ->orderBy('deadline')
+            ->orderBy('id')
+            ->limit(6)
+            ->get();
 
-        return response()->json(['count' => $count]);
+        return response()->json([
+            'count' => $count,
+            'notifications' => $notifications,
+        ]);
     }
 
     public function compatibilityAction(Request $request): RedirectResponse

@@ -1479,8 +1479,12 @@ body {
     align-items: center;
     justify-content: center;
     flex: 0 0 auto;
+    padding: 0;
+    border: 0;
     border-radius: 10px;
+    background: transparent;
     color: #64748b;
+    cursor: pointer;
     text-decoration: none;
     transition: background-color .18s ease, color .18s ease;
 }
@@ -1506,6 +1510,95 @@ body {
     font-size: 10px;
     font-weight: 700;
     line-height: 1;
+}
+.app-notification {
+    position: relative;
+    flex: 0 0 auto;
+}
+.app-notification-dropdown {
+    position: absolute;
+    top: calc(100% + 9px);
+    right: 0;
+    z-index: 10003;
+    width: min(350px, calc(100vw - 24px));
+    max-height: min(70vh, 440px);
+    overflow-y: auto;
+    border: 1px solid #e2e8f0;
+    border-radius: 13px;
+    background: #fff;
+    color: #172033;
+    box-shadow: 0 16px 40px rgba(15, 23, 42, .2);
+}
+.app-notification-dropdown[hidden] {
+    display: none;
+}
+.app-notification-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 14px 15px;
+    border-bottom: 1px solid #edf1f7;
+}
+.app-notification-heading h2 {
+    margin: 0;
+    color: #172033;
+    font-size: 13px;
+    font-weight: 800;
+}
+.app-notification-heading > span {
+    color: #64748b;
+    font-size: 11px;
+}
+.app-notification-list {
+    display: grid;
+}
+.app-notification-item {
+    display: grid;
+    gap: 4px;
+    padding: 11px 15px;
+    border-bottom: 1px solid #f1f5f9;
+    color: #334155;
+    text-decoration: none;
+}
+.app-notification-item:hover {
+    background: #f8fafc;
+}
+.app-notification-item-name {
+    overflow: hidden;
+    color: #172033;
+    font-size: 12px;
+    font-weight: 700;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.app-notification-item-deadline {
+    color: #64748b;
+    font-size: 10px;
+}
+.app-notification-empty,
+.app-notification-more {
+    margin: 0;
+    padding: 14px 15px;
+    color: #64748b;
+    font-size: 11px;
+}
+.app-notification-more {
+    padding-top: 9px;
+    padding-bottom: 9px;
+    border-top: 1px solid #f1f5f9;
+}
+.app-notification-all {
+    display: block;
+    padding: 12px 15px;
+    color: #2563eb;
+    font-size: 11px;
+    font-weight: 700;
+    text-align: center;
+    text-decoration: none;
+}
+.app-notification-all:hover {
+    background: #eff6ff;
 }
 .app-topbar .logout {
     flex: 0 0 auto;

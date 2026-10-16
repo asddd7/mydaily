@@ -115,7 +115,7 @@
         </div>
 
         @forelse ($tasks as $task)
-            <article class="card task-card">
+            <article class="card task-card" id="task-{{ $task->id }}" tabindex="-1">
                 <div class="task-card-main">
                     <form method="post" action="{{ route('tasks.toggle', $task->id) }}" class="task-check-form" data-loader-action="toggle">
                         @csrf
