@@ -256,6 +256,112 @@
     font-weight: 700;
 }
 
+.content .tasks-page .task-search-form {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 2px;
+    padding: 10px;
+    border: 1px solid #e7edf5;
+    border-radius: 13px;
+    background: linear-gradient(135deg, #f8fbff, #fff 70%);
+    box-shadow: 0 4px 14px rgba(15, 23, 42, .035);
+}
+
+.content .tasks-page .task-search-field {
+    display: flex;
+    min-width: 0;
+    min-height: 44px;
+    flex: 1;
+    align-items: center;
+    gap: 10px;
+    padding: 0 13px;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    background: #fff;
+    color: #64748b;
+    transition: border-color .18s ease, box-shadow .18s ease, background-color .18s ease;
+}
+
+.content .tasks-page .task-search-field:focus-within {
+    border-color: #93c5fd;
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, .1);
+}
+
+.content .tasks-page .task-search-field > i {
+    flex: 0 0 auto;
+    color: #2563eb;
+    font-size: 13px;
+}
+
+.content .tasks-page .task-search-field input {
+    width: 100%;
+    min-width: 0;
+    min-height: 40px;
+    margin: 0;
+    padding: 8px 0;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: #1e293b;
+    font: inherit;
+    font-size: 13px;
+}
+
+.content .tasks-page .task-search-field input::placeholder {
+    color: #94a3b8;
+}
+
+.content .tasks-page .task-search-field input:focus {
+    box-shadow: none;
+}
+
+.content .tasks-page .task-search-form button.task-secondary-button {
+    min-width: 92px;
+    min-height: 44px;
+    border-color: #2563eb;
+    border-radius: 10px;
+    background: #2563eb;
+    color: #fff;
+    transition: background-color .18s ease, border-color .18s ease, transform .18s ease;
+}
+
+.content .tasks-page .task-search-form button.task-secondary-button:hover {
+    border-color: #1d4ed8;
+    background: #1d4ed8;
+    color: #fff;
+    transform: translateY(-1px);
+}
+
+.content .tasks-page .task-search-form button.task-secondary-button:focus-visible,
+.content .tasks-page .task-search-clear:focus-visible {
+    outline: 3px solid rgba(37, 99, 235, .25);
+    outline-offset: 2px;
+}
+
+.content .tasks-page .task-search-clear {
+    display: inline-flex;
+    min-height: 40px;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 0 10px;
+    border-radius: 9px;
+    color: #64748b;
+    font-size: 12px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background-color .18s ease, color .18s ease;
+}
+
+.content .tasks-page .task-search-clear:hover {
+    background: #f1f5f9;
+    color: #2563eb;
+}
+
 .content .tasks-page .card.task-card {
     display: grid;
     gap: 0;
@@ -680,6 +786,27 @@
 
     .content .tasks-page .tasks-tools {
         gap: 13px;
+    }
+
+    .content .tasks-page .task-search-form {
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 8px;
+        padding: 9px;
+    }
+
+    .content .tasks-page .task-search-field {
+        grid-column: 1 / -1;
+    }
+
+    .content .tasks-page .task-search-form button {
+        grid-column: 1;
+        grid-row: 2;
+    }
+
+    .content .tasks-page .task-search-clear {
+        grid-column: 2;
+        grid-row: 2;
+        padding-inline: 8px;
     }
 
     .content .tasks-page .card.task-tool-card {

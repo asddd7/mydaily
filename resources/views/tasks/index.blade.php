@@ -111,8 +111,22 @@
                 <p class="tasks-eyebrow">Daftar pekerjaan</p>
                 <h2 id="task-list-title">Tugas kamu</h2>
             </div>
-            <span>{{ $tasks->count() }} item</span>
+            <span>{{ $tasks->count() }} {{ $search !== '' ? 'hasil' : 'item' }}</span>
         </div>
+
+        <form method="get" action="{{ route('tasks.index') }}" class="task-search-form" role="search">
+            @if (request()->query('date'))
+                <input type="hidden" name="date" value="{{ request()->query('date') }}">
+            @endif
+            <label class="task-search-field">
+                <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+                <input type="search" name="q" value="{{ $search }}" placeholder="Cari tugas atau subtugas..." maxlength="100" aria-label="Cari nama tugas atau subtugas">
+            </label>
+            <button class="task-secondary-button" type="submit">Cari</button>
+            @if ($search !== '')
+                <a class="task-search-clear" href="{{ route('tasks.index', request()->query('date') ? ['date' => request()->query('date')] : []) }}">Hapus pencarian</a>
+            @endif
+        </form>
 
         @forelse ($tasks as $task)
             <article class="card task-card" id="task-{{ $task->id }}" tabindex="-1">
@@ -297,9 +311,15 @@
             </article>
         @empty
             <div class="card task-empty">
-                <span class="task-empty-icon" aria-hidden="true"><i class="fa-regular fa-circle-check"></i></span>
-                <h3>Belum ada tugas</h3>
-                <p>Buat tugas pertama untuk mulai mengatur harimu.</p>
+                @if ($search !== '')
+                    <span class="task-empty-icon" aria-hidden="true"><i class="fa-solid fa-magnifying-glass"></i></span>
+                    <h3>Tugas tidak ditemukan</h3>
+                    <p>Tidak ada tugas atau subtugas yang cocok dengan “{{ $search }}”.</p>
+                @else
+                    <span class="task-empty-icon" aria-hidden="true"><i class="fa-regular fa-circle-check"></i></span>
+                    <h3>Belum ada tugas</h3>
+                    <p>Buat tugas pertama untuk mulai mengatur harimu.</p>
+                @endif
             </div>
         @endforelse
     </section>

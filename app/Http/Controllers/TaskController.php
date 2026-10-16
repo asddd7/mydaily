@@ -16,11 +16,27 @@ class TaskController extends Controller
     public function index(Request $request): View
     {
         $userId = $request->attributes->get('currentUser')->id;
-        $filters = $request->validate(['date' => ['sometimes', 'date']]);
+        $filters = $request->validate([
+            'date' => ['sometimes', 'date'],
+            'q' => ['sometimes', 'string', 'max:100'],
+        ]);
+        $search = trim($filters['q'] ?? '');
         $tasks = DB::table('tugas')
             ->where('user_id', $userId)
             ->whereNull('parent_id')
             ->when(isset($filters['date']), fn ($query) => $query->whereDate('deadline', $filters['date']))
+            ->when($search !== '', function ($query) use ($search, $userId): void {
+                $query->where(function ($query) use ($search, $userId): void {
+                    $query->where('nama_tugas', 'like', '%'.$search.'%')
+                        ->orWhereExists(function ($subquery) use ($search, $userId): void {
+                            $subquery->selectRaw('1')
+                                ->from('tugas as matching_subtask')
+                                ->whereColumn('matching_subtask.parent_id', 'tugas.id')
+                                ->where('matching_subtask.user_id', $userId)
+                                ->where('matching_subtask.nama_tugas', 'like', '%'.$search.'%');
+                        });
+                });
+            })
             ->orderBy('deadline')
             ->orderBy('urutan')
             ->get();
@@ -32,9 +48,20 @@ class TaskController extends Controller
             ->get()
             ->groupBy('parent_id');
 
+        if ($search !== '') {
+            foreach ($tasks as $task) {
+                if (mb_stripos($task->nama_tugas, $search) === false) {
+                    $subtasks[$task->id] = ($subtasks[$task->id] ?? collect())
+                        ->filter(fn ($subtask): bool => mb_stripos($subtask->nama_tugas, $search) !== false)
+                        ->values();
+                }
+            }
+        }
+
         return view('tasks.index', [
             'tasks' => $tasks,
             'subtasks' => $subtasks,
+            'search' => $search,
         ]);
     }
 
