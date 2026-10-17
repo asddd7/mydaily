@@ -63,6 +63,14 @@ Task images require this additive migration:
 php artisan migrate --path=database/migrations/2026_10_16_000001_add_image_to_tugas_table.php
 ```
 
+Sessions expire after 15 minutes without a request, and the browser session
+cookie expires when the browser is closed. Apply the remember-token activity
+migration so the “Ingat saya” option follows the same 15-minute idle timeout:
+
+```sh
+php artisan migrate --path=database/migrations/2026_10_17_000001_add_last_used_at_to_remember_tokens.php
+```
+
 The old daily-quest toggle endpoint has no corresponding tables in the active
 database (`daily_quest` and `achievements` are absent), so it is not exposed as
 a working Laravel feature without its intended schema.

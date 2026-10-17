@@ -46,6 +46,7 @@ class AuthController extends Controller
                 'user_id' => $user->id,
                 'token_hash' => hash('sha256', $token),
                 'expires_at' => $expiresAt,
+                'last_used_at' => now(),
                 'created_at' => now(),
             ]);
 

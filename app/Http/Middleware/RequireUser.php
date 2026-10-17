@@ -5,6 +5,8 @@ namespace App\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Cookie;
+use Illuminate\Support\Carbon;
 use Symfony\Component\HttpFoundation\Response;
 
 class RequireUser
@@ -33,17 +35,25 @@ class RequireUser
         }
 
         $userId = $request->session()->get('user_id');
+        $rememberToken = $request->cookie('remember_token');
+        $rememberTokenHash = $rememberToken ? hash('sha256', $rememberToken) : null;
 
-        if (!$userId && $request->hasCookie('remember_token')) {
-            $tokenHash = hash('sha256', $request->cookie('remember_token'));
+        if (!$userId && $rememberTokenHash) {
             $rememberedUser = DB::table('remember_tokens')
                 ->join('users', 'users.id', '=', 'remember_tokens.user_id')
-                ->where('remember_tokens.token_hash', $tokenHash)
+                ->where('remember_tokens.token_hash', $rememberTokenHash)
                 ->where('remember_tokens.expires_at', '>', now())
-                ->select('users.id')
+                ->select('users.id', 'remember_tokens.last_used_at', 'remember_tokens.created_at')
                 ->first();
 
             if ($rememberedUser) {
+                $lastActivity = $rememberedUser->last_used_at ?? $rememberedUser->created_at;
+                if (Carbon::parse($lastActivity)->lte(now()->subMinutes(config('session.lifetime')))) {
+                    DB::table('remember_tokens')->where('token_hash', $rememberTokenHash)->delete();
+
+                    return redirect()->route('login')->withCookie(Cookie::forget('remember_token'));
+                }
+
                 $request->session()->put('user_id', $rememberedUser->id);
                 $userId = $rememberedUser->id;
             }
@@ -62,6 +72,12 @@ class RequireUser
         }
 
         $request->attributes->set('currentUser', $user);
+        if ($rememberTokenHash) {
+            DB::table('remember_tokens')
+                ->where('token_hash', $rememberTokenHash)
+                ->where('user_id', $userId)
+                ->update(['last_used_at' => now()]);
+        }
 
         return $next($request);
     }
