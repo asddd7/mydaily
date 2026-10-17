@@ -491,6 +491,29 @@
     gap: 5px;
 }
 
+.content .tasks-page .task-detail-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 8px;
+    color: #2563eb;
+    font-size: 11px;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.content .tasks-page .task-detail-link:hover {
+    color: #1d4ed8;
+    text-decoration: underline;
+}
+
+.content .tasks-page .task-detail-link:focus-visible,
+.content .tasks-page .task-detail-back:focus-visible,
+.content .tasks-page .task-detail-back-button:focus-visible {
+    outline: 3px solid rgba(37, 99, 235, .25);
+    outline-offset: 3px;
+}
+
 .content .tasks-page .task-category {
     max-width: 180px;
     overflow: hidden;
@@ -769,6 +792,222 @@
     font-size: 13px;
 }
 
+.content .tasks-page .task-detail-back {
+    display: inline-flex;
+    width: fit-content;
+    align-items: center;
+    gap: 8px;
+    color: #64748b;
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.content .tasks-page .task-detail-back:hover {
+    color: #2563eb;
+}
+
+.content .tasks-page .task-detail-card {
+    display: grid;
+    gap: 24px;
+    padding: clamp(18px, 4vw, 32px);
+    border: 1px solid #e7edf5;
+    border-radius: 18px;
+    background: #fff;
+    box-shadow: 0 8px 28px rgba(15, 23, 42, .05);
+}
+
+.content .tasks-page .task-detail-header,
+.content .tasks-page .task-detail-section-heading {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.content .tasks-page .task-detail-title {
+    overflow-wrap: anywhere;
+    margin: 0;
+    color: #172033;
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(24px, 4vw, 34px);
+    font-weight: 800;
+    letter-spacing: -.035em;
+    line-height: 1.2;
+}
+
+.content .tasks-page .task-detail-status {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    gap: 7px;
+    padding: 8px 11px;
+    border-radius: 999px;
+    background: #fff7ed;
+    color: #c2410c;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.content .tasks-page .task-detail-status.is-complete {
+    background: #ecfdf5;
+    color: #047857;
+    text-decoration: none;
+}
+
+.content .tasks-page .task-detail-meta {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.content .tasks-page .task-detail-meta > div {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    gap: 11px;
+    padding: 14px;
+    border: 1px solid #edf1f7;
+    border-radius: 12px;
+    background: #f8fafc;
+    color: #2563eb;
+}
+
+.content .tasks-page .task-detail-meta > div > i {
+    flex: 0 0 auto;
+}
+
+.content .tasks-page .task-detail-meta span {
+    display: grid;
+    min-width: 0;
+    gap: 4px;
+}
+
+.content .tasks-page .task-detail-meta small {
+    color: #64748b;
+    font-size: 10px;
+}
+
+.content .tasks-page .task-detail-meta strong {
+    overflow-wrap: anywhere;
+    color: #1e293b;
+    font-size: 12px;
+}
+
+.content .tasks-page .task-detail-image-section h2,
+.content .tasks-page .task-detail-section-heading h2 {
+    margin: 0;
+    color: #172033;
+    font-size: 17px;
+    font-weight: 800;
+}
+
+.content .tasks-page .task-detail-image {
+    display: block;
+    width: min(100%, 680px);
+    max-height: 460px;
+    margin-top: 12px;
+    border: 1px solid #e2e8f0;
+    border-radius: 13px;
+    object-fit: contain;
+    background: #f8fafc;
+}
+
+.content .tasks-page .task-detail-section-heading {
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.content .tasks-page .task-detail-section-heading .tasks-eyebrow {
+    margin-bottom: 4px;
+}
+
+.content .tasks-page .task-detail-section-heading > span {
+    flex: 0 0 auto;
+    color: #64748b;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.content .tasks-page .task-detail-subtasks ul {
+    display: grid;
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.content .tasks-page .task-detail-subtasks li {
+    display: flex;
+    min-height: 44px;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border: 1px solid #edf1f7;
+    border-radius: 10px;
+    color: #475569;
+    font-size: 13px;
+}
+
+.content .tasks-page .task-detail-subtasks li > i {
+    flex: 0 0 auto;
+    color: #94a3b8;
+}
+
+.content .tasks-page .task-detail-subtasks li.is-complete {
+    background: #f8fafc;
+    color: #94a3b8;
+    text-decoration: line-through;
+}
+
+.content .tasks-page .task-detail-subtasks li.is-complete > i {
+    color: #059669;
+}
+
+.content .tasks-page .task-detail-empty {
+    margin: 0;
+    padding: 18px;
+    border: 1px dashed #dbe3ef;
+    border-radius: 10px;
+    color: #64748b;
+    font-size: 12px;
+    text-align: center;
+}
+
+.content .tasks-page .task-detail-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    padding-top: 18px;
+    border-top: 1px solid #edf1f7;
+}
+
+.content .tasks-page .task-detail-actions form {
+    margin: 0;
+}
+
+.content .tasks-page .task-detail-actions .task-detail-back-button {
+    display: inline-flex;
+    min-height: 40px;
+    align-items: center;
+    justify-content: center;
+    padding: 9px 14px;
+    border: 1px solid #dbe3ef;
+    border-radius: 8px;
+    background: #fff;
+    color: #334155;
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.content .tasks-page .task-detail-actions .task-detail-back-button:hover {
+    border-color: #bfdbfe;
+    background: #eff6ff;
+    color: #1d4ed8;
+}
+
 .content .tasks-page dialog.task-create-dialog,
 .content .tasks-page dialog.task-edit-dialog {
     width: min(92vw, 520px);
@@ -894,6 +1133,21 @@
 
     .content .tasks-page .task-list-section {
         padding: 15px 12px;
+    }
+
+    .content .tasks-page .task-detail-meta {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .content .tasks-page .task-detail-header {
+        flex-direction: column;
+    }
+
+    .content .tasks-page .task-detail-actions > *,
+    .content .tasks-page .task-detail-actions form,
+    .content .tasks-page .task-detail-actions button,
+    .content .tasks-page .task-detail-actions .task-detail-back-button {
+        width: 100%;
     }
 
     .content .tasks-page .task-subtasks {

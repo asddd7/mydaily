@@ -67,6 +67,25 @@ class TaskController extends Controller
         ]);
     }
 
+    public function show(Request $request, int $task): View
+    {
+        $userId = $request->attributes->get('currentUser')->id;
+        $task = DB::table('tugas')
+            ->where('id', $task)
+            ->where('user_id', $userId)
+            ->whereNull('parent_id')
+            ->first();
+        abort_unless($task, 404);
+
+        $subtasks = DB::table('tugas')
+            ->where('parent_id', $task->id)
+            ->where('user_id', $userId)
+            ->orderBy('id')
+            ->get();
+
+        return view('tasks.show', compact('task', 'subtasks'));
+    }
+
     public function store(Request $request): RedirectResponse
     {
         $data = $request->validate([

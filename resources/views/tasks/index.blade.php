@@ -148,6 +148,9 @@
                                 </span>
                             @endif
                         </div>
+                        <a class="task-detail-link" href="{{ route('tasks.show', $task->id) }}">
+                            Detail selengkapnya <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+                        </a>
                     </div>
                     <div class="task-actions">
                         <form method="post" action="{{ route('tasks.copy', $task->id) }}" data-loader-action="copy">
