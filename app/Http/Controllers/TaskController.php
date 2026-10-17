@@ -329,7 +329,11 @@ class TaskController extends Controller
             ]);
         });
 
-        return redirect()->route('tasks.index')->with('status', 'Subtugas diperbarui.');
+        $redirect = $request->boolean('return_to_detail')
+            ? redirect()->route('tasks.show', $subtask->parent_id)
+            : redirect()->route('tasks.index');
+
+        return $redirect->with('status', 'Subtugas diperbarui.');
     }
 
     public function destroySubtask(Request $request, int $task): RedirectResponse

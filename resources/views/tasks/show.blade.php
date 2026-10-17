@@ -64,8 +64,23 @@
                 <ul>
                     @foreach ($subtasks as $subtask)
                         <li class="{{ $subtask->selesai ? 'is-complete' : '' }}">
-                            <i class="fa-{{ $subtask->selesai ? 'solid fa-circle-check' : 'regular fa-circle' }}" aria-hidden="true"></i>
-                            <span>{{ $subtask->nama_tugas }}</span>
+                            <form method="post" action="{{ route('tasks.subtasks.update', $subtask->id) }}" class="task-detail-subtask-check" data-loader-action="subtask-update">
+                                @csrf
+                                @method('put')
+                                <input type="hidden" name="nama_tugas" value="{{ $subtask->nama_tugas }}">
+                                <input type="hidden" name="selesai" value="0">
+                                <input type="hidden" name="return_to_detail" value="1">
+                                <input
+                                    class="task-checkbox"
+                                    type="checkbox"
+                                    name="selesai"
+                                    value="1"
+                                    @checked($subtask->selesai)
+                                    onchange="this.form.requestSubmit()"
+                                    aria-label="Tandai subtugas {{ $subtask->nama_tugas }} sebagai {{ $subtask->selesai ? 'belum selesai' : 'selesai' }}"
+                                >
+                                <span class="{{ $subtask->selesai ? 'is-complete' : '' }}">{{ $subtask->nama_tugas }}</span>
+                            </form>
                         </li>
                     @endforeach
                 </ul>

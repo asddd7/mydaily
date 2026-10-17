@@ -958,30 +958,49 @@
 }
 
 .content .tasks-page .task-detail-subtasks li {
-    display: flex;
-    min-height: 44px;
-    align-items: center;
-    gap: 10px;
-    padding: 10px 12px;
+    padding: 0;
     border: 1px solid #edf1f7;
     border-radius: 10px;
     color: #475569;
     font-size: 13px;
 }
 
-.content .tasks-page .task-detail-subtasks li > i {
-    flex: 0 0 auto;
-    color: #94a3b8;
+.content .tasks-page .task-detail-subtask-check {
+    display: flex;
+    min-height: 44px;
+    align-items: center;
+    gap: 10px;
+    margin: 0;
+    padding: 10px 12px;
+    cursor: pointer;
+}
+
+.content .tasks-page .task-detail-subtask-check input.task-checkbox {
+    width: 18px;
+    height: 18px;
+    min-height: 18px;
+    border-width: 1.5px;
+}
+
+.content .tasks-page .task-detail-subtask-check input.task-checkbox::after {
+    width: 4px;
+    height: 7px;
+}
+
+.content .tasks-page .task-detail-subtask-check span {
+    min-width: 0;
+    overflow-wrap: anywhere;
+    color: #475569;
+    line-height: 1.45;
 }
 
 .content .tasks-page .task-detail-subtasks li.is-complete {
     background: #f8fafc;
-    color: #94a3b8;
-    text-decoration: line-through;
 }
 
-.content .tasks-page .task-detail-subtasks li.is-complete > i {
-    color: #059669;
+.content .tasks-page .task-detail-subtask-check span.is-complete {
+    color: #94a3b8;
+    text-decoration: line-through;
 }
 
 .content .tasks-page .task-detail-empty {
