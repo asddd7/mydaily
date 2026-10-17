@@ -1,6 +1,7 @@
 @php
     $fabContext = match (request()->route()?->getName()) {
         'tasks.index' => ['label' => 'Tambah tugas', 'icon' => 'fa-list-check', 'action' => 'task'],
+        'tasks.show' => ['label' => 'Tambah subtugas', 'icon' => 'fa-list-check', 'action' => 'subtask'],
         'money.index' => ['label' => 'Tambah transaksi', 'icon' => 'fa-wallet', 'action' => 'money'],
         'notes.index' => ['label' => 'Tambah catatan', 'icon' => 'fa-note-sticky', 'action' => 'note'],
         'files.index' => ['label' => 'Upload file', 'icon' => 'fa-folder-plus', 'action' => 'file'],
@@ -44,6 +45,8 @@
         toggle.addEventListener('click', () => {
             if (toggle.dataset.fabAction === 'task') {
                 document.dispatchEvent(new CustomEvent('task:open-create'));
+            } else if (toggle.dataset.fabAction === 'subtask') {
+                document.dispatchEvent(new CustomEvent('task:open-subtask'));
             } else if (toggle.dataset.fabAction === 'money') {
                 document.querySelector('[data-open-money-dialog]')?.click();
             } else if (toggle.dataset.fabAction === 'note') {

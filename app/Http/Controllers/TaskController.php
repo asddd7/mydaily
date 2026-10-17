@@ -297,7 +297,11 @@ class TaskController extends Controller
             'parent_id' => $task,
         ]);
 
-        return redirect()->route('tasks.index')->with('status', 'Subtugas berhasil ditambahkan.');
+        $redirect = $request->boolean('return_to_detail')
+            ? redirect()->route('tasks.show', $task)
+            : redirect()->route('tasks.index');
+
+        return $redirect->with('status', 'Subtugas berhasil ditambahkan.');
     }
 
     public function updateSubtask(Request $request, int $task): RedirectResponse

@@ -85,5 +85,58 @@
             </form>
         </div>
     </article>
+
+    <dialog class="task-create-dialog task-subtask-dialog" data-subtask-dialog aria-labelledby="subtask-dialog-title" @if ($errors->any() && old('_form') === 'subtask_create') data-reopen @endif>
+        <div class="task-dialog-heading">
+            <div>
+                <p class="tasks-eyebrow">Tugas: {{ $task->nama_tugas }}</p>
+                <h2 id="subtask-dialog-title">Tambah subtugas</h2>
+                <p>Tambahkan langkah kecil untuk menyelesaikan tugas ini.</p>
+            </div>
+            <button class="task-icon-button" type="button" data-close-subtask-dialog aria-label="Tutup dialog">
+                <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+            </button>
+        </div>
+        @if ($errors->any() && old('_form') === 'subtask_create')
+            <p class="task-dialog-error" role="alert">{{ $errors->first() }}</p>
+        @endif
+        <form method="post" action="{{ route('tasks.subtasks.store', $task->id) }}" class="task-form" data-loader-action="subtask-create">
+            @csrf
+            <input type="hidden" name="_form" value="subtask_create">
+            <input type="hidden" name="return_to_detail" value="1">
+            <label class="task-field task-field-wide">Nama subtugas
+                <input name="nama_subtask" value="{{ old('nama_subtask') }}" maxlength="100" placeholder="Contoh: Siapkan bahan" required>
+            </label>
+            <div class="task-dialog-actions task-field-wide">
+                <button class="task-secondary-button" type="button" data-close-subtask-dialog>Batal</button>
+                <button class="task-primary-button" type="submit">
+                    <i class="fa-solid fa-plus" aria-hidden="true"></i> Tambah subtugas
+                </button>
+            </div>
+        </form>
+    </dialog>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+(() => {
+    const dialog = document.querySelector('[data-subtask-dialog]');
+    if (!(dialog instanceof HTMLDialogElement)) return;
+
+    const openDialog = () => {
+        if (!dialog.open) dialog.showModal();
+        dialog.querySelector('[name="nama_subtask"]')?.focus();
+    };
+
+    document.addEventListener('task:open-subtask', openDialog);
+    dialog.querySelectorAll('[data-close-subtask-dialog]').forEach(button => {
+        button.addEventListener('click', () => dialog.close());
+    });
+    dialog.addEventListener('click', event => {
+        if (event.target === dialog) dialog.close();
+    });
+    if (dialog.hasAttribute('data-reopen')) openDialog();
+})();
+</script>
+@endpush
