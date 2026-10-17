@@ -508,8 +508,7 @@
 }
 
 .content .tasks-page .task-detail-link:focus-visible,
-.content .tasks-page .task-detail-back:focus-visible,
-.content .tasks-page .task-detail-back-button:focus-visible {
+.content .tasks-page .task-detail-back:focus-visible {
     outline: 3px solid rgba(37, 99, 235, .25);
     outline-offset: 3px;
 }
@@ -809,7 +808,10 @@
 
 .content .tasks-page .task-detail-card {
     display: grid;
-    gap: 24px;
+    width: 100%;
+    max-width: 920px;
+    gap: 22px;
+    margin: 0 auto;
     padding: clamp(18px, 4vw, 32px);
     border: 1px solid #e7edf5;
     border-radius: 18px;
@@ -823,6 +825,16 @@
     align-items: flex-start;
     justify-content: space-between;
     gap: 16px;
+}
+
+.content .tasks-page .task-detail-header {
+    align-items: center;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #edf1f7;
+}
+
+.content .tasks-page .task-detail-header .tasks-eyebrow {
+    margin-bottom: 7px;
 }
 
 .content .tasks-page .task-detail-title {
@@ -902,11 +914,19 @@
     font-weight: 800;
 }
 
+.content .tasks-page .task-detail-image-section,
+.content .tasks-page .task-detail-subtasks {
+    padding: 18px;
+    border: 1px solid #edf1f7;
+    border-radius: 13px;
+    background: #fbfdff;
+}
+
 .content .tasks-page .task-detail-image {
     display: block;
     width: min(100%, 680px);
     max-height: 460px;
-    margin-top: 12px;
+    margin: 14px auto 0;
     border: 1px solid #e2e8f0;
     border-radius: 13px;
     object-fit: contain;
@@ -985,27 +1005,6 @@
 
 .content .tasks-page .task-detail-actions form {
     margin: 0;
-}
-
-.content .tasks-page .task-detail-actions .task-detail-back-button {
-    display: inline-flex;
-    min-height: 40px;
-    align-items: center;
-    justify-content: center;
-    padding: 9px 14px;
-    border: 1px solid #dbe3ef;
-    border-radius: 8px;
-    background: #fff;
-    color: #334155;
-    font-size: 13px;
-    font-weight: 700;
-    text-decoration: none;
-}
-
-.content .tasks-page .task-detail-actions .task-detail-back-button:hover {
-    border-color: #bfdbfe;
-    background: #eff6ff;
-    color: #1d4ed8;
 }
 
 .content .tasks-page dialog.task-create-dialog,
@@ -1140,13 +1139,18 @@
     }
 
     .content .tasks-page .task-detail-header {
+        align-items: flex-start;
         flex-direction: column;
+    }
+
+    .content .tasks-page .task-detail-image-section,
+    .content .tasks-page .task-detail-subtasks {
+        padding: 14px;
     }
 
     .content .tasks-page .task-detail-actions > *,
     .content .tasks-page .task-detail-actions form,
-    .content .tasks-page .task-detail-actions button,
-    .content .tasks-page .task-detail-actions .task-detail-back-button {
+    .content .tasks-page .task-detail-actions button {
         width: 100%;
     }
 

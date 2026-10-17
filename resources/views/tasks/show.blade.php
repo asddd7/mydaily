@@ -13,7 +13,7 @@
     </a>
 
     <article class="task-detail-card">
-        <header class="task-detail-header">
+        <div class="task-detail-header">
             <div>
                 <p class="tasks-eyebrow">Detail tugas</p>
                 <h1 class="task-detail-title {{ $task->selesai ? 'is-complete' : '' }}">{{ $task->nama_tugas }}</h1>
@@ -22,7 +22,7 @@
                 <i class="fa-solid {{ $task->selesai ? 'fa-circle-check' : 'fa-clock' }}" aria-hidden="true"></i>
                 {{ $task->selesai ? 'Selesai' : 'Belum selesai' }}
             </span>
-        </header>
+        </div>
 
         <div class="task-detail-meta">
             <div>
@@ -83,7 +83,6 @@
                     {{ $task->selesai ? 'Tandai belum selesai' : 'Tandai selesai' }}
                 </button>
             </form>
-            <a class="task-secondary-button task-detail-back-button" href="{{ route('tasks.index') }}">Kembali ke daftar</a>
         </div>
     </article>
 </div>
