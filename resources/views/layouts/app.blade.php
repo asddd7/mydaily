@@ -3,6 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="fcm-device-url" content="{{ route('fcm.devices.store') }}">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>@yield('title', 'MyDaily')</title>
     @vite(['resources/css/style.css', 'resources/css/app.css', 'resources/js/page-loader.js', 'resources/js/push-notifications.js'])

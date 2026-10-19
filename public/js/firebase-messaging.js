@@ -41,10 +41,22 @@ function getCsrfToken() {
 async function saveFid(fid) {
     console.log('MyDaily FCM installation ID:', fid);
 
+    const endpoint = document.querySelector(
+        'meta[name="fcm-device-url"]'
+    )?.content;
+
+    if (!endpoint) {
+        console.error('URL endpoint FCM tidak ditemukan.');
+        setStatus('URL endpoint Laravel tidak ditemukan.');
+        return;
+    }
+
+    console.log('FCM endpoint:', endpoint);
+
     setStatus('FID didapatkan. Menyimpan perangkat ke Laravel...');
 
     try {
-        const response = await fetch('/fcm/devices', {
+        const response = await fetch(endpoint, {
             method: 'POST',
             credentials: 'same-origin',
             headers: {
@@ -58,30 +70,24 @@ async function saveFid(fid) {
             body: JSON.stringify({ fid })
         });
 
-        const contentType =
-            response.headers.get('content-type') ?? '';
-
         if (response.redirected) {
             throw new Error(
-                `Request dialihkan ke ${response.url}. ` +
-                'Periksa middleware auth dan sesi login.'
+                `Request dialihkan ke ${response.url}. Periksa sesi login.`
             );
         }
 
-        if (!response.ok) {
-            const details = await response.text();
+        const contentType =
+            response.headers.get('content-type') ?? '';
 
+        if (!response.ok) {
             throw new Error(
-                `HTTP ${response.status}: ${details.slice(0, 300)}`
+                `HTTP ${response.status}: ${await response.text()}`
             );
         }
 
         if (!contentType.includes('application/json')) {
-            const details = await response.text();
-
             throw new Error(
-                'Server tidak mengembalikan JSON. ' +
-                `Respons: ${details.slice(0, 200)}`
+                'Laravel tidak mengembalikan respons JSON.'
             );
         }
 
@@ -91,16 +97,15 @@ async function saveFid(fid) {
 
         if (!result.success) {
             throw new Error(
-                result.message ?? 'Penyimpanan perangkat gagal.'
+                result.message ?? 'Penyimpanan FID gagal.'
             );
         }
 
         setStatus('Perangkat berhasil disimpan ke MyDaily.');
     } catch (error) {
         console.error('Gagal menyimpan FID:', error);
-        setStatus(`Pendaftaran gagal: ${error.message}`);
+        setStatus(`Gagal menyimpan perangkat: ${error.message}`);
     }
-
 }
 
 async function initializePush() {
