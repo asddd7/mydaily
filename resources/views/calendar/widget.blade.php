@@ -60,13 +60,13 @@
     const csrf = @json(csrf_token());
 
     const endpoints = {
-        marks: @json(route('calendar.marks')),
-        holidays: @json(route('calendar.holidays')),
-        tasks: @json(route('calendar.task-marks')),
-        taskToggle: @json(route('tasks.toggle', ['task' => '__id__'])),
-        store: @json(route('calendar.store')),
-        toggle: @json(route('calendar.toggle', ['mark' => '__id__'])),
-        remove: @json(route('calendar.destroy', ['mark' => '__id__']))
+        marks: @json(route('calendar.marks', absolute: false)),
+        holidays: @json(route('calendar.holidays', absolute: false)),
+        tasks: @json(route('calendar.task-marks', absolute: false)),
+        taskToggle: @json(route('tasks.toggle', ['task' => '__id__'], absolute: false)),
+        store: @json(route('calendar.store', absolute: false)),
+        toggle: @json(route('calendar.toggle', ['mark' => '__id__'], absolute: false)),
+        remove: @json(route('calendar.destroy', ['mark' => '__id__'], absolute: false))
     };
 
     let current = new Date();
@@ -233,7 +233,7 @@
 
         item.appendChild(text);
 
-        if (mark.task) {
+        if (mark.agendaType === 'task' || mark.task) {
             const actions = document.createElement('div');
             actions.className = 'mark-actions calendar-task-actions';
 
@@ -258,6 +258,7 @@
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest',
                             'X-CSRF-TOKEN': csrf
                         },
                         body: JSON.stringify({ selesai: !done })
