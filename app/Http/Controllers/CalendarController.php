@@ -65,13 +65,15 @@ class CalendarController extends Controller
     public function toggle(Request $request, int $mark): JsonResponse
     {
         $data = $request->validate(['selesai' => ['required', 'boolean']]);
-        $updated = DB::table('calendar_marks')
+        $query = DB::table('calendar_marks')
             ->where('id', $mark)
-            ->where('user_id', $request->attributes->get('currentUser')->id)
-            ->update(['selesai' => (bool) $data['selesai']]);
-        abort_unless($updated, 404);
+            ->where('user_id', $request->attributes->get('currentUser')->id);
+        abort_unless($query->exists(), 404);
 
-        return response()->json(['status' => 'updated']);
+        $done = (bool) $data['selesai'];
+        $query->update(['selesai' => $done]);
+
+        return response()->json(['status' => 'updated', 'selesai' => $done]);
     }
 
     public function destroy(Request $request, int $mark): JsonResponse|RedirectResponse
@@ -109,7 +111,7 @@ class CalendarController extends Controller
             'id' => $task->id,
             'title' => $task->title,
             'tanggal' => $task->tanggal,
-            'selesai' => (bool) $task->selesai,
+            'selesai' => (bool) ($task->selesai ?? false),
             'url' => route('tasks.index', ['date' => $task->tanggal]),
         ]));
     }
