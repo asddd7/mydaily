@@ -37,8 +37,11 @@ function getCsrfToken() {
     )?.content ?? '';
 }
 
+
 async function saveFid(fid) {
     console.log('MyDaily FCM installation ID:', fid);
+
+    setStatus('FID didapatkan. Menyimpan perangkat ke Laravel...');
 
     try {
         const response = await fetch('/fcm/devices', {
@@ -47,25 +50,57 @@ async function saveFid(fid) {
             headers: {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json',
-                'X-CSRF-TOKEN': getCsrfToken()
+                'X-CSRF-TOKEN':
+                    document.querySelector(
+                        'meta[name="csrf-token"]'
+                    )?.content ?? ''
             },
             body: JSON.stringify({ fid })
         });
 
-        if (!response.ok) {
+        const contentType =
+            response.headers.get('content-type') ?? '';
+
+        if (response.redirected) {
             throw new Error(
-                `Gagal menyimpan perangkat (${response.status}).`
+                `Request dialihkan ke ${response.url}. ` +
+                'Periksa middleware auth dan sesi login.'
             );
         }
 
-        setStatus('Perangkat berhasil terdaftar untuk notifikasi.');
+        if (!response.ok) {
+            const details = await response.text();
+
+            throw new Error(
+                `HTTP ${response.status}: ${details.slice(0, 300)}`
+            );
+        }
+
+        if (!contentType.includes('application/json')) {
+            const details = await response.text();
+
+            throw new Error(
+                'Server tidak mengembalikan JSON. ' +
+                `Respons: ${details.slice(0, 200)}`
+            );
+        }
+
+        const result = await response.json();
+
+        console.log('Respons Laravel:', result);
+
+        if (!result.success) {
+            throw new Error(
+                result.message ?? 'Penyimpanan perangkat gagal.'
+            );
+        }
+
+        setStatus('Perangkat berhasil disimpan ke MyDaily.');
     } catch (error) {
-        console.error(error);
-        setStatus(
-            'Pendaftaran Firebase berhasil dimulai, ' +
-            'tetapi penyimpanan perangkat ke Laravel gagal.'
-        );
+        console.error('Gagal menyimpan FID:', error);
+        setStatus(`Pendaftaran gagal: ${error.message}`);
     }
+
 }
 
 async function initializePush() {
