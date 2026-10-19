@@ -14,21 +14,15 @@
                 <p>Belum ada catatan.</p>
             @endif
         </section>
-        <section class="card dashboard-card">
-            <h2>Notifikasi MyDaily</h2>
-
-            <p>
-                Aktifkan notifikasi untuk menerima pembaruan
-                dari aplikasi MyDaily.
-            </p>
-
-            <button type="button" id="enable-push">
-                Aktifkan Notifikasi
-            </button>
-
-            <p id="push-status" role="status" aria-live="polite">
-                Notifikasi belum diaktifkan.
-            </p>
+        <section class="card dashboard-card dashboard-push-card">
+            <div class="dashboard-push-icon" aria-hidden="true"><i class="fa-solid fa-bell"></i></div>
+            <div class="dashboard-push-copy">
+                <h2>Notifikasi MyDaily</h2>
+                <p>Aktifkan notifikasi dari ikon lonceng di bagian atas. Anda bisa menguji pengirimannya lewat stopwatch.</p>
+            </div>
+            <a class="dashboard-push-link" href="{{ route('clock.edit') }}">
+                <i class="fa-solid fa-stopwatch" aria-hidden="true"></i> Buka stopwatch
+            </a>
         </section>
         @include('calendar.widget')
     </div>

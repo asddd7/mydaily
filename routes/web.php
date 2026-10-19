@@ -14,6 +14,7 @@ use App\Http\Controllers\DatabaseStructureController;
 use App\Http\Controllers\FirebaseMessagingServiceWorkerController;
 use App\Http\Controllers\PushNotificationCronController;
 use App\Http\Controllers\PushSubscriptionController;
+use App\Http\Controllers\PushTestNotificationController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -83,6 +84,8 @@ Route::post('/notifications/push-subscriptions', [PushSubscriptionController::cl
     ->name('notifications.push-subscriptions.store');
 Route::delete('/notifications/push-subscriptions', [PushSubscriptionController::class, 'destroy'])
     ->name('notifications.push-subscriptions.destroy');
+Route::post('/notifications/push-test', [PushTestNotificationController::class, 'store'])
+    ->name('notifications.push-test');
 Route::post('/notifications/cron/due-tasks', PushNotificationCronController::class)
     ->name('notifications.push.cron');
 Route::get('/clock', [ClockController::class, 'edit'])->name('clock.edit');

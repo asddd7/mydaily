@@ -1897,6 +1897,155 @@ body {
     }
 }
 
+.dashboard-push-card {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 20px 22px;
+}
+.dashboard-push-icon,
+.clock-test-icon {
+    display: grid;
+    flex: 0 0 auto;
+    width: 44px;
+    height: 44px;
+    place-items: center;
+    border-radius: 14px;
+    background: #eef2ff;
+    color: #4f46e5;
+    font-size: 18px;
+}
+.dashboard-push-copy {
+    flex: 1;
+    min-width: 0;
+}
+.dashboard-push-copy h2 {
+    margin-bottom: 4px !important;
+}
+.dashboard-push-copy p {
+    max-width: 620px;
+}
+.dashboard-push-link {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 42px;
+    padding: 0 15px;
+    border-radius: 11px;
+    background: #4f46e5;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: none;
+}
+.dashboard-push-link:hover {
+    background: #4338ca;
+}
+.clock-test-card {
+    margin-top: 18px;
+}
+.clock-test-heading {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+.clock-test-heading h2 {
+    margin: 0 0 4px;
+    color: #172033;
+    font-size: 18px;
+}
+.clock-test-heading p,
+.clock-test-status {
+    margin: 0;
+    color: #64748b;
+    font-size: 14px;
+    line-height: 1.6;
+}
+.clock-test-time {
+    display: block;
+    margin: 24px 0 18px;
+    color: #172033;
+    font-size: clamp(38px, 8vw, 54px);
+    font-variant-numeric: tabular-nums;
+    font-weight: 800;
+    letter-spacing: .04em;
+    line-height: 1;
+    text-align: center;
+}
+.clock-test-controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+.clock-test-controls label {
+    color: #475569;
+    font-size: 14px;
+    font-weight: 600;
+}
+.clock-test-controls select,
+.clock-test-controls button {
+    min-height: 42px;
+    padding: 0 13px;
+    border: 1px solid #dbe2ee;
+    border-radius: 10px;
+    background: #fff;
+    color: #172033;
+    font: inherit;
+}
+.clock-test-controls button {
+    border-color: #4f46e5;
+    background: #4f46e5;
+    color: #fff;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 700;
+}
+.clock-test-controls button:hover:not(:disabled) {
+    background: #4338ca;
+}
+.clock-test-controls button:disabled {
+    cursor: wait;
+    opacity: .65;
+}
+.clock-test-controls .clock-test-cancel {
+    border-color: #cbd5e1;
+    background: #f8fafc;
+    color: #334155;
+}
+.clock-test-status {
+    margin-top: 14px;
+    text-align: center;
+}
+@media (max-width: 600px) {
+    .dashboard-push-card {
+        align-items: flex-start;
+        flex-wrap: wrap;
+        padding: 17px;
+    }
+    .dashboard-push-copy {
+        flex-basis: calc(100% - 60px);
+    }
+    .dashboard-push-link {
+        width: 100%;
+    }
+    .clock-test-controls {
+        align-items: stretch;
+    }
+    .clock-test-controls label {
+        width: 100%;
+        text-align: center;
+    }
+    .clock-test-controls select,
+    .clock-test-controls button {
+        flex: 1 1 100%;
+    }
+}
+
 /* Calendar widget layout and touch-friendly controls. */
 .calendar-widget {
     min-width: 0;
