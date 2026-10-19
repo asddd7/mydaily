@@ -20,7 +20,7 @@
     </div>
 
     <div class="calendar-marks">
-        <h3>📌 Penanda dan tugas bulan ini</h3>
+        <h3>Agenda bulan ini</h3>
         <ul data-calendar-list></ul>
     </div>
 
@@ -63,6 +63,7 @@
         marks: @json(route('calendar.marks')),
         holidays: @json(route('calendar.holidays')),
         tasks: @json(route('calendar.task-marks')),
+        taskToggle: @json(route('tasks.toggle', ['task' => '__id__'])),
         store: @json(route('calendar.store')),
         toggle: @json(route('calendar.toggle', ['mark' => '__id__'])),
         remove: @json(route('calendar.destroy', ['mark' => '__id__']))
@@ -140,6 +141,8 @@
         return element;
     };
 
+    const isDone = value => value === true || Number(value) === 1;
+
     const createGrid = (year, month) => {
         body.replaceChildren();
 
@@ -206,7 +209,8 @@
         const item = document.createElement('li');
 
         if (holiday) item.classList.add('holiday-item');
-        if (mark.selesai) item.classList.add('done');
+        const done = isDone(mark.selesai);
+        if (done) item.classList.add('done');
 
         const text = document.createElement('div');
         text.className = 'mark-text';
@@ -233,14 +237,53 @@
 
         item.appendChild(text);
 
-        if (mark.id) {
+        if (mark.task) {
+            const actions = document.createElement('div');
+            actions.className = 'mark-actions calendar-task-actions';
+
+            const badge = addText(
+                actions,
+                'span',
+                done ? 'Selesai' : 'Belum selesai',
+                `calendar-task-status${done ? ' is-done' : ''}`
+            );
+            badge.setAttribute('aria-label', `Status tugas: ${done ? 'selesai' : 'belum selesai'}`);
+
+            const toggle = document.createElement('button');
+            toggle.type = 'button';
+            toggle.className = 'calendar-task-toggle';
+            toggle.textContent = done ? 'Buka kembali' : 'Selesaikan';
+            toggle.setAttribute('aria-pressed', String(done));
+            toggle.setAttribute('aria-label', `${done ? 'Buka kembali' : 'Tandai selesai'}: ${label}`);
+            toggle.addEventListener('click', async () => {
+                toggle.disabled = true;
+                try {
+                    await requestJson(endpoints.taskToggle.replace('__id__', mark.id), {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': csrf
+                        },
+                        body: JSON.stringify({ selesai: !done })
+                    });
+                    cache.tasks = null;
+                    await render();
+                } catch (error) {
+                    status.textContent = error.message;
+                    toggle.disabled = false;
+                }
+            });
+
+            actions.appendChild(toggle);
+            item.appendChild(actions);
+        } else if (mark.id) {
             const actions = document.createElement('div');
             actions.className = 'mark-actions';
 
             const toggle = document.createElement('button');
             toggle.type = 'button';
             toggle.className = 'btn-done';
-            toggle.textContent = mark.selesai ? 'Belum selesai' : 'Selesai';
+            toggle.textContent = done ? 'Belum selesai' : 'Selesai';
             toggle.addEventListener('click', async () => {
                 toggle.disabled = true;
                 try {
@@ -250,7 +293,7 @@
                             'Content-Type': 'application/json',
                             'X-CSRF-TOKEN': csrf
                         },
-                        body: JSON.stringify({ selesai: !mark.selesai })
+                        body: JSON.stringify({ selesai: !done })
                     });
                     cache.marks.delete(monthKey(current.getFullYear(), current.getMonth()));
                     await render();
@@ -315,9 +358,11 @@
             const holiday = holidaysByDate.get(date);
             const dayMarks = marksByDate.get(date) || [];
             const dayTasks = tasksByDate.get(date) || [];
+            const completedTasks = dayTasks.filter(task => isDone(task.selesai)).length;
 
             cell.querySelectorAll('.holiday-label').forEach(node => node.remove());
-            cell.classList.remove('holiday', 'marked-date', 'done-date');
+            cell.querySelectorAll('.calendar-task-progress').forEach(node => node.remove());
+            cell.classList.remove('holiday', 'marked-date', 'done-date', 'has-tasks');
 
             if (holiday) {
                 cell.classList.add('holiday');
@@ -330,13 +375,17 @@
             const description = [date];
             if (holiday?.keterangan) description.push(`hari libur: ${holiday.keterangan}`);
             if (dayMarks.length) description.push(`${dayMarks.length} penanda`);
-            if (dayTasks.length) description.push(`${dayTasks.length} tugas`);
+            if (dayTasks.length) {
+                description.push(`${completedTasks} dari ${dayTasks.length} tugas selesai`);
+                cell.classList.add('has-tasks');
+                addText(cell, 'span', `${completedTasks}/${dayTasks.length}`, 'calendar-task-progress');
+            }
             cell.setAttribute('aria-label', description.join(', '));
 
-            if (dayMarks.length || dayTasks.length) {
+            const trackedItems = [...dayMarks, ...dayTasks];
+            if (trackedItems.length) {
                 cell.classList.add('marked-date');
-
-                if (dayMarks.length && dayMarks.every(mark => Number(mark.selesai) === 1)) {
+                if (trackedItems.every(item => isDone(item.selesai))) {
                     cell.classList.add('done-date');
                 }
             }
@@ -356,7 +405,7 @@
         marks.forEach(mark => addMarkEntry(mark));
 
         currentMonthTasks.forEach(task => {
-            const entry = addMarkEntry({ ...task, id: null });
+            const entry = addMarkEntry({ ...task, task: true });
             entry.classList.add('calendar-task-item');
         });
 

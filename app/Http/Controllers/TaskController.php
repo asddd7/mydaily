@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -181,7 +182,7 @@ class TaskController extends Controller
         return redirect()->route('tasks.index')->with('status', 'Tugas berhasil dihapus.');
     }
 
-    public function toggle(Request $request, int $task): RedirectResponse
+    public function toggle(Request $request, int $task): RedirectResponse|JsonResponse
     {
         $data = $request->validate(['selesai' => ['required', 'boolean']]);
         $userId = $request->attributes->get('currentUser')->id;
@@ -248,6 +249,10 @@ class TaskController extends Controller
 
             DB::table('tugas')->where('id', $task)->update(['recurring_generated' => 1]);
         });
+
+        if ($request->expectsJson()) {
+            return response()->json(['status' => 'updated', 'selesai' => $done]);
+        }
 
         return redirect()->route('tasks.index')->with('status', 'Status tugas diperbarui.');
     }

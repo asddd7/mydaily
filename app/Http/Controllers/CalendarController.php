@@ -103,12 +103,13 @@ class CalendarController extends Controller
         $tasks = DB::table('tugas')
             ->where('user_id', $request->attributes->get('currentUser')->id)
             ->whereNull('parent_id')
-            ->get(['id', 'nama_tugas as title', 'deadline as tanggal']);
+            ->get(['id', 'nama_tugas as title', 'deadline as tanggal', 'selesai']);
 
         return response()->json($tasks->map(fn ($task) => [
             'id' => $task->id,
             'title' => $task->title,
             'tanggal' => $task->tanggal,
+            'selesai' => (bool) $task->selesai,
             'url' => route('tasks.index', ['date' => $task->tanggal]),
         ]));
     }
