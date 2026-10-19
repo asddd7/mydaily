@@ -81,6 +81,11 @@
                                 >
                                 <span class="{{ $subtask->selesai ? 'is-complete' : '' }}">{{ $subtask->nama_tugas }}</span>
                             </form>
+                            @if ($subtask->image)
+                                <a class="task-detail-subtask-image-link" href="{{ route('tasks.image', $subtask->id) }}" target="_blank" rel="noopener">
+                                    <img class="task-detail-subtask-image" src="{{ route('tasks.image', $subtask->id) }}" alt="Gambar untuk subtugas {{ $subtask->nama_tugas }}" loading="lazy">
+                                </a>
+                            @endif
                         </li>
                     @endforeach
                 </ul>
@@ -115,12 +120,16 @@
         @if ($errors->any() && old('_form') === 'subtask_create')
             <p class="task-dialog-error" role="alert">{{ $errors->first() }}</p>
         @endif
-        <form method="post" action="{{ route('tasks.subtasks.store', $task->id) }}" class="task-form" data-loader-action="subtask-create">
+        <form method="post" action="{{ route('tasks.subtasks.store', $task->id) }}" class="task-form" enctype="multipart/form-data" data-loader-action="subtask-create">
             @csrf
             <input type="hidden" name="_form" value="subtask_create">
             <input type="hidden" name="return_to_detail" value="1">
             <label class="task-field task-field-wide">Nama subtugas
                 <input name="nama_subtask" value="{{ old('nama_subtask') }}" maxlength="100" placeholder="Contoh: Siapkan bahan" required>
+            </label>
+            <label class="task-field task-field-wide">Foto subtugas (opsional)
+                <input type="file" name="image" accept="image/jpeg,image/png,image/gif,image/webp">
+                <small>Format JPG, PNG, GIF, atau WebP. Maksimal 5 MB.</small>
             </label>
             <div class="task-dialog-actions task-field-wide">
                 <button class="task-secondary-button" type="button" data-close-subtask-dialog>Batal</button>

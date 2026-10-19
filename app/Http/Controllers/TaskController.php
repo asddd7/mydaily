@@ -131,7 +131,6 @@ class TaskController extends Controller
         $record = DB::table('tugas')
             ->where('id', $task)
             ->where('user_id', $request->attributes->get('currentUser')->id)
-            ->whereNull('parent_id')
             ->first(['image']);
         abort_unless($record && $record->image, 404);
 
@@ -290,17 +289,38 @@ class TaskController extends Controller
 
     public function storeSubtask(Request $request, int $task): RedirectResponse
     {
-        $data = $request->validate(['nama_subtask' => ['required', 'string', 'max:100']]);
+        $data = $request->validate([
+            'nama_subtask' => ['required', 'string', 'max:100'],
+            'image' => ['nullable', 'image', 'mimes:jpeg,png,gif,webp', 'max:5120'],
+        ]);
         $userId = $request->attributes->get('currentUser')->id;
         $parent = DB::table('tugas')->where('id', $task)->where('user_id', $userId)->whereNull('parent_id')->first();
         abort_unless($parent, 404);
 
-        DB::table('tugas')->insert([
-            'nama_tugas' => $data['nama_subtask'],
-            'deadline' => $parent->deadline,
-            'user_id' => $userId,
-            'parent_id' => $task,
-        ]);
+        $imageName = $request->file('image')?->hashName();
+        $imagePath = null;
+        if ($imageName) {
+            $imageDirectory = base_path('uploads/tasks');
+            File::ensureDirectoryExists($imageDirectory);
+            $imagePath = $imageDirectory.'/'.$imageName;
+            $request->file('image')->move($imageDirectory, $imageName);
+        }
+
+        try {
+            DB::table('tugas')->insert([
+                'nama_tugas' => $data['nama_subtask'],
+                'deadline' => $parent->deadline,
+                'user_id' => $userId,
+                'parent_id' => $task,
+                'image' => $imageName,
+            ]);
+        } catch (\Throwable $error) {
+            if ($imagePath && File::exists($imagePath) && !File::delete($imagePath)) {
+                throw new \RuntimeException('Unable to remove the subtask image after a failed task save.', 0, $error);
+            }
+
+            throw $error;
+        }
 
         $redirect = $request->boolean('return_to_detail')
             ? redirect()->route('tasks.show', $task)
