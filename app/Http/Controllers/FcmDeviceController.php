@@ -13,7 +13,8 @@ class FcmDeviceController extends Controller
             'fid' => ['required', 'string', 'max:128'],
         ]);
 
-        $userId = (string) $request->user()->getAuthIdentifier();
+        $user = $request->attributes->get('currentUser');
+        $userId = (string) $user->id;
 
         DB::table('fcm_devices')->upsert(
             [[

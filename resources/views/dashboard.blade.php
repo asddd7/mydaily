@@ -3,24 +3,6 @@
 @section('title', 'Dashboard - MyDaily')
 
 @section('content')
-@auth
-    <section class="card dashboard-card">
-        <h2>Notifikasi MyDaily</h2>
-
-        <p>
-            Aktifkan notifikasi untuk menerima pembaruan
-            dari aplikasi.
-        </p>
-
-        <button type="button" id="enable-push">
-            Aktifkan Notifikasi
-        </button>
-
-        <p id="push-status" role="status" aria-live="polite">
-            Notifikasi belum diaktifkan.
-        </p>
-    </section>
-@endauth
     <div class="dashboard-page">
         <h1 class="dashboard-title">Dashboard</h1>
         <section class="card dashboard-card dashboard-summary">
@@ -32,7 +14,22 @@
                 <p>Belum ada catatan.</p>
             @endif
         </section>
+        <section class="card dashboard-card">
+            <h2>Notifikasi MyDaily</h2>
 
+            <p>
+                Aktifkan notifikasi untuk menerima pembaruan
+                dari aplikasi MyDaily.
+            </p>
+
+            <button type="button" id="enable-push">
+                Aktifkan Notifikasi
+            </button>
+
+            <p id="push-status" role="status" aria-live="polite">
+                Notifikasi belum diaktifkan.
+            </p>
+        </section>
         @include('calendar.widget')
     </div>
 @endsection

@@ -160,7 +160,7 @@
 </script>
 <script
     type="module"
-    src="{{ asset('js/firebase-messaging.js') }}"
+    src="{{ asset('js/firebase-messaging.js') }}?v=4"
 ></script>
 </body>
 </html>

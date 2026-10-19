@@ -11,6 +11,8 @@ import {
 } from
     'https://www.gstatic.com/firebasejs/13.0.0/firebase-messaging.js';
 
+console.info('[FCM] File JavaScript berhasil dijalankan:', import.meta.url);
+
 const firebaseConfig = {
     apiKey: 'AIzaSyC2_ycyhC3htGkh-oe1_kj6JQI9lmgBcuY',
     authDomain: 'mydaily-app-51b1d.firebaseapp.com',
@@ -109,6 +111,7 @@ async function saveFid(fid) {
 }
 
 async function initializePush() {
+    console.info('[FCM] initializePush dimulai');
     if (
         !('Notification' in window) ||
         !('serviceWorker' in navigator)
@@ -118,16 +121,25 @@ async function initializePush() {
         return;
     }
 
-    if (!(await isSupported())) {
+    const supported = await isSupported();
+
+    console.info('[FCM] Browser mendukung FCM:', supported);
+
+    if (!supported) {
         setStatus('Firebase Messaging tidak didukung browser ini.');
         if (button) button.disabled = true;
         return;
     }
 
+console.info('[FCM] Tombol ditemukan:', Boolean(button));
+
     const app = initializeApp(firebaseConfig);
     const messaging = getMessaging(app);
 
-    onRegistered(messaging, saveFid);
+    onRegistered(messaging, (fid) => {
+    console.info('[FCM] FID diterima:', fid);
+    return saveFid(fid);
+    });
 
     onMessage(messaging, (payload) => {
         const title = payload.notification?.title ?? 'MyDaily';
@@ -147,6 +159,7 @@ async function initializePush() {
     if (!button) return;
 
     button.addEventListener('click', async () => {
+    console.info('[FCM] Tombol Aktifkan Notifikasi diklik');
         button.disabled = true;
 
         try {
@@ -166,11 +179,16 @@ async function initializePush() {
                     '/firebase-messaging-sw.js',
                     { scope: '/' }
                 );
-
+            
+            console.info(
+                '[FCM] Memanggil register(), scope:',
+                swRegistration.scope
+            );
             await register(messaging, {
                 vapidKey: VAPID_KEY,
                 serviceWorkerRegistration: swRegistration
             });
+            console.info('[FCM] register() selesai; menunggu callback FID');
 
             setStatus(
                 'Izin diberikan. Sedang mendaftarkan perangkat ke Firebase...'

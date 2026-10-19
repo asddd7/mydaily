@@ -129,7 +129,5 @@ Route::get('/sub/clock.php', fn () => redirect()->route('clock.edit'));
 Route::post('/sub/clock.php', [ClockController::class, 'update']);
 Route::get('/koneksi/database_structure.php', fn () => redirect()->route('admin.database-structure'));
 Route::get('/koneksi/download.php', fn () => redirect()->route('files.index'));
-Route::middleware('auth')->post(
-    '/fcm/devices',
-    [FcmDeviceController::class, 'store']
-)->name('fcm.devices.store');
+Route::post('/fcm/devices', [FcmDeviceController::class, 'store'])
+    ->name('fcm.devices.store');
