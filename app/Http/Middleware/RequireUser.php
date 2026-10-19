@@ -22,6 +22,8 @@ class RequireUser
             'password.email',
             'password.reset',
             'password.update',
+            'firebase.messaging-sw',
+            'notifications.push.cron',
         ], true) || in_array($request->path(), [
             'koneksi/login.php',
             'register.php',

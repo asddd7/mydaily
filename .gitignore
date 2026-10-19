@@ -6,6 +6,7 @@
 !/uploads/files/
 /uploads/files/*
 !/uploads/files/.htaccess
+/storage/app/private/firebase-service-account.json
 /.env
 /.env.*
 !.env.example

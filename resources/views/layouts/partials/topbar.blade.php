@@ -18,6 +18,21 @@
             <div id="notificationList" class="app-notification-list" aria-live="polite">
                 <p class="app-notification-empty">Memuat notifikasi...</p>
             </div>
+            <div class="app-push-settings">
+                <p id="pushNotificationStatus" role="status">Notifikasi ke HP belum disiapkan.</p>
+                <div class="app-push-actions">
+                    <button type="button" id="enablePushNotifications">Aktifkan notifikasi HP</button>
+                    <button type="button" id="disablePushNotifications" hidden>Nonaktifkan di perangkat ini</button>
+                </div>
+                <script type="application/json" id="firebaseWebConfig">{!! json_encode(config('firebase.web'), JSON_THROW_ON_ERROR | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) !!}</script>
+                <script type="application/json" id="pushNotificationConfig">{!! json_encode([
+                    'vapidKey' => config('firebase.vapid_key'),
+                    'serviceWorkerUrl' => route('firebase.messaging-sw', absolute: false),
+                    'subscribeUrl' => route('notifications.push-subscriptions.store', absolute: false),
+                    'unsubscribeUrl' => route('notifications.push-subscriptions.destroy', absolute: false),
+                    'csrfToken' => csrf_token(),
+                ], JSON_THROW_ON_ERROR | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) !!}</script>
+            </div>
             <a class="app-notification-all" href="{{ route('tasks.index') }}">Lihat semua tugas</a>
         </section>
     </div>

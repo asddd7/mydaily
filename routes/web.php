@@ -8,8 +8,12 @@ use App\Http\Controllers\NotesController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\FileManagerController;
 use App\Http\Controllers\CalendarController;
+use App\Http\Controllers\FcmDeviceController;
 use App\Http\Controllers\ClockController;
 use App\Http\Controllers\DatabaseStructureController;
+use App\Http\Controllers\FirebaseMessagingServiceWorkerController;
+use App\Http\Controllers\PushNotificationCronController;
+use App\Http\Controllers\PushSubscriptionController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -24,6 +28,8 @@ Route::post('/forgot-password', [AuthController::class, 'sendResetLink'])->name(
 Route::get('/reset-password/{token}', [AuthController::class, 'resetPassword'])->name('password.reset');
 Route::post('/reset-password/{token}', [AuthController::class, 'updatePassword'])->name('password.update');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+Route::get('/firebase-messaging-sw.js', FirebaseMessagingServiceWorkerController::class)
+    ->name('firebase.messaging-sw');
 
 Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 Route::post('/dashboard/check-in', [DashboardController::class, 'checkIn'])->name('attendance.check-in');
@@ -73,6 +79,12 @@ Route::get('/calendar/holidays', [CalendarController::class, 'holidays'])->name(
 Route::get('/calendar', [CalendarController::class, 'index'])->name('calendar.index');
 Route::get('/calendar/task-marks', [CalendarController::class, 'taskMarks'])->name('calendar.task-marks');
 Route::get('/notifications/count', [TaskController::class, 'notificationCount'])->name('notifications.count');
+Route::post('/notifications/push-subscriptions', [PushSubscriptionController::class, 'store'])
+    ->name('notifications.push-subscriptions.store');
+Route::delete('/notifications/push-subscriptions', [PushSubscriptionController::class, 'destroy'])
+    ->name('notifications.push-subscriptions.destroy');
+Route::post('/notifications/cron/due-tasks', PushNotificationCronController::class)
+    ->name('notifications.push.cron');
 Route::get('/clock', [ClockController::class, 'edit'])->name('clock.edit');
 Route::put('/clock', [ClockController::class, 'update'])->name('clock.update');
 Route::get('/admin/database-structure', [DatabaseStructureController::class, 'index'])->name('admin.database-structure');
@@ -117,3 +129,7 @@ Route::get('/sub/clock.php', fn () => redirect()->route('clock.edit'));
 Route::post('/sub/clock.php', [ClockController::class, 'update']);
 Route::get('/koneksi/database_structure.php', fn () => redirect()->route('admin.database-structure'));
 Route::get('/koneksi/download.php', fn () => redirect()->route('files.index'));
+Route::middleware('auth')->post(
+    '/fcm/devices',
+    [FcmDeviceController::class, 'store']
+)->name('fcm.devices.store');

@@ -10,6 +10,7 @@ export default defineConfig({
                 'resources/css/tasks.css',
                 'resources/css/money.css',
                 'resources/js/page-loader.js',
+                'resources/js/push-notifications.js',
                 'resources/js/money-receipt-ocr.js',
                 'resources/js/money-transaction-items.js',
             ],

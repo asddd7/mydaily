@@ -1,0 +1,85 @@
+
+self.addEventListener('push', (event) => {
+    if (!event.data) return;
+
+    let payload;
+
+    try {
+        payload = event.data.json();
+    } catch (error) {
+        console.error('Invalid FCM payload', error);
+        return;
+    }
+
+    const notification = payload.notification ?? payload.data ?? {};
+    const title = notification.title ?? 'MyDaily';
+    const body = notification.body ?? 'Ada pembaruan di MyDaily.';
+
+    const requestedUrl =
+        payload.fcmOptions?.link ??
+        payload.data?.url ??
+        '/dashboard';
+
+    const parsedUrl = new URL(requestedUrl, self.location.origin);
+
+    const targetUrl =
+        parsedUrl.origin === self.location.origin
+            ? parsedUrl.href
+            : new URL('/dashboard', self.location.origin).href;
+
+    event.waitUntil((async () => {
+        const windows = await self.clients.matchAll({
+            type: 'window',
+            includeUncontrolled: true
+        });
+
+        const visiblePageExists = windows.some((client) => {
+            return (
+                client.visibilityState === 'visible' &&
+                new URL(client.url).origin === self.location.origin
+            );
+        });
+
+        // Saat tab aktif, penanganan pesan dilakukan di halaman.
+        if (visiblePageExists) return;
+
+        await self.registration.showNotification(title, {
+            body,
+            icon: '/favicon.ico',
+            data: { url: targetUrl }
+        });
+    })());
+});
+
+self.addEventListener('notificationclick', (event) => {
+    event.notification.close();
+
+    const requestedUrl =
+        event.notification.data?.url ?? '/dashboard';
+
+    const parsedUrl = new URL(requestedUrl, self.location.origin);
+
+    const targetUrl =
+        parsedUrl.origin === self.location.origin
+            ? parsedUrl.href
+            : new URL('/dashboard', self.location.origin).href;
+
+    event.waitUntil((async () => {
+        const windows = await self.clients.matchAll({
+            type: 'window',
+            includeUncontrolled: true
+        });
+
+        const existingWindow = windows.find((client) => {
+            return new URL(client.url).origin === self.location.origin;
+        });
+
+        if (existingWindow) {
+            await existingWindow.navigate(targetUrl);
+            await existingWindow.focus();
+            return;
+        }
+
+        await self.clients.openWindow(targetUrl);
+    })());
+});
