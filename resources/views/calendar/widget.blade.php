@@ -205,7 +205,7 @@
         return map;
     };
 
-    const addMarkEntry = (mark, holiday = false) => {
+    const addMarkEntry = (mark, targetList, holiday = false) => {
         const item = document.createElement('li');
 
         if (holiday) item.classList.add('holiday-item');
@@ -214,10 +214,6 @@
 
         const text = document.createElement('div');
         text.className = 'mark-text';
-
-        const date = document.createElement('strong');
-        date.textContent = mark.tanggal || '';
-        text.appendChild(date);
 
         const label = mark.title || mark.keterangan || '';
 
@@ -328,7 +324,7 @@
             item.appendChild(actions);
         }
 
-        list.appendChild(item);
+        targetList.appendChild(item);
         return item;
     };
 
@@ -396,22 +392,62 @@
         const monthHolidays = holidays.filter(holiday =>
             holiday?.tanggal?.startsWith(currentMonthPrefix)
         );
+        const agendaByDate = new Map();
+        const addToAgenda = (item, type) => {
+            if (!item?.tanggal) return;
+            const entries = agendaByDate.get(item.tanggal) || [];
+            entries.push({ ...item, agendaType: type });
+            agendaByDate.set(item.tanggal, entries);
+        };
 
-        if (monthHolidays.length) {
-            addText(list, 'li', '🎌 Hari Libur Nasional', 'holiday-item');
-        }
+        monthHolidays.forEach(holiday => addToAgenda(holiday, 'holiday'));
+        marks.forEach(mark => addToAgenda(mark, 'mark'));
+        currentMonthTasks.forEach(task => addToAgenda(task, 'task'));
 
-        monthHolidays.forEach(holiday => addMarkEntry(holiday, true));
-        marks.forEach(mark => addMarkEntry(mark));
-
-        currentMonthTasks.forEach(task => {
-            const entry = addMarkEntry({ ...task, task: true });
-            entry.classList.add('calendar-task-item');
-        });
-
-        if (!monthHolidays.length && !marks.length && !currentMonthTasks.length) {
+        if (!agendaByDate.size) {
             addText(list, 'li', 'Tidak ada penanda atau tugas bulan ini.');
+            return;
         }
+
+        [...agendaByDate.entries()]
+            .sort(([dateA], [dateB]) => dateA.localeCompare(dateB))
+            .forEach(([date, entries]) => {
+                const group = document.createElement('li');
+                group.className = 'calendar-date-group';
+
+                const header = document.createElement('div');
+                header.className = 'calendar-date-heading';
+
+                const dateLabel = document.createElement('time');
+                dateLabel.dateTime = date;
+                dateLabel.textContent = new Date(`${date}T00:00:00`).toLocaleDateString('id-ID', {
+                    weekday: 'long',
+                    day: 'numeric',
+                    month: 'long',
+                    year: 'numeric'
+                });
+                header.appendChild(dateLabel);
+
+                const taskCount = entries.filter(entry => entry.agendaType === 'task').length;
+                const markCount = entries.filter(entry => entry.agendaType === 'mark').length;
+                const holidayCount = entries.filter(entry => entry.agendaType === 'holiday').length;
+                const summary = [
+                    taskCount ? `${taskCount} tugas` : '',
+                    markCount ? `${markCount} penanda` : '',
+                    holidayCount ? `${holidayCount} hari libur` : ''
+                ].filter(Boolean).join(' · ');
+                addText(header, 'span', summary, 'calendar-date-summary');
+                group.appendChild(header);
+
+                const entriesList = document.createElement('ul');
+                entriesList.className = 'calendar-date-items';
+                entries.forEach(entry => {
+                    const item = addMarkEntry(entry, entriesList, entry.agendaType === 'holiday');
+                    if (entry.agendaType === 'task') item.classList.add('calendar-task-item');
+                });
+                group.appendChild(entriesList);
+                list.appendChild(group);
+            });
     };
 
     const render = async () => {

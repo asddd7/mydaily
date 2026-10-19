@@ -26,15 +26,6 @@ class DashboardController extends Controller
                 ->where('user_id', $user->id)
                 ->orderByDesc('created_at')
                 ->first(['title', 'created_at']),
-            'attendanceToday' => DB::table('absen')
-                ->where('user_id', $user->id)
-                ->whereDate('tanggal', $today)
-                ->first(),
-            'attendanceHistory' => DB::table('absen')
-                ->where('user_id', $user->id)
-                ->orderByDesc('tanggal')
-                ->limit(10)
-                ->get(),
         ]);
     }
 
