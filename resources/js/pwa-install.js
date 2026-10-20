@@ -7,7 +7,7 @@ if (installButton) {
         || window.navigator.standalone === true;
 
     if ('serviceWorker' in navigator && window.isSecureContext) {
-        navigator.serviceWorker.register('/firebase-messaging-sw.js', { scope: '/' })
+        navigator.serviceWorker.register('/firebase-messaging-worker.js', { scope: '/' })
             .catch(error => console.error('Gagal menyiapkan service worker aplikasi:', error));
     }
 

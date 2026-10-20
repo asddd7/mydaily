@@ -69,10 +69,11 @@ self.addEventListener('fetch', event => {
 // Handle background FCM messages.
 messaging.onBackgroundMessage(payload => {
     const data = payload.data || {};
-    self.registration.showNotification(data.title || 'MyDaily', {
-        body: data.body || 'Ada pengingat tugas yang belum selesai.',
-        icon: '/favicon.ico',
-        data: { url: data.url || '/' }
+    return self.registration.showNotification(data.title || payload.notification?.title || 'MyDaily', {
+        body: data.body || payload.notification?.body || 'Ada pengingat tugas yang belum selesai.',
+        icon: '/icons/icon-192.png',
+        badge: '/icons/icon-192.png',
+        data: { url: data.url || payload.fcmOptions?.link || '/dashboard' }
     });
 });
 

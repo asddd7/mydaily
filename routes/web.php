@@ -32,6 +32,8 @@ Route::post('/reset-password/{token}', [AuthController::class, 'updatePassword']
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 Route::get('/firebase-messaging-sw.js', FirebaseMessagingServiceWorkerController::class)
     ->name('firebase.messaging-sw');
+Route::get('/firebase-messaging-worker.js', FirebaseMessagingServiceWorkerController::class)
+    ->name('firebase.messaging-worker');
 Route::get('/manifest.webmanifest', WebAppManifestController::class)
     ->name('pwa.manifest');
 Route::get('/manifest.json', WebAppManifestController::class)
