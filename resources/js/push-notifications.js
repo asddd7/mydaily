@@ -128,15 +128,18 @@ if (enableButton && disableButton && status && firebaseConfig && pushConfig) {
 
             onMessage(messaging, payload => {
                 const data = payload.data || {};
-                if (Notification.permission === 'granted') {
-                    const notification = new Notification(data.title || 'MyDaily', {
-                        body: data.body || 'Ada pengingat tugas yang belum selesai.',
-                        icon: '/favicon.ico',
-                    });
-                    notification.addEventListener('click', () => {
-                        window.location.assign(data.url || '/');
-                    });
+                if (Notification.permission !== 'granted') {
+                    console.warn('Push diterima, tetapi izin notifikasi browser belum diberikan.');
+                    return;
                 }
+
+                registration.showNotification(data.title || 'MyDaily', {
+                    body: data.body || 'Ada pengingat tugas yang belum selesai.',
+                    icon: '/favicon.ico',
+                    data: { url: data.url || '/' },
+                }).catch(error => {
+                    console.error('Gagal menampilkan notifikasi foreground:', error);
+                });
             });
 
             enableButton.addEventListener('click', async () => {

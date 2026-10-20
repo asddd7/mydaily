@@ -12,50 +12,49 @@ class PushTestNotificationController extends Controller
 {
     public function store(Request $request, FirebaseMessagingService $messaging): JsonResponse
     {
+        $validated = $request->validate([
+            'token' => ['required', 'string', 'max:4096'],
+        ]);
         $userId = $request->attributes->get('currentUser')->id;
-        $subscriptions = DB::table('push_subscriptions')
+        $subscription = DB::table('push_subscriptions')
             ->where('user_id', $userId)
-            ->get(['token']);
+            ->where('token_hash', hash('sha256', $validated['token']))
+            ->first(['token']);
 
-        if ($subscriptions->isEmpty()) {
+        if (!$subscription) {
             return response()->json([
                 'success' => false,
-                'message' => 'Belum ada perangkat berlangganan. Aktifkan notifikasi lewat ikon lonceng terlebih dahulu.',
+                'message' => 'Perangkat ini belum terdaftar. Aktifkan notifikasi lewat ikon lonceng di perangkat ini terlebih dahulu.',
             ], 422);
         }
 
-        $sent = 0;
-        $failed = 0;
-        foreach ($subscriptions as $subscription) {
-            try {
-                if ($messaging->send(
-                    $subscription->token,
-                    'Tes notifikasi MyDaily',
-                    'Berhasil! Stopwatch MyDaily mengirim notifikasi ke perangkat ini.',
-                    route('clock.edit', absolute: false)
-                )) {
-                    $sent++;
-                } else {
-                    $failed++;
-                }
-            } catch (Throwable $error) {
-                report($error);
-                $failed++;
-            }
-        }
+        try {
+            $sent = $messaging->send(
+                $subscription->token,
+                'Tes notifikasi MyDaily',
+                'Berhasil! Stopwatch MyDaily mengirim notifikasi ke perangkat ini.',
+                route('clock.edit', absolute: false)
+            );
+        } catch (Throwable $error) {
+            report($error);
 
-        if ($sent === 0) {
             return response()->json([
                 'success' => false,
-                'message' => 'Notifikasi gagal dikirim. Periksa konfigurasi Firebase dan izin perangkat.',
+                'message' => 'Firebase gagal mengirim notifikasi ke perangkat ini.',
+            ], 502);
+        }
+
+        if (!$sent) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Token perangkat sudah tidak aktif. Aktifkan ulang notifikasi di perangkat ini.',
             ], 502);
         }
 
         return response()->json([
             'success' => true,
             'message' => 'Notifikasi tes berhasil dikirim.',
-            'sent' => $sent,
-            'failed' => $failed,
+            'sent' => 1,
         ]);
     }
 }

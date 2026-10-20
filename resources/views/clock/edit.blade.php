@@ -78,6 +78,10 @@
         intervalId = null;
         status.textContent = 'Stopwatch selesai. Mengirim notifikasi tes...';
         try {
+            const token = localStorage.getItem('mydaily-push-token');
+            if (!token) {
+                throw new Error('Aktifkan notifikasi pada perangkat ini melalui ikon lonceng terlebih dahulu.');
+            }
             const response = await fetch(endpoint, {
                 method: 'POST',
                 credentials: 'same-origin',
@@ -86,13 +90,13 @@
                     'Content-Type': 'application/json',
                     'X-CSRF-TOKEN': csrfToken,
                 },
-                body: JSON.stringify({}),
+                body: JSON.stringify({ token }),
             });
             const result = await response.json().catch(() => ({}));
             if (!response.ok || !result.success) {
                 throw new Error(result.message || `Pengiriman gagal (${response.status}).`);
             }
-            status.textContent = `Notifikasi tes berhasil dikirim ke ${result.sent} perangkat.`;
+            status.textContent = 'Notifikasi tes berhasil dikirim ke perangkat ini.';
         } catch (error) {
             status.textContent = error.message;
         } finally {
