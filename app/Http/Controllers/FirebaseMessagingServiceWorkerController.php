@@ -19,6 +19,17 @@ importScripts('https://www.gstatic.com/firebasejs/13.0.0/firebase-messaging-comp
 firebase.initializeApp({$config});
 const messaging = firebase.messaging();
 
+// Handle page navigations so Chrome can treat this as an installable PWA,
+// while keeping authenticated MyDaily pages network-only.
+self.addEventListener('fetch', event => {
+    if (event.request.mode !== 'navigate' || event.request.method !== 'GET') return;
+
+    event.respondWith(fetch(event.request).catch(() => new Response(
+        '<!doctype html><html lang="id"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>MyDaily offline</title><body style="font:16px system-ui;padding:2rem"><h1>MyDaily</h1><p>Koneksi internet terputus. Periksa koneksi lalu muat ulang halaman.</p></body></html>',
+        { status: 200, headers: { 'Content-Type': 'text/html; charset=utf-8' } }
+    )));
+});
+
 messaging.onBackgroundMessage(payload => {
     const data = payload.data || {};
     self.registration.showNotification(data.title || 'MyDaily', {
