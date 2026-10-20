@@ -23,6 +23,7 @@ class RequireUser
             'password.reset',
             'password.update',
             'firebase.messaging-sw',
+            'firebase.messaging-worker',
             'pwa.manifest',
             'pwa.manifest-json',
             'notifications.push.cron',
