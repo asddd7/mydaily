@@ -96,7 +96,7 @@
             if (!response.ok || !result.success) {
                 throw new Error(result.message || `Pengiriman gagal (${response.status}).`);
             }
-            status.textContent = 'Notifikasi tes berhasil dikirim ke perangkat ini.';
+            status.textContent = 'Firebase menerima permintaan tes. Status ini belum memastikan browser menampilkan notifikasi.';
         } catch (error) {
             status.textContent = error.message;
         } finally {
