@@ -1,0 +1,49 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\JsonResponse;
+
+class WebAppManifestController extends Controller
+{
+    public function __invoke(): JsonResponse
+    {
+        return response()->json([
+            'id' => '/dashboard',
+            'name' => 'MyDaily',
+            'short_name' => 'MyDaily',
+            'description' => 'Aplikasi produktivitas pribadi MyDaily.',
+            'start_url' => '/dashboard',
+            'scope' => '/',
+            'display' => 'standalone',
+            'display_override' => ['standalone', 'minimal-ui'],
+            'prefer_related_applications' => false,
+            'orientation' => 'portrait',
+            'theme_color' => '#1d4ed8',
+            'background_color' => '#f8fafc',
+            'icons' => [
+                [
+                    'src' => '/icons/icon-192.png',
+                    'sizes' => '192x192',
+                    'type' => 'image/png',
+                    'purpose' => 'any',
+                ],
+                [
+                    'src' => '/icons/icon-512.png',
+                    'sizes' => '512x512',
+                    'type' => 'image/png',
+                    'purpose' => 'any',
+                ],
+                [
+                    'src' => '/icons/icon-maskable-512.png',
+                    'sizes' => '512x512',
+                    'type' => 'image/png',
+                    'purpose' => 'maskable',
+                ],
+            ],
+        ], 200, [
+            'Content-Type' => 'application/manifest+json; charset=UTF-8',
+            'Cache-Control' => 'no-cache, no-store, must-revalidate',
+        ], JSON_UNESCAPED_SLASHES);
+    }
+}

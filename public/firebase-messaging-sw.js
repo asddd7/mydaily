@@ -1,4 +1,23 @@
 
+self.addEventListener('install', (event) => {
+    event.waitUntil(self.skipWaiting());
+});
+
+self.addEventListener('activate', (event) => {
+    event.waitUntil(self.clients.claim());
+});
+
+// Keep authenticated pages network-first, and show a small fallback only if
+// the network is unavailable. This also enables Chrome's install prompt.
+self.addEventListener('fetch', (event) => {
+    if (event.request.method !== 'GET' || event.request.mode !== 'navigate') return;
+
+    event.respondWith(fetch(event.request).catch(() => new Response(
+        '<!doctype html><html lang="id"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>MyDaily offline</title><body style="font:16px system-ui;padding:2rem"><h1>MyDaily</h1><p>Koneksi internet terputus. Periksa koneksi lalu muat ulang halaman.</p></body></html>',
+        { status: 200, headers: { 'Content-Type': 'text/html; charset=utf-8' } }
+    )));
+});
+
 self.addEventListener('push', (event) => {
     if (!event.data) return;
 

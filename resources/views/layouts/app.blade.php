@@ -9,8 +9,8 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-title" content="MyDaily">
-    <link rel="manifest" href="{{ asset('manifest.webmanifest') }}">
-    <link rel="apple-touch-icon" href="{{ asset('icons/icon-192.png') }}">
+    <link rel="manifest" href="/manifest.json?v=3">
+    <link rel="apple-touch-icon" href="/icons/icon-192.png">
     <title>@yield('title', 'MyDaily')</title>
     @vite(['resources/css/style.css', 'resources/css/app.css', 'resources/js/page-loader.js', 'resources/js/push-notifications.js', 'resources/js/pwa-install.js'])
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">

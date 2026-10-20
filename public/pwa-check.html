@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="id">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#1d4ed8">
+    <link rel="manifest" href="/manifest.json?v=3">
+    <title>Pemeriksaan instalasi MyDaily</title>
+    <style>
+        body { max-width: 760px; margin: 2rem auto; padding: 0 1rem; font: 16px/1.5 system-ui, sans-serif; color: #172033; }
+        h1 { font-size: 1.5rem; }
+        pre { overflow-wrap: anywhere; white-space: pre-wrap; padding: 1rem; border-radius: .75rem; background: #f1f5f9; }
+    </style>
+</head>
+<body>
+    <h1>Pemeriksaan instalasi MyDaily</h1>
+    <p>Halaman ini memeriksa berkas PWA yang diterima browser. Salin hasilnya jika pemasangan masih gagal.</p>
+    <pre id="result">Memeriksa…</pre>
+    <script>
+        const result = document.getElementById('result');
+        const lines = [];
+        const report = (label, value) => lines.push(`${label}: ${value}`);
+        const show = () => { result.textContent = lines.join('\n'); };
+        const timeout = (promise, ms) => Promise.race([
+            promise,
+            new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), ms))
+        ]);
+
+        window.addEventListener('beforeinstallprompt', () => report('Prompt install browser', 'TERSEDIA'));
+        setTimeout(() => {
+            if (!lines.some(line => line.startsWith('Prompt install browser:'))) {
+                report('Prompt install browser', 'belum muncul pada halaman pemeriksaan');
+            }
+            show();
+        }, 8000);
+
+        (async () => {
+            report('HTTPS / secure context', window.isSecureContext ? 'OK' : 'GAGAL');
+            report('Browser', navigator.userAgent);
+            report('Manifest link', document.querySelector('link[rel="manifest"]').href);
+
+            try {
+                const response = await fetch('/manifest.json?v=3', { cache: 'no-store' });
+                report('Manifest HTTP', `${response.status} (${response.headers.get('content-type') || 'tanpa Content-Type'})`);
+                const manifest = await response.json();
+                report('Manifest name / start_url / display', `${manifest.name || manifest.short_name || 'KOSONG'} / ${manifest.start_url || 'KOSONG'} / ${manifest.display || 'KOSONG'}`);
+                report('Manifest icons', Array.isArray(manifest.icons) ? manifest.icons.length : 'FORMAT SALAH');
+
+                for (const icon of (manifest.icons || [])) {
+                    try {
+                        const imageResponse = await fetch(icon.src, { cache: 'no-store' });
+                        const blob = await imageResponse.blob();
+                        const bitmap = await createImageBitmap(blob);
+                        report(`Ikon ${icon.src}`, `${imageResponse.status}, ${bitmap.width}x${bitmap.height}, ${blob.type || 'tanpa tipe'}`);
+                        bitmap.close();
+                    } catch (error) {
+                        report(`Ikon ${icon.src}`, `GAGAL: ${error.message}`);
+                    }
+                }
+            } catch (error) {
+                report('Manifest', `GAGAL: ${error.message}`);
+            }
+
+            try {
+                const response = await fetch('/firebase-messaging-sw.js', { cache: 'no-store' });
+                const source = await response.text();
+                report('Service worker HTTP', `${response.status} (${response.headers.get('content-type') || 'tanpa Content-Type'})`);
+                report('Service worker berisi JavaScript', /importScripts\(|addEventListener\(['"]fetch/.test(source) ? 'YA' : 'TIDAK / respons mungkin halaman error');
+                const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js', { scope: '/' });
+                await timeout(navigator.serviceWorker.ready, 10000);
+                report('Service worker registration', `OK; scope ${registration.scope}; active ${Boolean(registration.active)}`);
+            } catch (error) {
+                report('Service worker registration', `GAGAL: ${error.message}`);
+            }
+
+            show();
+        })();
+    </script>
+</body>
+</html>

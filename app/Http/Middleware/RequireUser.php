@@ -23,6 +23,8 @@ class RequireUser
             'password.reset',
             'password.update',
             'firebase.messaging-sw',
+            'pwa.manifest',
+            'pwa.manifest-json',
             'notifications.push.cron',
         ], true) || in_array($request->path(), [
             'koneksi/login.php',

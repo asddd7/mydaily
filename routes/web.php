@@ -12,6 +12,7 @@ use App\Http\Controllers\FcmDeviceController;
 use App\Http\Controllers\ClockController;
 use App\Http\Controllers\DatabaseStructureController;
 use App\Http\Controllers\FirebaseMessagingServiceWorkerController;
+use App\Http\Controllers\WebAppManifestController;
 use App\Http\Controllers\PushNotificationCronController;
 use App\Http\Controllers\PushSubscriptionController;
 use App\Http\Controllers\PushTestNotificationController;
@@ -31,6 +32,10 @@ Route::post('/reset-password/{token}', [AuthController::class, 'updatePassword']
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 Route::get('/firebase-messaging-sw.js', FirebaseMessagingServiceWorkerController::class)
     ->name('firebase.messaging-sw');
+Route::get('/manifest.webmanifest', WebAppManifestController::class)
+    ->name('pwa.manifest');
+Route::get('/manifest.json', WebAppManifestController::class)
+    ->name('pwa.manifest-json');
 
 Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 Route::post('/dashboard/check-in', [DashboardController::class, 'checkIn'])->name('attendance.check-in');
