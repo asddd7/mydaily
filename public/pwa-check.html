@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="theme-color" content="#1d4ed8">
-    <link rel="manifest" href="/manifest.json?v=3">
+    <link rel="manifest" href="/manifest.php?v=4">
     <title>Pemeriksaan instalasi MyDaily</title>
     <style>
         body { max-width: 760px; margin: 2rem auto; padding: 0 1rem; font: 16px/1.5 system-ui, sans-serif; color: #172033; }
@@ -40,7 +40,7 @@
             report('Manifest link', document.querySelector('link[rel="manifest"]').href);
 
             try {
-                const response = await fetch('/manifest.json?v=3', { cache: 'no-store' });
+                const response = await fetch('/manifest.php?v=4', { cache: 'no-store' });
                 report('Manifest HTTP', `${response.status} (${response.headers.get('content-type') || 'tanpa Content-Type'})`);
                 const manifest = await response.json();
                 report('Manifest name / start_url / display', `${manifest.name || manifest.short_name || 'KOSONG'} / ${manifest.start_url || 'KOSONG'} / ${manifest.display || 'KOSONG'}`);
