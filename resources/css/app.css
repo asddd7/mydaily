@@ -42,6 +42,30 @@
     cursor: pointer;
     font-size: 20px;
 }
+.app-install-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    min-height: 36px;
+    padding: 0 11px;
+    border: 1px solid rgba(255, 255, 255, .45);
+    border-radius: 9px;
+    background: rgba(255, 255, 255, .12);
+    color: #fff;
+    cursor: pointer;
+    font: inherit;
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+.app-install-btn:hover,
+.app-install-btn.is-installable {
+    background: rgba(255, 255, 255, .24);
+}
+.app-install-btn[hidden] {
+    display: none;
+}
 .sidebar.collapsed \~ .content .app-topbar {
     left: var(--sidebar-collapsed-w);
 }
@@ -644,6 +668,19 @@
         text-overflow: ellipsis;
         white-space: nowrap;
     }
+    .app-install-btn {
+        width: 38px;
+        min-width: 38px;
+        padding: 0;
+    }
+    .app-install-text {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+    }
     .app-topbar-logo {
         font-size: 13px;
     }
@@ -670,6 +707,11 @@
     }
     .task-subtasks {
         padding: 14px 16px 16px;
+    }
+}
+@media (max-width: 480px) {
+    .app-topbar-welcome {
+        display: none;
     }
 }
 @media (max-width: 480px) {

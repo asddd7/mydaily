@@ -36,6 +36,10 @@
             <a class="app-notification-all" href="{{ route('tasks.index') }}">Lihat semua tugas</a>
         </section>
     </div>
+    <button type="button" id="installAppButton" class="app-install-btn" aria-label="Install MyDaily">
+        <i class="fa-solid fa-download" aria-hidden="true"></i>
+        <span class="app-install-text">Install app</span>
+    </button>
     <form method="post" action="{{ route('logout') }}">
         @csrf
         <button type="submit" class="logout">Logout</button>
