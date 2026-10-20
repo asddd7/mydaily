@@ -18,10 +18,46 @@ importScripts('https://www.gstatic.com/firebasejs/13.0.0/firebase-messaging-comp
 
 firebase.initializeApp({$config});
 const messaging = firebase.messaging();
+const myDailyManifest = {
+    id: '/dashboard',
+    name: 'MyDaily',
+    short_name: 'MyDaily',
+    description: 'Aplikasi produktivitas pribadi MyDaily.',
+    start_url: '/dashboard',
+    scope: '/',
+    display: 'standalone',
+    display_override: ['standalone', 'minimal-ui'],
+    prefer_related_applications: false,
+    orientation: 'portrait',
+    theme_color: '#1d4ed8',
+    background_color: '#f8fafc',
+    icons: [
+        { src: '/icons/icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
+        { src: '/icons/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
+        { src: '/icons/icon-maskable-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
+    ],
+};
 
-// Handle page navigations so Chrome can treat this as an installable PWA,
-// while keeping authenticated MyDaily pages network-only.
+// Provide a valid manifest when the host's browser challenge intercepts it.
 self.addEventListener('fetch', event => {
+    const requestUrl = new URL(event.request.url);
+    const manifestPaths = ['/manifest.php', '/manifest.json', '/manifest.webmanifest'];
+
+    if (
+        event.request.method === 'GET' &&
+        requestUrl.origin === self.location.origin &&
+        manifestPaths.includes(requestUrl.pathname)
+    ) {
+        event.respondWith(new Response(JSON.stringify(myDailyManifest), {
+            status: 200,
+            headers: {
+                'Content-Type': 'application/manifest+json; charset=utf-8',
+                'Cache-Control': 'no-cache, no-store, must-revalidate',
+            },
+        }));
+        return;
+    }
+
     if (event.request.mode !== 'navigate' || event.request.method !== 'GET') return;
 
     event.respondWith(fetch(event.request).catch(() => new Response(
@@ -30,6 +66,7 @@ self.addEventListener('fetch', event => {
     )));
 });
 
+// Handle background FCM messages.
 messaging.onBackgroundMessage(payload => {
     const data = payload.data || {};
     self.registration.showNotification(data.title || 'MyDaily', {

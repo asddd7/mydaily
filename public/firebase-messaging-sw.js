@@ -7,9 +7,50 @@ self.addEventListener('activate', (event) => {
     event.waitUntil(self.clients.claim());
 });
 
+const myDailyManifest = {
+    id: '/dashboard',
+    name: 'MyDaily',
+    short_name: 'MyDaily',
+    description: 'Aplikasi produktivitas pribadi MyDaily.',
+    start_url: '/dashboard',
+    scope: '/',
+    display: 'standalone',
+    display_override: ['standalone', 'minimal-ui'],
+    prefer_related_applications: false,
+    orientation: 'portrait',
+    theme_color: '#1d4ed8',
+    background_color: '#f8fafc',
+    icons: [
+        { src: '/icons/icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
+        { src: '/icons/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
+        { src: '/icons/icon-maskable-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
+    ],
+};
+
 // Keep authenticated pages network-first, and show a small fallback only if
 // the network is unavailable. This also enables Chrome's install prompt.
 self.addEventListener('fetch', (event) => {
+    const requestUrl = new URL(event.request.url);
+    const manifestPaths = ['/manifest.php', '/manifest.json', '/manifest.webmanifest'];
+
+    // Some shared hosts replace browser manifest requests with an HTML
+    // JavaScript challenge. Once this worker controls the page, provide the
+    // same manifest directly to Chrome instead of parsing that HTML response.
+    if (
+        event.request.method === 'GET' &&
+        requestUrl.origin === self.location.origin &&
+        manifestPaths.includes(requestUrl.pathname)
+    ) {
+        event.respondWith(new Response(JSON.stringify(myDailyManifest), {
+            status: 200,
+            headers: {
+                'Content-Type': 'application/manifest+json; charset=utf-8',
+                'Cache-Control': 'no-cache, no-store, must-revalidate',
+            },
+        }));
+        return;
+    }
+
     if (event.request.method !== 'GET' || event.request.mode !== 'navigate') return;
 
     event.respondWith(fetch(event.request).catch(() => new Response(
