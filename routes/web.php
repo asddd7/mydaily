@@ -16,6 +16,7 @@ use App\Http\Controllers\WebAppManifestController;
 use App\Http\Controllers\PushNotificationCronController;
 use App\Http\Controllers\PushSubscriptionController;
 use App\Http\Controllers\PushTestNotificationController;
+use App\Http\Controllers\CloudflarePushSyncController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -93,6 +94,8 @@ Route::delete('/notifications/push-subscriptions', [PushSubscriptionController::
     ->name('notifications.push-subscriptions.destroy');
 Route::post('/notifications/push-test', [PushTestNotificationController::class, 'store'])
     ->name('notifications.push-test');
+Route::post('/notifications/cloudflare/sync', CloudflarePushSyncController::class)
+    ->name('notifications.cloudflare.sync');
 Route::post('/notifications/cron/due-tasks', PushNotificationCronController::class)
     ->name('notifications.push.cron');
 Route::get('/clock', [ClockController::class, 'edit'])->name('clock.edit');

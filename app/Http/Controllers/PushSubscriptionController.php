@@ -5,10 +5,11 @@ namespace App\Http\Controllers;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Services\CloudflarePushSyncService;
 
 class PushSubscriptionController extends Controller
 {
-    public function store(Request $request): JsonResponse
+    public function store(Request $request, CloudflarePushSyncService $sync): JsonResponse
     {
         $data = $request->validate([
             'token' => ['required', 'string', 'max:4096'],
@@ -27,10 +28,13 @@ class PushSubscriptionController extends Controller
             ]
         );
 
-        return response()->json(['status' => 'registered']);
+        return response()->json([
+            'status' => 'registered',
+            'cloudflare_synced' => $sync->syncDevice($data['token'], $request->attributes->get('currentUser')->id),
+        ]);
     }
 
-    public function destroy(Request $request): JsonResponse
+    public function destroy(Request $request, CloudflarePushSyncService $sync): JsonResponse
     {
         $data = $request->validate(['token' => ['required', 'string', 'max:4096']]);
         $subscriptionIds = DB::table('push_subscriptions')
@@ -45,6 +49,11 @@ class PushSubscriptionController extends Controller
             DB::table('push_subscriptions')->whereIn('id', $subscriptionIds)->delete();
         }
 
-        return response()->json(['status' => 'unregistered']);
+        $removedFromWorker = $subscriptionIds->isEmpty() || $sync->removeDevice($data['token']);
+
+        return response()->json([
+            'status' => 'unregistered',
+            'cloudflare_synced' => $removedFromWorker,
+        ]);
     }
 }

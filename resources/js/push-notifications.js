@@ -51,6 +51,23 @@ if (enableButton && disableButton && status && firebaseConfig && pushConfig) {
         return payload;
     };
 
+    const syncExistingReminders = async () => {
+        if (!pushConfig.syncUrl || sessionStorage.getItem('mydaily-cloudflare-sync-v1') === '1') return;
+        try {
+            await requestJson(pushConfig.syncUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': pushConfig.csrfToken,
+                },
+                body: JSON.stringify({}),
+            });
+            sessionStorage.setItem('mydaily-cloudflare-sync-v1', '1');
+        } catch (error) {
+            console.warn('Pengingat belum berhasil disinkronkan ke Cloudflare:', error.message);
+        }
+    };
+
     const setBusy = busy => {
         enableButton.disabled = busy;
         disableButton.disabled = busy;
@@ -70,6 +87,7 @@ if (enableButton && disableButton && status && firebaseConfig && pushConfig) {
         }
 
         try {
+            void syncExistingReminders();
             if (!await isSupported()) {
                 enableButton.disabled = true;
                 updateStatus('Push notification tidak didukung oleh browser ini.');
@@ -82,7 +100,7 @@ if (enableButton && disableButton && status && firebaseConfig && pushConfig) {
             const savedToken = localStorage.getItem('mydaily-push-token');
 
             const registerToken = async token => {
-                await requestJson(pushConfig.subscribeUrl, {
+                const result = await requestJson(pushConfig.subscribeUrl, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -96,7 +114,9 @@ if (enableButton && disableButton && status && firebaseConfig && pushConfig) {
                 localStorage.setItem('mydaily-push-token', token);
                 localStorage.removeItem('mydaily-push-disabled');
                 disableButton.hidden = false;
-                updateStatus('Notifikasi HP aktif di perangkat ini.');
+                updateStatus(result.cloudflare_synced === false
+                    ? 'Notifikasi aktif, tetapi perangkat belum tersinkron ke pengingat Cloudflare.'
+                    : 'Notifikasi HP aktif di perangkat ini.');
             };
 
             const isDisabled = localStorage.getItem('mydaily-push-disabled') === '1';

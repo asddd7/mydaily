@@ -136,7 +136,7 @@ class TaskController extends Controller
         }
 
         try {
-            DB::table('tugas')->insert([
+            $taskId = DB::table('tugas')->insertGetId([
                 'nama_tugas' => $data['nama_tugas'],
                 'deadline' => $data['deadline'],
                 'reminder_at' => $request->boolean('reminder_enabled')
@@ -156,7 +156,19 @@ class TaskController extends Controller
             throw $error;
         }
 
-        return redirect()->route('tasks.index')->with('status', 'Tugas berhasil ditambahkan.');
+        $reminderSynced = app(\App\Services\CloudflarePushSyncService::class)->syncTask(
+            $taskId,
+            $request->attributes->get('currentUser')->id,
+            $request->boolean('reminder_enabled') ? $data['nama_tugas'] : null,
+            $request->boolean('reminder_enabled') ? $data['reminder_at'] : null,
+        );
+
+        $status = 'Tugas berhasil ditambahkan.';
+        if ($request->boolean('reminder_enabled') && !$reminderSynced) {
+            $status .= ' Pengingat belum tersinkron ke layanan notifikasi; periksa URL dan secret Cloudflare.';
+        }
+
+        return redirect()->route('tasks.index')->with('status', $status);
     }
 
     public function image(Request $request, int $task): BinaryFileResponse
@@ -214,7 +226,19 @@ class TaskController extends Controller
 
         abort_unless($updated, 404);
 
-        return redirect()->route('tasks.index')->with('status', 'Tugas berhasil diperbarui.');
+        $reminderSynced = app(\App\Services\CloudflarePushSyncService::class)->syncTask(
+            $task,
+            $userId,
+            $request->boolean('reminder_enabled') ? $data['nama_tugas'] : null,
+            $request->boolean('reminder_enabled') ? $data['reminder_at'] : null,
+        );
+
+        $status = 'Tugas berhasil diperbarui.';
+        if ($request->boolean('reminder_enabled') && !$reminderSynced) {
+            $status .= ' Pengingat belum tersinkron ke layanan notifikasi; periksa URL dan secret Cloudflare.';
+        }
+
+        return redirect()->route('tasks.index')->with('status', $status);
     }
 
     public function destroy(Request $request, int $task): RedirectResponse
@@ -228,6 +252,8 @@ class TaskController extends Controller
             DB::table('tugas')->where('parent_id', $task)->where('user_id', $userId)->delete();
             DB::table('tugas')->where('id', $task)->where('user_id', $userId)->delete();
         });
+
+        app(\App\Services\CloudflarePushSyncService::class)->syncTask($task, $userId, null, null);
 
         return redirect()->route('tasks.index')->with('status', 'Tugas berhasil dihapus.');
     }
@@ -300,6 +326,20 @@ class TaskController extends Controller
 
             DB::table('tugas')->where('id', $task)->update(['recurring_generated' => 1]);
         });
+
+        $taskRecord = DB::table('tugas')
+            ->where('id', $task)
+            ->where('user_id', $userId)
+            ->whereNull('parent_id')
+            ->first(['id', 'user_id', 'nama_tugas', 'reminder_at', 'selesai']);
+        if ($taskRecord) {
+            $sync = app(\App\Services\CloudflarePushSyncService::class);
+            if ($taskRecord->selesai) {
+                $sync->syncTask($task, $userId, null, null);
+            } else {
+                $sync->syncTask($task, $userId, $taskRecord->nama_tugas, $taskRecord->reminder_at);
+            }
+        }
 
         if ($request->expectsJson()) {
             return response()->json(['status' => 'updated', 'selesai' => $done]);

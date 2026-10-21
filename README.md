@@ -101,16 +101,38 @@ npm run build
 Users can opt in to device notifications from the bell menu after signing in.
 The app sends due-date reminders at 08:00 Asia/Jakarta and user-scheduled task
 reminders at their selected date and time, only for unfinished main tasks.
-Configure the hosting cron feature to run
-`php artisan notifications:send-due-task-pushes` every minute. If InfinityFree
-does not provide scheduled PHP commands, use an external cron service that can
-send an HTTPS POST to `/notifications/cron/due-tasks` every minute with an `Authorization`
-header using `Bearer` followed by the value configured in `PUSH_CRON_SECRET`.
-Keep this endpoint secret and do
-not put the token in a public page or URL. The scheduled sender records
-successful due-task and scheduled-reminder deliveries so repeating a cron
-request will not send the same reminder twice to the same device. Scheduled
-task reminder times use Asia/Jakarta (WIB).
+InfinityFree free hosting does not provide a reliable scheduled PHP process.
+For scheduled task reminders there is an optional Cloudflare Worker under
+`cloudflare/push-worker/`; the website can remain on InfinityFree. The Worker
+uses D1 for a copy of active reminders and FCM tokens, then sends due pushes
+from its Cron Trigger. Its D1 delivery rows are the source of delivery state;
+the MySQL `tugas.reminder_sent_at` field is not updated by the Worker.
+
+To deploy the Worker:
+
+1. Create a D1 database named `mydaily-reminders` and run
+   `cloudflare/push-worker/schema.sql` in the D1 SQL console.
+2. Deploy `cloudflare/push-worker/src/index.js` as the Worker entrypoint.
+3. Add a D1 binding named `DB` pointing to `mydaily-reminders`.
+4. Add a Cron Trigger with `* * * * *` (once per minute).
+5. Add Worker secrets `FIREBASE_SERVICE_ACCOUNT_JSON` (the raw Firebase
+   service-account JSON) and `SYNC_SECRET` (a random secret of at least 32
+   characters). Add the Worker variable `FIREBASE_PROJECT_ID`.
+6. Set `CLOUDFLARE_PUSH_WORKER_URL` to the Worker `workers.dev` URL and
+   `CLOUDFLARE_PUSH_SYNC_SECRET` to the same value as `SYNC_SECRET` in the
+   Laravel environment. Do not expose either secret in frontend code.
+7. After deploying those Laravel settings, open MyDaily while signed in and
+   activate push on each device. The app synchronizes existing reminders and
+   registered FCM tokens on the next page load. New or edited reminders and
+   device registrations synchronize automatically.
+
+The Worker checks due reminders once per minute. Its D1 table
+`task_reminder_deliveries` records successful sends, and
+`task_reminders.completed_at` indicates that all current devices were handled.
+InfinityFree's cron feature and its browser security challenge make a third-
+party cron call to the Laravel endpoint unreliable. On another host, the
+Laravel endpoint `/notifications/cron/due-tasks` still accepts POST requests
+with `Authorization: Bearer <PUSH_CRON_SECRET>`.
 
 Push delivery also requires each user to grant browser permission on each
 device. iPhone users need iOS 16.4 or newer and must add the site to the Home

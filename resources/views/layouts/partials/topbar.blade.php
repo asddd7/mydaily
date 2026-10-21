@@ -30,6 +30,9 @@
                     'serviceWorkerUrl' => route('firebase.messaging-worker', absolute: false),
                     'subscribeUrl' => route('notifications.push-subscriptions.store', absolute: false),
                     'unsubscribeUrl' => route('notifications.push-subscriptions.destroy', absolute: false),
+                    'syncUrl' => config('services.cloudflare_push.url')
+                        ? route('notifications.cloudflare.sync', absolute: false)
+                        : null,
                     'csrfToken' => csrf_token(),
                 ], JSON_THROW_ON_ERROR | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) !!}</script>
             </div>

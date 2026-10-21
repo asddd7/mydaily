@@ -1,0 +1,11 @@
+name = "mydaily-push-reminders"
+main = "src/index.js"
+compatibility_date = "2026-10-21"
+
+[triggers]
+crons = ["* * * * *"]
+
+[[d1_databases]]
+binding = "DB"
+database_name = "mydaily-reminders"
+database_id = "REPLACE_WITH_YOUR_D1_DATABASE_ID"
