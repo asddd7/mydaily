@@ -140,24 +140,27 @@ async function syncTask(request, env, taskId = null) {
     if (!data.task_id || !data.user_id || !data.title || !data.reminder_at || !data.target_url) {
         return json({ error: 'Invalid reminder payload' }, 422);
     }
+    const repeatType = ['once', 'every_minute', 'hourly', 'daily', 'weekly'].includes(data.repeat_type)
+        ? data.repeat_type : 'once';
 
     const taskKey = String(data.task_id);
     await env.DB.prepare(`
-        INSERT INTO task_reminders (task_id, user_id, title, reminder_at, target_url, completed_at, updated_at)
-        VALUES (?, ?, ?, ?, ?, NULL, ?)
+        INSERT INTO task_reminders (task_id, user_id, title, reminder_at, repeat_type, target_url, completed_at, updated_at)
+        VALUES (?, ?, ?, ?, ?, ?, NULL, ?)
         ON CONFLICT(task_id) DO UPDATE SET
             user_id = excluded.user_id,
             title = excluded.title,
             reminder_at = excluded.reminder_at,
+            repeat_type = excluded.repeat_type,
             target_url = excluded.target_url,
             completed_at = CASE
-                WHEN task_reminders.reminder_at != excluded.reminder_at THEN NULL
+                WHEN task_reminders.reminder_at != excluded.reminder_at OR task_reminders.repeat_type != excluded.repeat_type THEN NULL
                 ELSE task_reminders.completed_at
             END,
             updated_at = excluded.updated_at
     `).bind(
         taskKey, String(data.user_id), String(data.title),
-        String(data.reminder_at), String(data.target_url), new Date().toISOString(),
+        String(data.reminder_at), repeatType, String(data.target_url), new Date().toISOString(),
     ).run();
     return json({ synced: true });
 }
@@ -205,13 +208,17 @@ async function syncSnapshot(request, env) {
 
     const validReminders = data.reminders.filter(reminder =>
         reminder.task_id && reminder.title && reminder.reminder_at && reminder.target_url,
-    );
+    ).map(reminder => ({
+        ...reminder,
+        repeat_type: ['once', 'every_minute', 'hourly', 'daily', 'weekly'].includes(reminder.repeat_type)
+            ? reminder.repeat_type : 'once',
+    }));
     const validDevices = data.devices.filter(device => device.token && device.token_hash);
     const taskIds = new Set(validReminders.map(reminder => String(reminder.task_id)));
     const tokenHashes = new Set(validDevices.map(device => String(device.token_hash)));
 
     const { results: existingReminders } = await env.DB.prepare(
-        'SELECT task_id FROM task_reminders WHERE user_id = ?',
+        'SELECT task_id, reminder_at, repeat_type FROM task_reminders WHERE user_id = ?',
     ).bind(userId).all();
     const { results: existingDevices } = await env.DB.prepare(
         'SELECT token_hash FROM push_devices WHERE user_id = ?',
@@ -239,21 +246,27 @@ async function syncSnapshot(request, env) {
     const upserts = [];
     for (const reminder of validReminders) {
         const taskId = String(reminder.task_id);
+        const current = existingReminders.find(row => String(row.task_id) === taskId);
+        if (current && (String(current.reminder_at) !== String(reminder.reminder_at)
+            || String(current.repeat_type || 'once') !== String(reminder.repeat_type))) {
+            upserts.push(env.DB.prepare('DELETE FROM task_reminder_deliveries WHERE task_id = ?').bind(taskId));
+        }
         upserts.push(env.DB.prepare(`
-            INSERT INTO task_reminders (task_id, user_id, title, reminder_at, target_url, completed_at, updated_at)
-            VALUES (?, ?, ?, ?, ?, NULL, ?)
+            INSERT INTO task_reminders (task_id, user_id, title, reminder_at, repeat_type, target_url, completed_at, updated_at)
+            VALUES (?, ?, ?, ?, ?, ?, NULL, ?)
             ON CONFLICT(task_id) DO UPDATE SET
                 user_id = excluded.user_id,
                 title = excluded.title,
                 reminder_at = excluded.reminder_at,
+                repeat_type = excluded.repeat_type,
                 target_url = excluded.target_url,
                 completed_at = CASE
-                    WHEN task_reminders.reminder_at != excluded.reminder_at THEN NULL
+                    WHEN task_reminders.reminder_at != excluded.reminder_at OR task_reminders.repeat_type != excluded.repeat_type THEN NULL
                     ELSE task_reminders.completed_at
                 END,
                 updated_at = excluded.updated_at
         `).bind(
-            taskId, userId, String(reminder.title), String(reminder.reminder_at),
+            taskId, userId, String(reminder.title), String(reminder.reminder_at), String(reminder.repeat_type),
             String(reminder.target_url), new Date().toISOString(),
         ));
     }
@@ -306,19 +319,38 @@ async function sendReminder(env, reminder, device) {
     return 'failed';
 }
 
+function dueOccurrenceAt(reminder, now) {
+    const start = Date.parse(reminder.reminder_at);
+    if (!Number.isFinite(start) || start > now.getTime()) return null;
+    const intervals = {
+        every_minute: 60_000,
+        hourly: 3_600_000,
+        daily: 86_400_000,
+        weekly: 604_800_000,
+    };
+    const interval = intervals[reminder.repeat_type];
+    if (!interval) return reminder.repeat_type === 'once' ? new Date(start).toISOString() : null;
+
+    // Send only the latest due occurrence so a delayed cron does not emit a burst.
+    const occurrence = start + Math.floor((now.getTime() - start) / interval) * interval;
+    return new Date(occurrence).toISOString();
+}
+
 async function runScheduledReminders(env) {
-    const now = new Date().toISOString();
+    const now = new Date();
     const { results: reminders } = await env.DB.prepare(`
-        SELECT task_id, user_id, title, reminder_at, target_url
+        SELECT task_id, user_id, title, reminder_at, repeat_type, target_url
         FROM task_reminders
         WHERE reminder_at <= ? AND completed_at IS NULL
         ORDER BY reminder_at
         LIMIT 25
-    `).bind(now).all();
+    `).bind(now.toISOString()).all();
 
     let sent = 0;
     let failed = 0;
     for (const reminder of reminders) {
+        const occurrenceAt = dueOccurrenceAt(reminder, now);
+        if (!occurrenceAt) continue;
         const { results: devices } = await env.DB.prepare(
             'SELECT token_hash, token FROM push_devices WHERE user_id = ? LIMIT 20',
         ).bind(reminder.user_id).all();
@@ -326,7 +358,7 @@ async function runScheduledReminders(env) {
         for (const device of devices) {
             const existing = await env.DB.prepare(
                 'SELECT 1 FROM task_reminder_deliveries WHERE task_id = ? AND reminder_at = ? AND token_hash = ? LIMIT 1',
-            ).bind(reminder.task_id, reminder.reminder_at, device.token_hash).first();
+            ).bind(reminder.task_id, occurrenceAt, device.token_hash).first();
             if (existing) continue;
 
             try {
@@ -334,7 +366,7 @@ async function runScheduledReminders(env) {
                 if (result === 'sent') {
                     await env.DB.prepare(
                         'INSERT OR IGNORE INTO task_reminder_deliveries (task_id, reminder_at, token_hash, sent_at) VALUES (?, ?, ?, ?)',
-                    ).bind(reminder.task_id, reminder.reminder_at, device.token_hash, new Date().toISOString()).run();
+                    ).bind(reminder.task_id, occurrenceAt, device.token_hash, new Date().toISOString()).run();
                     sent++;
                 } else if (result === 'unregistered') {
                     await env.DB.batch([
@@ -350,13 +382,13 @@ async function runScheduledReminders(env) {
             }
         }
 
-        if (devices.length === 0) {
+        if (reminder.repeat_type === 'once' && devices.length === 0) {
             await env.DB.prepare('UPDATE task_reminders SET completed_at = ? WHERE task_id = ?')
                 .bind(new Date().toISOString(), reminder.task_id).run();
-        } else {
+        } else if (reminder.repeat_type === 'once') {
             const { count } = await env.DB.prepare(
                 'SELECT COUNT(*) AS count FROM task_reminder_deliveries WHERE task_id = ? AND reminder_at = ?',
-            ).bind(reminder.task_id, reminder.reminder_at).first();
+            ).bind(reminder.task_id, occurrenceAt).first();
             if (Number(count) >= devices.length) {
                 await env.DB.prepare('UPDATE task_reminders SET completed_at = ? WHERE task_id = ?')
                     .bind(new Date().toISOString(), reminder.task_id).run();

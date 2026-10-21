@@ -3,6 +3,7 @@ CREATE TABLE IF NOT EXISTS task_reminders (
     user_id TEXT NOT NULL,
     title TEXT NOT NULL,
     reminder_at TEXT NOT NULL,
+    repeat_type TEXT NOT NULL DEFAULT 'once',
     target_url TEXT NOT NULL,
     completed_at TEXT NULL,
     updated_at TEXT NOT NULL

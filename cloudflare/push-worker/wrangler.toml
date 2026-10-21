@@ -8,4 +8,4 @@ crons = ["* * * * *"]
 [[d1_databases]]
 binding = "DB"
 database_name = "mydaily-reminders"
-database_id = "REPLACE_WITH_YOUR_D1_DATABASE_ID"
+database_id = "047e80a6-0ec2-49e7-9307-432d16f0b846"

@@ -80,7 +80,15 @@
                     <input type="checkbox" name="reminder_enabled" value="1" data-reminder-toggle @checked(old('reminder_enabled', '0') === '1')>
                     <span>Aktifkan notifikasi untuk tugas ini</span>
                 </label>
-                <label class="task-field" data-reminder-time @if (old('reminder_enabled', '0') !== '1') hidden @endif>Tanggal dan jam notifikasi (WIB)
+                <label class="task-field" data-reminder-repeat @if (old('reminder_enabled', '0') !== '1') hidden @endif>Template pengingat
+                    <select name="reminder_repeat_type" @if (old('reminder_enabled', '0') !== '1') disabled @endif>
+                        @foreach (['once' => 'Custom (sekali)', 'every_minute' => 'Setiap menit', 'hourly' => 'Setiap jam', 'daily' => 'Harian', 'weekly' => 'Mingguan'] as $value => $label)
+                            <option value="{{ $value }}" @selected(old('reminder_repeat_type', 'once') === $value)>{{ $label }}</option>
+                        @endforeach
+                    </select>
+                </label>
+                <p class="task-field-wide task-reminder-template-note" data-reminder-template-note @if (old('reminder_enabled', '0') !== '1') hidden @endif>Untuk pengingat berulang, pilih waktu mulai pengingat pertama.</p>
+                <label class="task-field" data-reminder-time @if (old('reminder_enabled', '0') !== '1') hidden @endif>Waktu mulai / pengingat pertama (WIB)
                     <input type="datetime-local" name="reminder_at" value="{{ old('reminder_at') }}" @if (old('reminder_enabled', '0') === '1') required @else disabled @endif>
                 </label>
             </div>
@@ -247,7 +255,16 @@
                                 <input type="checkbox" name="reminder_enabled" value="1" data-reminder-toggle @checked($reminderEnabled)>
                                 <span>Aktifkan notifikasi untuk tugas ini</span>
                             </label>
-                            <label class="task-field" data-reminder-time @if (!$reminderEnabled) hidden @endif>Tanggal dan jam notifikasi (WIB)
+                            @php($selectedReminderRepeat = $isEditError ? old('reminder_repeat_type', $task->reminder_repeat_type ?? 'once') : ($task->reminder_repeat_type ?? 'once'))
+                            <label class="task-field" data-reminder-repeat @if (!$reminderEnabled) hidden @endif>Template pengingat
+                                <select name="reminder_repeat_type" @if (!$reminderEnabled) disabled @endif>
+                                    @foreach (['once' => 'Custom (sekali)', 'every_minute' => 'Setiap menit', 'hourly' => 'Setiap jam', 'daily' => 'Harian', 'weekly' => 'Mingguan'] as $value => $label)
+                                        <option value="{{ $value }}" @selected($selectedReminderRepeat === $value)>{{ $label }}</option>
+                                    @endforeach
+                                </select>
+                            </label>
+                            <p class="task-field-wide task-reminder-template-note" data-reminder-template-note @if (!$reminderEnabled) hidden @endif>Untuk pengingat berulang, pilih waktu mulai pengingat pertama.</p>
+                            <label class="task-field" data-reminder-time @if (!$reminderEnabled) hidden @endif>Waktu mulai / pengingat pertama (WIB)
                                 <input type="datetime-local" name="reminder_at" value="{{ $isEditError ? old('reminder_at', $task->reminder_at ? \Illuminate\Support\Carbon::parse($task->reminder_at)->format('Y-m-d\TH:i') : '') : ($task->reminder_at ? \Illuminate\Support\Carbon::parse($task->reminder_at)->format('Y-m-d\TH:i') : '') }}" @if ($reminderEnabled) required @else disabled @endif>
                             </label>
                         </div>
@@ -376,11 +393,17 @@
         const reminderToggle = form.querySelector('[data-reminder-toggle]');
         const reminderTime = form.querySelector('[data-reminder-time]');
         const reminderInput = reminderTime?.querySelector('[name="reminder_at"]');
+        const reminderRepeat = form.querySelector('[data-reminder-repeat]');
+        const reminderRepeatInput = reminderRepeat?.querySelector('[name="reminder_repeat_type"]');
+        const reminderTemplateNote = form.querySelector('[data-reminder-template-note]');
         if (reminderToggle instanceof HTMLInputElement && reminderTime instanceof HTMLElement && reminderInput instanceof HTMLInputElement) {
             const updateReminderVisibility = () => {
                 reminderTime.hidden = !reminderToggle.checked;
                 reminderInput.disabled = !reminderToggle.checked;
                 reminderInput.required = reminderToggle.checked;
+                if (reminderRepeat instanceof HTMLElement) reminderRepeat.hidden = !reminderToggle.checked;
+                if (reminderRepeatInput instanceof HTMLSelectElement) reminderRepeatInput.disabled = !reminderToggle.checked;
+                if (reminderTemplateNote instanceof HTMLElement) reminderTemplateNote.hidden = !reminderToggle.checked;
             };
             reminderToggle.addEventListener('change', updateReminderVisibility);
             updateReminderVisibility();

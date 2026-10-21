@@ -23,7 +23,7 @@ class CloudflarePushSyncService
             ->where('selesai', 0)
             ->whereNotNull('reminder_at')
             ->whereNull('reminder_sent_at')
-            ->get(['id', 'nama_tugas', 'reminder_at']);
+            ->get(['id', 'nama_tugas', 'reminder_at', 'reminder_repeat_type']);
         $devices = DB::table('push_subscriptions')
             ->where('user_id', $userId)
             ->get(['token', 'token_hash']);
@@ -34,6 +34,7 @@ class CloudflarePushSyncService
                 'task_id' => (string) $task->id,
                 'title' => $task->nama_tugas,
                 'reminder_at' => Carbon::parse($task->reminder_at)->utc()->toISOString(),
+                'repeat_type' => $task->reminder_repeat_type ?: 'once',
                 'target_url' => '/tasks/'.rawurlencode((string) $task->id),
             ])->all(),
             'devices' => $devices->map(fn ($device): array => [

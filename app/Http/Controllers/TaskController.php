@@ -121,6 +121,7 @@ class TaskController extends Controller
             'deadline' => ['required', 'date'],
             'reminder_enabled' => ['required', 'boolean'],
             'reminder_at' => ['nullable', 'required_if:reminder_enabled,1', 'date'],
+            'reminder_repeat_type' => ['nullable', 'required_if:reminder_enabled,1', Rule::in(['once', 'every_minute', 'hourly', 'daily', 'weekly'])],
             'recurring_type' => ['nullable', Rule::in(['none', 'daily', 'weekly', 'monthly', 'yearly'])],
             'kategori' => ['required', Rule::in(array_keys(self::TASK_CATEGORIES))],
             'image' => ['nullable', 'image', 'mimes:jpeg,png,gif,webp', 'max:5120'],
@@ -142,6 +143,7 @@ class TaskController extends Controller
                 'reminder_at' => $request->boolean('reminder_enabled')
                     ? Carbon::parse($data['reminder_at'])->format('Y-m-d H:i:s')
                     : null,
+                'reminder_repeat_type' => $request->boolean('reminder_enabled') ? $data['reminder_repeat_type'] : 'once',
                 'reminder_sent_at' => null,
                 'user_id' => $request->attributes->get('currentUser')->id,
                 'recurring_type' => $data['recurring_type'] ?? 'none',
@@ -181,7 +183,7 @@ class TaskController extends Controller
             ->where('id', $task)
             ->where('user_id', $userId)
             ->whereNull('parent_id')
-            ->first(['kategori', 'reminder_at', 'reminder_sent_at']);
+            ->first(['kategori', 'reminder_at', 'reminder_sent_at', 'reminder_repeat_type']);
         abort_unless($currentTask, 404);
         $currentCategory = $currentTask->kategori ?? 'daily';
 
@@ -190,6 +192,7 @@ class TaskController extends Controller
             'deadline' => ['required', 'date'],
             'reminder_enabled' => ['required', 'boolean'],
             'reminder_at' => ['nullable', 'required_if:reminder_enabled,1', 'date'],
+            'reminder_repeat_type' => ['nullable', 'required_if:reminder_enabled,1', Rule::in(['once', 'every_minute', 'hourly', 'daily', 'weekly'])],
             'recurring_type' => ['nullable', Rule::in(['none', 'daily', 'weekly', 'monthly', 'yearly'])],
             'kategori' => ['required', Rule::in(array_values(array_unique([...array_keys(self::TASK_CATEGORIES), $currentCategory])))],
         ]);
@@ -204,8 +207,10 @@ class TaskController extends Controller
                 'reminder_at' => $request->boolean('reminder_enabled')
                     ? Carbon::parse($data['reminder_at'])->format('Y-m-d H:i:s')
                     : null,
+                'reminder_repeat_type' => $request->boolean('reminder_enabled') ? $data['reminder_repeat_type'] : 'once',
                 'reminder_sent_at' => $request->boolean('reminder_enabled')
                     && $currentTask->reminder_at === Carbon::parse($data['reminder_at'])->format('Y-m-d H:i:s')
+                    && ($currentTask->reminder_repeat_type ?? 'once') === $data['reminder_repeat_type']
                     ? $currentTask->reminder_sent_at
                     : null,
                 'recurring_type' => $data['recurring_type'] ?? 'none',
