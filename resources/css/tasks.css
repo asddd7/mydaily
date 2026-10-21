@@ -130,6 +130,18 @@
     font-weight: 700;
 }
 
+.content .tasks-page .task-field[hidden],
+.content .tasks-page .task-recurring-deadline-note[hidden] {
+    display: none !important;
+}
+
+.content .tasks-page .task-recurring-deadline-note {
+    margin: 0;
+    color: #64748b;
+    font-size: 12px;
+    line-height: 1.5;
+}
+
 .content .tasks-page .task-field-wide {
     grid-column: 1 / -1;
 }

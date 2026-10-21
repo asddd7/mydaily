@@ -70,9 +70,10 @@
             <label class="task-field task-field-wide">Nama tugas
                 <input name="nama_tugas" value="{{ old('nama_tugas') }}" maxlength="100" placeholder="Contoh: Selesaikan laporan" required autofocus>
             </label>
-            <label class="task-field">Tenggat
+            <label class="task-field" data-deadline-field>Tenggat
                 <input type="date" name="deadline" value="{{ old('deadline', today()->toDateString()) }}" required>
             </label>
+            <p class="task-recurring-deadline-note task-field-wide" data-deadline-note hidden>Tugas berulang akan dimulai hari ini.</p>
             <label class="task-field">Kategori
                 <select name="kategori" required>
                     @foreach (['work' => 'Work', 'casual' => 'Casual', 'game' => 'Game', 'urgent' => 'Urgent'] as $value => $label)
@@ -222,9 +223,10 @@
                         <label class="task-field task-field-wide">Nama tugas
                             <input name="nama_tugas" value="{{ $isEditError ? old('nama_tugas', $task->nama_tugas) : $task->nama_tugas }}" maxlength="100" required>
                         </label>
-                        <label class="task-field">Tenggat
+                        <label class="task-field" data-deadline-field>Tenggat
                             <input type="date" name="deadline" value="{{ $isEditError ? old('deadline', $task->deadline) : $task->deadline }}" required>
                         </label>
+                        <p class="task-recurring-deadline-note task-field-wide" data-deadline-note hidden>Tanggal tugas saat ini tetap digunakan sebagai tanggal awal.</p>
                         <label class="task-field">Kategori
                             @php($selectedCategory = $isEditError ? old('kategori', $task->kategori ?? 'daily') : ($task->kategori ?? 'daily'))
                             <select name="kategori" required>
@@ -346,6 +348,24 @@
 @push('scripts')
 <script>
 (() => {
+    document.querySelectorAll('.task-form').forEach(form => {
+        const recurrence = form.querySelector('[name="recurring_type"]');
+        const deadlineField = form.querySelector('[data-deadline-field]');
+        const deadlineInput = deadlineField?.querySelector('[name="deadline"]');
+        const deadlineNote = form.querySelector('[data-deadline-note]');
+        if (!(recurrence instanceof HTMLSelectElement) || !(deadlineField instanceof HTMLElement) || !(deadlineInput instanceof HTMLInputElement)) return;
+
+        const updateDeadlineVisibility = () => {
+            const recurring = recurrence.value !== 'none';
+            deadlineField.hidden = recurring;
+            deadlineInput.required = !recurring;
+            if (deadlineNote instanceof HTMLElement) deadlineNote.hidden = !recurring;
+        };
+
+        recurrence.addEventListener('change', updateDeadlineVisibility);
+        updateDeadlineVisibility();
+    });
+
     const dialog = document.querySelector('[data-task-dialog]');
     const openDialog = (targetDialog) => {
         if (!targetDialog.open) targetDialog.showModal();
