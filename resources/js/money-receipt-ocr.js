@@ -227,7 +227,13 @@ const initializeReceiptScanner = () => {
             if (fields.payment_method) transactionForm.elements.payment_method.value = fields.payment_method;
             const amountInput = transactionForm.querySelector('[data-grand-total]');
             if (fields.amount !== null && amountInput instanceof HTMLInputElement) {
-                setRupiahInputValue(amountInput, fields.amount);
+                if (amountInput.type === 'number') {
+                    amountInput.value = String(fields.amount);
+                    amountInput.dispatchEvent(new Event('input', { bubbles: true }));
+                    amountInput.dispatchEvent(new Event('change', { bubbles: true }));
+                } else {
+                    setRupiahInputValue(amountInput, fields.amount);
+                }
             }
             transactionForm.elements.type.value = 'expense';
 
