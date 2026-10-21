@@ -48,7 +48,11 @@
             } else if (toggle.dataset.fabAction === 'subtask') {
                 document.dispatchEvent(new CustomEvent('task:open-subtask'));
             } else if (toggle.dataset.fabAction === 'money') {
-                document.querySelector('[data-open-money-dialog]')?.click();
+                const dialog = document.querySelector('[data-money-dialog]');
+                if (dialog instanceof HTMLDialogElement && !dialog.open) {
+                    dialog.showModal();
+                    dialog.querySelector('[name="type"]')?.focus();
+                }
             } else if (toggle.dataset.fabAction === 'note') {
                 const target = document.getElementById('noteCreateForm');
                 target?.scrollIntoView({ behavior: 'smooth', block: 'center' });
