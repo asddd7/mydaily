@@ -94,20 +94,23 @@ deploying:
 
 ```sh
 php artisan migrate --path=database/migrations/2026_10_19_000001_create_push_notification_tables.php
+php artisan migrate --path=database/migrations/2026_10_21_000001_add_reminders_to_tugas_table.php
 npm run build
 ```
 
 Users can opt in to device notifications from the bell menu after signing in.
-The app sends reminders at 08:00 Asia/Jakarta on the due date, only for
-unfinished main tasks. Configure the hosting cron feature to run
-`php artisan notifications:send-due-task-pushes` daily at 08:00. If InfinityFree
+The app sends due-date reminders at 08:00 Asia/Jakarta and user-scheduled task
+reminders at their selected date and time, only for unfinished main tasks.
+Configure the hosting cron feature to run
+`php artisan notifications:send-due-task-pushes` every minute. If InfinityFree
 does not provide scheduled PHP commands, use an external cron service that can
-send an HTTPS POST to `/notifications/cron/due-tasks` with an `Authorization`
+send an HTTPS POST to `/notifications/cron/due-tasks` every minute with an `Authorization`
 header using `Bearer` followed by the value configured in `PUSH_CRON_SECRET`.
 Keep this endpoint secret and do
 not put the token in a public page or URL. The scheduled sender records
-successful deliveries so repeating a cron request will not send the same task
-reminder twice to the same device.
+successful due-task and scheduled-reminder deliveries so repeating a cron
+request will not send the same reminder twice to the same device. Scheduled
+task reminder times use Asia/Jakarta (WIB).
 
 Push delivery also requires each user to grant browser permission on each
 device. iPhone users need iOS 16.4 or newer and must add the site to the Home

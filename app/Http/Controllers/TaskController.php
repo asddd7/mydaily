@@ -119,6 +119,8 @@ class TaskController extends Controller
         $data = $request->validate([
             'nama_tugas' => ['required', 'string', 'max:100'],
             'deadline' => ['required', 'date'],
+            'reminder_enabled' => ['required', 'boolean'],
+            'reminder_at' => ['nullable', 'required_if:reminder_enabled,1', 'date'],
             'recurring_type' => ['nullable', Rule::in(['none', 'daily', 'weekly', 'monthly', 'yearly'])],
             'kategori' => ['required', Rule::in(array_keys(self::TASK_CATEGORIES))],
             'image' => ['nullable', 'image', 'mimes:jpeg,png,gif,webp', 'max:5120'],
@@ -137,6 +139,10 @@ class TaskController extends Controller
             DB::table('tugas')->insert([
                 'nama_tugas' => $data['nama_tugas'],
                 'deadline' => $data['deadline'],
+                'reminder_at' => $request->boolean('reminder_enabled')
+                    ? Carbon::parse($data['reminder_at'])->format('Y-m-d H:i:s')
+                    : null,
+                'reminder_sent_at' => null,
                 'user_id' => $request->attributes->get('currentUser')->id,
                 'recurring_type' => $data['recurring_type'] ?? 'none',
                 'kategori' => $data['kategori'],
@@ -175,13 +181,15 @@ class TaskController extends Controller
             ->where('id', $task)
             ->where('user_id', $userId)
             ->whereNull('parent_id')
-            ->first(['kategori']);
+            ->first(['kategori', 'reminder_at', 'reminder_sent_at']);
         abort_unless($currentTask, 404);
         $currentCategory = $currentTask->kategori ?? 'daily';
 
         $data = $request->validate([
             'nama_tugas' => ['required', 'string', 'max:100'],
             'deadline' => ['required', 'date'],
+            'reminder_enabled' => ['required', 'boolean'],
+            'reminder_at' => ['nullable', 'required_if:reminder_enabled,1', 'date'],
             'recurring_type' => ['nullable', Rule::in(['none', 'daily', 'weekly', 'monthly', 'yearly'])],
             'kategori' => ['required', Rule::in(array_values(array_unique([...array_keys(self::TASK_CATEGORIES), $currentCategory])))],
         ]);
@@ -193,6 +201,13 @@ class TaskController extends Controller
             ->update([
                 'nama_tugas' => $data['nama_tugas'],
                 'deadline' => $data['deadline'],
+                'reminder_at' => $request->boolean('reminder_enabled')
+                    ? Carbon::parse($data['reminder_at'])->format('Y-m-d H:i:s')
+                    : null,
+                'reminder_sent_at' => $request->boolean('reminder_enabled')
+                    && $currentTask->reminder_at === Carbon::parse($data['reminder_at'])->format('Y-m-d H:i:s')
+                    ? $currentTask->reminder_sent_at
+                    : null,
                 'recurring_type' => $data['recurring_type'] ?? 'none',
                 'kategori' => $data['kategori'],
             ]);

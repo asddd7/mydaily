@@ -15,14 +15,17 @@ class SendDueTaskPushNotifications extends Command
     public function handle(DueTaskPushSender $sender): int
     {
         try {
-            $result = $sender->sendTodayDueTasks();
+            $dueTasks = $sender->sendTodayDueTasks();
+            $reminders = $sender->sendScheduledReminders();
         } catch (Throwable $error) {
             $this->error($error->getMessage());
 
             return self::FAILURE;
         }
 
-        $this->info("Push notifications sent: {$result['sent']}; skipped: {$result['skipped']}.");
+        $sent = $dueTasks['sent'] + $reminders['sent'];
+        $skipped = $dueTasks['skipped'] + $reminders['skipped'];
+        $this->info("Push notifications sent: {$sent}; skipped: {$skipped}.");
 
         return self::SUCCESS;
     }

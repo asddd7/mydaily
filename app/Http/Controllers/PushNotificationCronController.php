@@ -17,7 +17,16 @@ class PushNotificationCronController extends Controller
         abort_if(strlen($secret) < 32 || !hash_equals($secret, $providedSecret), 403);
 
         try {
-            return response()->json($sender->sendTodayDueTasks());
+            $dueTasks = $sender->sendTodayDueTasks();
+            $scheduledReminders = $sender->sendScheduledReminders();
+
+            return response()->json([
+                'sent' => $dueTasks['sent'] + $scheduledReminders['sent'],
+                'skipped' => $dueTasks['skipped'] + $scheduledReminders['skipped'],
+                'failed' => $dueTasks['failed'] + $scheduledReminders['failed'],
+                'due_tasks' => $dueTasks,
+                'scheduled_reminders' => $scheduledReminders,
+            ]);
         } catch (Throwable $error) {
             report($error);
 

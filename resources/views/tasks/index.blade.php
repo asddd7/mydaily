@@ -74,6 +74,16 @@
                 <input type="date" name="deadline" value="{{ old('deadline', today()->toDateString()) }}" required>
             </label>
             <p class="task-recurring-deadline-note task-field-wide" data-deadline-note hidden>Tugas berulang akan dimulai hari ini.</p>
+            <div class="task-reminder-field task-field-wide" data-reminder-control>
+                <label class="task-reminder-toggle">
+                    <input type="hidden" name="reminder_enabled" value="0">
+                    <input type="checkbox" name="reminder_enabled" value="1" data-reminder-toggle @checked(old('reminder_enabled', '0') === '1')>
+                    <span>Aktifkan notifikasi untuk tugas ini</span>
+                </label>
+                <label class="task-field" data-reminder-time @if (old('reminder_enabled', '0') !== '1') hidden @endif>Tanggal dan jam notifikasi (WIB)
+                    <input type="datetime-local" name="reminder_at" value="{{ old('reminder_at') }}" @if (old('reminder_enabled', '0') === '1') required @else disabled @endif>
+                </label>
+            </div>
             <label class="task-field">Kategori
                 <select name="kategori" required>
                     @foreach (['work' => 'Work', 'casual' => 'Casual', 'game' => 'Game', 'urgent' => 'Urgent'] as $value => $label)
@@ -156,6 +166,9 @@
                         <div class="task-meta">
                             <span><i class="fa-regular fa-calendar" aria-hidden="true"></i> {{ $task->deadline }}</span>
                             <span class="task-category">{{ $task->kategori ?? 'daily' }}</span>
+                            @if ($task->reminder_at)
+                                <span class="task-reminder-badge"><i class="fa-regular fa-bell" aria-hidden="true"></i> {{ \Illuminate\Support\Carbon::parse($task->reminder_at)->format('d M Y, H:i') }}</span>
+                            @endif
                             @if ($task->recurring_type && $task->recurring_type !== 'none')
                                 <span><i class="fa-solid fa-repeat" aria-hidden="true"></i>
                                     {{ ['daily' => 'Harian', 'weekly' => 'Mingguan', 'monthly' => 'Bulanan', 'yearly' => 'Tahunan'][$task->recurring_type] ?? 'Berulang' }}
@@ -227,6 +240,17 @@
                             <input type="date" name="deadline" value="{{ $isEditError ? old('deadline', $task->deadline) : $task->deadline }}" required>
                         </label>
                         <p class="task-recurring-deadline-note task-field-wide" data-deadline-note hidden>Tanggal tugas saat ini tetap digunakan sebagai tanggal awal.</p>
+                        @php($reminderEnabled = $isEditError ? (bool) old('reminder_enabled', $task->reminder_at ? '1' : '0') : (bool) $task->reminder_at)
+                        <div class="task-reminder-field task-field-wide" data-reminder-control>
+                            <label class="task-reminder-toggle">
+                                <input type="hidden" name="reminder_enabled" value="0">
+                                <input type="checkbox" name="reminder_enabled" value="1" data-reminder-toggle @checked($reminderEnabled)>
+                                <span>Aktifkan notifikasi untuk tugas ini</span>
+                            </label>
+                            <label class="task-field" data-reminder-time @if (!$reminderEnabled) hidden @endif>Tanggal dan jam notifikasi (WIB)
+                                <input type="datetime-local" name="reminder_at" value="{{ $isEditError ? old('reminder_at', $task->reminder_at ? \Illuminate\Support\Carbon::parse($task->reminder_at)->format('Y-m-d\TH:i') : '') : ($task->reminder_at ? \Illuminate\Support\Carbon::parse($task->reminder_at)->format('Y-m-d\TH:i') : '') }}" @if ($reminderEnabled) required @else disabled @endif>
+                            </label>
+                        </div>
                         <label class="task-field">Kategori
                             @php($selectedCategory = $isEditError ? old('kategori', $task->kategori ?? 'daily') : ($task->kategori ?? 'daily'))
                             <select name="kategori" required>
@@ -349,6 +373,19 @@
 <script>
 (() => {
     document.querySelectorAll('.task-form').forEach(form => {
+        const reminderToggle = form.querySelector('[data-reminder-toggle]');
+        const reminderTime = form.querySelector('[data-reminder-time]');
+        const reminderInput = reminderTime?.querySelector('[name="reminder_at"]');
+        if (reminderToggle instanceof HTMLInputElement && reminderTime instanceof HTMLElement && reminderInput instanceof HTMLInputElement) {
+            const updateReminderVisibility = () => {
+                reminderTime.hidden = !reminderToggle.checked;
+                reminderInput.disabled = !reminderToggle.checked;
+                reminderInput.required = reminderToggle.checked;
+            };
+            reminderToggle.addEventListener('change', updateReminderVisibility);
+            updateReminderVisibility();
+        }
+
         const recurrence = form.querySelector('[name="recurring_type"]');
         const deadlineField = form.querySelector('[data-deadline-field]');
         const deadlineInput = deadlineField?.querySelector('[name="deadline"]');
