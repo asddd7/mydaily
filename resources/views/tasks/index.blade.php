@@ -119,15 +119,43 @@
     </dialog>
 
     <section class="task-list-section" aria-labelledby="task-list-title">
+
         <div class="task-list-heading">
             <div>
                 <p class="tasks-eyebrow">Daftar pekerjaan</p>
                 <h2 id="task-list-title">Tugas kamu</h2>
             </div>
-            <span>{{ $tasks->count() }} {{ ($search !== '' || $category !== '') ? 'hasil' : 'item' }}</span>
+
+            <div class="task-list-heading-actions">
+                <span>
+                    {{ $tasks->count() }}
+                    {{ ($search !== '' || $category !== '') ? 'hasil' : 'item' }}
+                </span>
+
+                @if ($showAll)
+                    <a
+                        class="task-secondary-button"
+                        href="{{ route('tasks.index', request()->except('show_all')) }}"
+                    >
+                        <i class="fa-solid fa-eye-slash" aria-hidden="true"></i>
+                        Sembunyikan tugas selesai
+                    </a>
+                @else
+                    <a
+                        class="task-secondary-button"
+                        href="{{ route('tasks.index', array_merge(request()->except('show_all'), ['show_all' => 1])) }}"
+                    >
+                        <i class="fa-solid fa-eye" aria-hidden="true"></i>
+                        Tampilkan semua
+                    </a>
+                @endif
+            </div>
         </div>
 
         <form method="get" action="{{ route('tasks.index') }}" class="task-search-form" role="search">
+            @if ($showAll)
+                <input type="hidden" name="show_all" value="1">
+            @endif
             @if (request()->query('date'))
                 <input type="hidden" name="date" value="{{ request()->query('date') }}">
             @endif

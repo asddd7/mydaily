@@ -48,9 +48,11 @@ class TaskController extends Controller
         ]);
         $search = trim($filters['q'] ?? '');
         $category = $filters['category'] ?? '';
+        $showAll = $request->boolean('show_all');
         $tasks = DB::table('tugas')
             ->where('user_id', $userId)
             ->whereNull('parent_id')
+            ->when(!$showAll, fn ($query) => $query->where('selesai', 0))
             ->when(isset($filters['date']), fn ($query) => $query->whereDate('deadline', $filters['date']))
             ->when($category !== '', fn ($query) => $query->where('kategori', $category))
             ->when($search !== '', function ($query) use ($search, $userId): void {
@@ -92,6 +94,7 @@ class TaskController extends Controller
             'search' => $search,
             'category' => $category,
             'categoryOptions' => $categoryOptions,
+            'showAll' => $showAll,
         ]);
     }
 
