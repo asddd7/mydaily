@@ -101,12 +101,14 @@ npm run build
 Users can opt in to device notifications from the bell menu after signing in.
 The app sends due-date reminders at 08:00 Asia/Jakarta and user-scheduled task
 reminders at their selected date and time, only for unfinished main tasks.
-InfinityFree free hosting does not provide a reliable scheduled PHP process.
-For scheduled task reminders there is an optional Cloudflare Worker under
-`cloudflare/push-worker/`; the website can remain on InfinityFree. The Worker
-uses D1 for a copy of active reminders and FCM tokens, then sends due pushes
-from its Cron Trigger. Its D1 delivery rows are the source of delivery state;
-the MySQL `tugas.reminder_sent_at` field is not updated by the Worker.
+InfinityFree free hosting does not provide a reliable scheduled PHP process
+and blocks PHP requests to Cloudflare Workers. For scheduled task reminders
+there is an optional Cloudflare Worker under `cloudflare/push-worker/`; the
+website can remain on InfinityFree. Laravel returns a short-lived signed sync
+ticket and the authenticated browser sends the current reminders and FCM tokens
+directly to the Worker. The Worker uses D1 for that snapshot and sends due
+pushes from its Cron Trigger. Its D1 delivery rows are the source of delivery
+state; the MySQL `tugas.reminder_sent_at` field is not updated by the Worker.
 
 To deploy the Worker:
 
@@ -121,10 +123,12 @@ To deploy the Worker:
 6. Set `CLOUDFLARE_PUSH_WORKER_URL` to the Worker `workers.dev` URL and
    `CLOUDFLARE_PUSH_SYNC_SECRET` to the same value as `SYNC_SECRET` in the
    Laravel environment. Do not expose either secret in frontend code.
-7. After deploying those Laravel settings, open MyDaily while signed in and
-   activate push on each device. The app synchronizes existing reminders and
-   registered FCM tokens on the next page load. New or edited reminders and
-   device registrations synchronize automatically.
+7. After deploying those Laravel settings and the latest frontend build, open
+   MyDaily while signed in and activate push on each device. The authenticated
+   browser synchronizes existing reminders and registered FCM tokens on page
+   load. New or edited reminders synchronize after the task form returns to
+   the app. The short-lived ticket is scoped to the signed-in user and is
+   signed by the shared secret; never expose that secret in frontend code.
 
 The Worker checks due reminders once per minute. Its D1 table
 `task_reminder_deliveries` records successful sends, and

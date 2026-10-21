@@ -1,11 +1,19 @@
 const encoder = new TextEncoder();
+const appOrigin = 'https://mydaily.infinityfreeapp.com';
 let cachedAccessToken = null;
 let cachedTokenExpiry = 0;
 
 function json(data, status = 200) {
     return new Response(JSON.stringify(data), {
         status,
-        headers: { 'content-type': 'application/json; charset=utf-8' },
+        headers: {
+            'content-type': 'application/json; charset=utf-8',
+            'access-control-allow-origin': appOrigin,
+            'access-control-allow-methods': 'GET, POST, DELETE, OPTIONS',
+            'access-control-allow-headers': 'Authorization, Content-Type',
+            'access-control-max-age': '86400',
+            vary: 'Origin',
+        },
     });
 }
 
@@ -17,6 +25,12 @@ function base64Url(bytes) {
 
 function base64UrlText(value) {
     return base64Url(encoder.encode(value));
+}
+
+function decodeBase64UrlText(value) {
+    const normalized = value.replace(/-/g, '+').replace(/_/g, '/');
+    const binary = atob(normalized + '='.repeat((4 - normalized.length % 4) % 4));
+    return new TextDecoder().decode(Uint8Array.from(binary, character => character.charCodeAt(0)));
 }
 
 function pemToBytes(pem) {
@@ -76,6 +90,38 @@ async function authorize(request, env) {
     const secret = env.SYNC_SECRET || '';
     const supplied = request.headers.get('authorization') || '';
     return secret.length >= 32 && supplied === `Bearer ${secret}`;
+}
+
+async function verifyBrowserTicket(request, env, expectedUserId) {
+    const authorization = request.headers.get('authorization') || '';
+    const ticket = authorization.startsWith('Bearer ') ? authorization.slice(7) : '';
+    const parts = ticket.split('.');
+    if (parts.length !== 3) return false;
+
+    try {
+        const secret = env.SYNC_SECRET || '';
+        if (secret.length < 32) return false;
+        const key = await crypto.subtle.importKey(
+            'raw', encoder.encode(secret), { name: 'HMAC', hash: 'SHA-256' }, false, ['verify'],
+        );
+        const signature = Uint8Array.from(
+            atob(parts[2].replace(/-/g, '+').replace(/_/g, '/') + '='.repeat((4 - parts[2].length % 4) % 4)),
+            character => character.charCodeAt(0),
+        );
+        const valid = await crypto.subtle.verify(
+            'HMAC', key, signature, encoder.encode(`${parts[0]}.${parts[1]}`),
+        );
+        if (!valid) return false;
+
+        const header = JSON.parse(decodeBase64UrlText(parts[0]));
+        const claims = JSON.parse(decodeBase64UrlText(parts[1]));
+        return header.alg === 'HS256'
+            && claims.aud === 'mydaily-push-sync'
+            && Number(claims.exp) > Math.floor(Date.now() / 1000)
+            && String(claims.sub) === String(expectedUserId);
+    } catch {
+        return false;
+    }
 }
 
 async function syncTask(request, env, taskId = null) {
@@ -147,17 +193,53 @@ async function syncDevice(request, env, tokenHash = null) {
 }
 
 async function syncSnapshot(request, env) {
-    if (!await authorize(request, env)) return json({ error: 'Unauthorized' }, 401);
+    const origin = request.headers.get('origin');
+    if (origin !== appOrigin) return json({ error: 'Origin not allowed' }, 403);
     const data = await request.json();
     if (!data.user_id || !Array.isArray(data.reminders) || !Array.isArray(data.devices)) {
         return json({ error: 'Invalid snapshot payload' }, 422);
     }
 
     const userId = String(data.user_id);
-    const statements = [];
-    for (const reminder of data.reminders) {
-        if (!reminder.task_id || !reminder.title || !reminder.reminder_at || !reminder.target_url) continue;
-        statements.push(env.DB.prepare(`
+    if (!await verifyBrowserTicket(request, env, userId)) return json({ error: 'Unauthorized' }, 401);
+
+    const validReminders = data.reminders.filter(reminder =>
+        reminder.task_id && reminder.title && reminder.reminder_at && reminder.target_url,
+    );
+    const validDevices = data.devices.filter(device => device.token && device.token_hash);
+    const taskIds = new Set(validReminders.map(reminder => String(reminder.task_id)));
+    const tokenHashes = new Set(validDevices.map(device => String(device.token_hash)));
+
+    const { results: existingReminders } = await env.DB.prepare(
+        'SELECT task_id FROM task_reminders WHERE user_id = ?',
+    ).bind(userId).all();
+    const { results: existingDevices } = await env.DB.prepare(
+        'SELECT token_hash FROM push_devices WHERE user_id = ?',
+    ).bind(userId).all();
+    const deletions = [];
+
+    for (const row of existingReminders) {
+        const taskId = String(row.task_id);
+        if (!taskIds.has(taskId)) {
+            deletions.push(env.DB.prepare('DELETE FROM task_reminder_deliveries WHERE task_id = ?').bind(taskId));
+            deletions.push(env.DB.prepare('DELETE FROM task_reminders WHERE task_id = ? AND user_id = ?').bind(taskId, userId));
+        }
+    }
+    for (const row of existingDevices) {
+        const tokenHash = String(row.token_hash);
+        if (!tokenHashes.has(tokenHash)) {
+            deletions.push(env.DB.prepare('DELETE FROM task_reminder_deliveries WHERE token_hash = ?').bind(tokenHash));
+            deletions.push(env.DB.prepare('DELETE FROM push_devices WHERE token_hash = ? AND user_id = ?').bind(tokenHash, userId));
+        }
+    }
+    for (let offset = 0; offset < deletions.length; offset += 40) {
+        await env.DB.batch(deletions.slice(offset, offset + 40));
+    }
+
+    const upserts = [];
+    for (const reminder of validReminders) {
+        const taskId = String(reminder.task_id);
+        upserts.push(env.DB.prepare(`
             INSERT INTO task_reminders (task_id, user_id, title, reminder_at, target_url, completed_at, updated_at)
             VALUES (?, ?, ?, ?, ?, NULL, ?)
             ON CONFLICT(task_id) DO UPDATE SET
@@ -175,9 +257,8 @@ async function syncSnapshot(request, env) {
             String(reminder.target_url), new Date().toISOString(),
         ));
     }
-    for (const device of data.devices) {
-        if (!device.token || !device.token_hash) continue;
-        statements.push(env.DB.prepare(`
+    for (const device of validDevices) {
+        upserts.push(env.DB.prepare(`
             INSERT INTO push_devices (token_hash, user_id, token, updated_at)
             VALUES (?, ?, ?, ?)
             ON CONFLICT(token_hash) DO UPDATE SET
@@ -187,10 +268,10 @@ async function syncSnapshot(request, env) {
         `).bind(String(device.token_hash), userId, String(device.token), new Date().toISOString()));
     }
 
-    for (let offset = 0; offset < statements.length; offset += 40) {
-        await env.DB.batch(statements.slice(offset, offset + 40));
+    for (let offset = 0; offset < upserts.length; offset += 40) {
+        await env.DB.batch(upserts.slice(offset, offset + 40));
     }
-    return json({ synced: true, reminders: data.reminders.length, devices: data.devices.length });
+    return json({ synced: true, reminders: validReminders.length, devices: validDevices.length });
 }
 
 async function sendReminder(env, reminder, device) {
@@ -289,6 +370,21 @@ async function runScheduledReminders(env) {
 export default {
     async fetch(request, env) {
         const url = new URL(request.url);
+        const origin = request.headers.get('origin');
+        if (request.method === 'OPTIONS') {
+            if (origin !== appOrigin) return json({ error: 'Origin not allowed' }, 403);
+            return new Response(null, {
+                status: 204,
+                headers: {
+                    'access-control-allow-origin': appOrigin,
+                    'access-control-allow-methods': 'GET, POST, DELETE, OPTIONS',
+                    'access-control-allow-headers': 'Authorization, Content-Type',
+                    'access-control-max-age': '86400',
+                    vary: 'Origin',
+                },
+            });
+        }
+        if (origin && origin !== appOrigin) return json({ error: 'Origin not allowed' }, 403);
         if (url.pathname === '/health' && request.method === 'GET') {
             return json({ ok: true, service: 'mydaily-push-reminders' });
         }

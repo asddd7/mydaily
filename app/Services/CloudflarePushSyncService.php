@@ -4,42 +4,18 @@ namespace App\Services;
 
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Log;
-use Throwable;
+use RuntimeException;
 
 class CloudflarePushSyncService
 {
-    public function syncTask(int|string $taskId, int|string $userId, ?string $title, mixed $reminderAt): bool
-    {
-        if ($reminderAt === null || $title === null) {
-            return $this->request('DELETE', '/sync/task/'.rawurlencode((string) $taskId));
-        }
-
-        return $this->request('POST', '/sync/task', [
-            'task_id' => (string) $taskId,
-            'user_id' => (string) $userId,
-            'title' => $title,
-            'reminder_at' => Carbon::parse($reminderAt)->utc()->toISOString(),
-            'target_url' => '/tasks/'.rawurlencode((string) $taskId),
-        ]);
-    }
-
-    public function syncDevice(string $token, int|string $userId): bool
-    {
-        return $this->request('POST', '/sync/device', [
-            'user_id' => (string) $userId,
-            'token' => $token,
-            'token_hash' => hash('sha256', $token),
-        ]);
-    }
-
-    public function removeDevice(string $token): bool
-    {
-        return $this->request('DELETE', '/sync/device/'.hash('sha256', $token));
-    }
-
-    public function syncUserSnapshot(int|string $userId): bool
+    /**
+     * Return this account's current reminder/device snapshot for the browser
+     * to send directly to Cloudflare. InfinityFree blocks PHP connections to
+     * Cloudflare Workers, so this service must not make outbound HTTP calls.
+     *
+     * @return array{user_id: string, reminders: array<int, array<string, string>>, devices: array<int, array<string, string>>}
+     */
+    public function snapshotForUser(int|string $userId): array
     {
         $reminders = DB::table('tugas')
             ->where('user_id', $userId)
@@ -52,7 +28,7 @@ class CloudflarePushSyncService
             ->where('user_id', $userId)
             ->get(['token', 'token_hash']);
 
-        return $this->request('POST', '/sync/snapshot', [
+        return [
             'user_id' => (string) $userId,
             'reminders' => $reminders->map(fn ($task): array => [
                 'task_id' => (string) $task->id,
@@ -64,46 +40,36 @@ class CloudflarePushSyncService
                 'token' => $device->token,
                 'token_hash' => $device->token_hash,
             ])->all(),
-        ]);
+        ];
     }
 
-    private function request(string $method, string $path, ?array $payload = null): bool
+    public function issueBrowserTicket(int|string $userId): string
     {
-        $baseUrl = rtrim((string) config('services.cloudflare_push.url'), '/');
         $secret = (string) config('services.cloudflare_push.secret');
-
-        if ($baseUrl === '' || strlen($secret) < 32) {
-            Log::warning('Cloudflare push sync is not configured.');
-
-            return false;
+        if (strlen($secret) < 32) {
+            throw new RuntimeException('CLOUDFLARE_PUSH_SYNC_SECRET is missing or too short.');
         }
 
-        try {
-            $request = Http::timeout(8)
-                ->withToken($secret)
-                ->acceptJson();
+        $encode = static fn (string $value): string => rtrim(strtr(base64_encode($value), '+/', '-_'), '=');
+        $header = $encode(json_encode(['alg' => 'HS256', 'typ' => 'JWT'], JSON_THROW_ON_ERROR));
+        $payload = $encode(json_encode([
+            'sub' => (string) $userId,
+            'aud' => 'mydaily-push-sync',
+            'exp' => now()->timestamp + 300,
+        ], JSON_THROW_ON_ERROR));
+        $unsigned = $header.'.'.$payload;
+        $signature = $encode(hash_hmac('sha256', $unsigned, $secret, true));
 
-            $response = $method === 'DELETE'
-                ? $request->delete($baseUrl.$path)
-                : $request->post($baseUrl.$path, $payload ?? []);
+        return $unsigned.'.'.$signature;
+    }
 
-            if (!$response->successful()) {
-                Log::warning('Cloudflare push sync request failed.', [
-                    'status' => $response->status(),
-                    'path' => $path,
-                ]);
-
-                return false;
-            }
-
-            return true;
-        } catch (Throwable $error) {
-            Log::warning('Cloudflare push sync request could not be completed.', [
-                'exception' => $error::class,
-                'path' => $path,
-            ]);
-
-            return false;
+    public function workerUrl(): string
+    {
+        $url = rtrim((string) config('services.cloudflare_push.url'), '/');
+        if (!filter_var($url, FILTER_VALIDATE_URL) || !str_starts_with($url, 'https://')) {
+            throw new RuntimeException('CLOUDFLARE_PUSH_WORKER_URL is missing or invalid.');
         }
+
+        return $url;
     }
 }

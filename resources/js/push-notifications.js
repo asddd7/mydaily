@@ -32,6 +32,8 @@ if (enableButton && disableButton && status && firebaseConfig && pushConfig) {
         status.textContent = message;
     };
 
+    let syncInProgress = null;
+
     const requestJson = async (url, options) => {
         const response = await fetch(url, {
             cache: 'no-store',
@@ -52,9 +54,11 @@ if (enableButton && disableButton && status && firebaseConfig && pushConfig) {
     };
 
     const syncExistingReminders = async () => {
-        if (!pushConfig.syncUrl || sessionStorage.getItem('mydaily-cloudflare-sync-v1') === '1') return;
-        try {
-            await requestJson(pushConfig.syncUrl, {
+        if (!pushConfig.syncUrl) return false;
+        if (syncInProgress) return syncInProgress;
+
+        syncInProgress = (async () => {
+            const handoff = await requestJson(pushConfig.syncUrl, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -62,9 +66,32 @@ if (enableButton && disableButton && status && firebaseConfig && pushConfig) {
                 },
                 body: JSON.stringify({}),
             });
-            sessionStorage.setItem('mydaily-cloudflare-sync-v1', '1');
+            const response = await fetch(`${handoff.worker_url}/sync/snapshot`, {
+                method: 'POST',
+                mode: 'cors',
+                credentials: 'omit',
+                headers: {
+                    'Authorization': `Bearer ${handoff.ticket}`,
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                },
+                body: JSON.stringify(handoff.snapshot),
+            });
+            const result = await response.json().catch(() => null);
+            if (!response.ok || !result?.synced) {
+                throw new Error(result?.error || `Worker menolak sinkronisasi (${response.status}).`);
+            }
+
+            return true;
+        })();
+
+        try {
+            return await syncInProgress;
         } catch (error) {
             console.warn('Pengingat belum berhasil disinkronkan ke Cloudflare:', error.message);
+            return false;
+        } finally {
+            syncInProgress = null;
         }
     };
 
@@ -100,7 +127,7 @@ if (enableButton && disableButton && status && firebaseConfig && pushConfig) {
             const savedToken = localStorage.getItem('mydaily-push-token');
 
             const registerToken = async token => {
-                const result = await requestJson(pushConfig.subscribeUrl, {
+                await requestJson(pushConfig.subscribeUrl, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -114,9 +141,10 @@ if (enableButton && disableButton && status && firebaseConfig && pushConfig) {
                 localStorage.setItem('mydaily-push-token', token);
                 localStorage.removeItem('mydaily-push-disabled');
                 disableButton.hidden = false;
-                updateStatus(result.cloudflare_synced === false
-                    ? 'Notifikasi aktif, tetapi perangkat belum tersinkron ke pengingat Cloudflare.'
-                    : 'Notifikasi HP aktif di perangkat ini.');
+                const cloudflareSynced = await syncExistingReminders();
+                updateStatus(cloudflareSynced
+                    ? 'Notifikasi aktif dan perangkat tersinkron ke pengingat Cloudflare.'
+                    : 'Notifikasi aktif, tetapi pengingat Cloudflare belum tersinkron.');
             };
 
             const isDisabled = localStorage.getItem('mydaily-push-disabled') === '1';
@@ -135,7 +163,7 @@ if (enableButton && disableButton && status && firebaseConfig && pushConfig) {
             } else if (isDisabled) {
                 updateStatus('Notifikasi dinonaktifkan di perangkat ini.');
             } else if (savedToken) {
-                await requestJson(pushConfig.unsubscribeUrl, {
+                    await requestJson(pushConfig.unsubscribeUrl, {
                     method: 'DELETE',
                     headers: {
                         'Content-Type': 'application/json',
@@ -204,6 +232,7 @@ if (enableButton && disableButton && status && firebaseConfig && pushConfig) {
                     localStorage.setItem('mydaily-push-disabled', '1');
                     await deleteToken(messaging);
                     localStorage.removeItem('mydaily-push-token');
+                    await syncExistingReminders();
                     disableButton.hidden = true;
                     updateStatus('Notifikasi HP dinonaktifkan di perangkat ini.');
                 } catch (error) {
