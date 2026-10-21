@@ -263,7 +263,7 @@
 
 .content .tasks-page .task-search-form {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) auto auto;
+    grid-template-columns: minmax(0, 1fr) minmax(145px, auto) auto auto;
     align-items: center;
     gap: 10px;
     margin: 0 0 8px;
@@ -272,6 +272,35 @@
     border-radius: 13px;
     background: linear-gradient(135deg, #f8fbff, #fff 70%);
     box-shadow: 0 4px 14px rgba(15, 23, 42, .035);
+}
+
+.content .tasks-page .task-category-filter {
+    display: flex;
+    min-height: 44px;
+    align-items: center;
+    gap: 8px;
+    color: #64748b;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.content .tasks-page .task-category-filter select {
+    width: 100%;
+    min-width: 0;
+    min-height: 42px;
+    padding: 7px 28px 7px 10px;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    background: #fff;
+    color: #1e293b;
+    font: inherit;
+    font-size: 13px;
+}
+
+.content .tasks-page .task-category-filter select:focus {
+    border-color: #93c5fd;
+    outline: 0;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, .1);
 }
 
 .content .tasks-page .task-search-field {
@@ -1133,14 +1162,18 @@
         grid-column: 1 / -1;
     }
 
+    .content .tasks-page .task-category-filter {
+        grid-column: 1 / -1;
+    }
+
     .content .tasks-page .task-search-form button {
         grid-column: 1;
-        grid-row: 2;
+        grid-row: 3;
     }
 
     .content .tasks-page .task-search-clear {
         grid-column: 2;
-        grid-row: 2;
+        grid-row: 3;
         padding-inline: 8px;
     }
 

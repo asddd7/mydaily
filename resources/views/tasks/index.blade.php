@@ -74,7 +74,11 @@
                 <input type="date" name="deadline" value="{{ old('deadline', today()->toDateString()) }}" required>
             </label>
             <label class="task-field">Kategori
-                <input name="kategori" value="{{ old('kategori', 'daily') }}" maxlength="100" placeholder="Contoh: kerja">
+                <select name="kategori" required>
+                    @foreach (['work' => 'Work', 'casual' => 'Casual', 'game' => 'Game', 'urgent' => 'Urgent'] as $value => $label)
+                        <option value="{{ $value }}" @selected(old('kategori', 'work') === $value)>{{ $label }}</option>
+                    @endforeach
+                </select>
             </label>
             <label class="task-field task-field-wide">Pengulangan
                 <select name="recurring_type">
@@ -101,7 +105,7 @@
                 <p class="tasks-eyebrow">Daftar pekerjaan</p>
                 <h2 id="task-list-title">Tugas kamu</h2>
             </div>
-            <span>{{ $tasks->count() }} {{ $search !== '' ? 'hasil' : 'item' }}</span>
+            <span>{{ $tasks->count() }} {{ ($search !== '' || $category !== '') ? 'hasil' : 'item' }}</span>
         </div>
 
         <form method="get" action="{{ route('tasks.index') }}" class="task-search-form" role="search">
@@ -112,9 +116,18 @@
                 <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
                 <input type="search" name="q" value="{{ $search }}" placeholder="Cari tugas atau subtugas..." maxlength="100" aria-label="Cari nama tugas atau subtugas">
             </label>
+            <label class="task-category-filter">
+                <span>Kategori</span>
+                <select name="category" aria-label="Filter kategori tugas">
+                    <option value="">Semua kategori</option>
+                    @foreach ($categoryOptions as $value => $label)
+                        <option value="{{ $value }}" @selected($category === $value)>{{ $label }}</option>
+                    @endforeach
+                </select>
+            </label>
             <button class="task-secondary-button" type="submit">Cari</button>
-            @if ($search !== '')
-                <a class="task-search-clear" href="{{ route('tasks.index', request()->query('date') ? ['date' => request()->query('date')] : []) }}">Hapus pencarian</a>
+            @if ($search !== '' || $category !== '')
+                <a class="task-search-clear" href="{{ route('tasks.index', request()->query('date') ? ['date' => request()->query('date')] : []) }}">Hapus filter</a>
             @endif
         </form>
 
@@ -213,7 +226,15 @@
                             <input type="date" name="deadline" value="{{ $isEditError ? old('deadline', $task->deadline) : $task->deadline }}" required>
                         </label>
                         <label class="task-field">Kategori
-                            <input name="kategori" value="{{ $isEditError ? old('kategori', $task->kategori) : $task->kategori }}" maxlength="100">
+                            @php($selectedCategory = $isEditError ? old('kategori', $task->kategori ?? 'daily') : ($task->kategori ?? 'daily'))
+                            <select name="kategori" required>
+                                @foreach (['work' => 'Work', 'casual' => 'Casual', 'game' => 'Game', 'urgent' => 'Urgent'] as $value => $label)
+                                    <option value="{{ $value }}" @selected($selectedCategory === $value)>{{ $label }}</option>
+                                @endforeach
+                                @if (!in_array($selectedCategory, ['work', 'casual', 'game', 'urgent'], true))
+                                    <option value="{{ $selectedCategory }}" selected>{{ ucfirst($selectedCategory) }} (kategori lama)</option>
+                                @endif
+                            </select>
                         </label>
                         <label class="task-field task-field-wide">Pengulangan
                             <select name="recurring_type">
@@ -307,10 +328,10 @@
             </article>
         @empty
             <div class="card task-empty">
-                @if ($search !== '')
+@if ($search !== '' || $category !== '')
                     <span class="task-empty-icon" aria-hidden="true"><i class="fa-solid fa-magnifying-glass"></i></span>
                     <h3>Tugas tidak ditemukan</h3>
-                    <p>Tidak ada tugas atau subtugas yang cocok dengan “{{ $search }}”.</p>
+                    <p>Tidak ada tugas yang cocok dengan filter yang dipilih.</p>
                 @else
                     <span class="task-empty-icon" aria-hidden="true"><i class="fa-regular fa-circle-check"></i></span>
                     <h3>Belum ada tugas</h3>

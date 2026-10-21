@@ -16,18 +16,43 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class TaskController extends Controller
 {
+    private const TASK_CATEGORIES = [
+        'work' => 'Work',
+        'casual' => 'Casual',
+        'game' => 'Game',
+        'urgent' => 'Urgent',
+    ];
+
     public function index(Request $request): View
     {
         $userId = $request->attributes->get('currentUser')->id;
+        $knownCategories = DB::table('tugas')
+            ->where('user_id', $userId)
+            ->whereNull('parent_id')
+            ->whereNotNull('kategori')
+            ->distinct()
+            ->orderBy('kategori')
+            ->pluck('kategori')
+            ->all();
+        $categoryOptions = self::TASK_CATEGORIES;
+        foreach ($knownCategories as $knownCategory) {
+            if (!array_key_exists($knownCategory, $categoryOptions)) {
+                $categoryOptions[$knownCategory] = ucfirst($knownCategory);
+            }
+        }
+
         $filters = $request->validate([
             'date' => ['sometimes', 'date'],
-            'q' => ['sometimes', 'string', 'max:100'],
+            'q' => ['sometimes', 'nullable', 'string', 'max:100'],
+            'category' => ['sometimes', 'nullable', 'string', Rule::in(array_keys($categoryOptions))],
         ]);
         $search = trim($filters['q'] ?? '');
+        $category = $filters['category'] ?? '';
         $tasks = DB::table('tugas')
             ->where('user_id', $userId)
             ->whereNull('parent_id')
             ->when(isset($filters['date']), fn ($query) => $query->whereDate('deadline', $filters['date']))
+            ->when($category !== '', fn ($query) => $query->where('kategori', $category))
             ->when($search !== '', function ($query) use ($search, $userId): void {
                 $query->where(function ($query) use ($search, $userId): void {
                     $query->where('nama_tugas', 'like', '%'.$search.'%')
@@ -65,6 +90,8 @@ class TaskController extends Controller
             'tasks' => $tasks,
             'subtasks' => $subtasks,
             'search' => $search,
+            'category' => $category,
+            'categoryOptions' => $categoryOptions,
         ]);
     }
 
@@ -93,7 +120,7 @@ class TaskController extends Controller
             'nama_tugas' => ['required', 'string', 'max:100'],
             'deadline' => ['required', 'date'],
             'recurring_type' => ['nullable', Rule::in(['none', 'daily', 'weekly', 'monthly', 'yearly'])],
-            'kategori' => ['nullable', 'string', 'max:100'],
+            'kategori' => ['required', Rule::in(array_keys(self::TASK_CATEGORIES))],
             'image' => ['nullable', 'image', 'mimes:jpeg,png,gif,webp', 'max:5120'],
         ]);
 
@@ -112,7 +139,7 @@ class TaskController extends Controller
                 'deadline' => $data['deadline'],
                 'user_id' => $request->attributes->get('currentUser')->id,
                 'recurring_type' => $data['recurring_type'] ?? 'none',
-                'kategori' => $data['kategori'] ?? 'daily',
+                'kategori' => $data['kategori'],
                 'image' => $imageName,
             ]);
         } catch (\Throwable $error) {
@@ -143,22 +170,31 @@ class TaskController extends Controller
 
     public function update(Request $request, int $task): RedirectResponse
     {
+        $userId = $request->attributes->get('currentUser')->id;
+        $currentTask = DB::table('tugas')
+            ->where('id', $task)
+            ->where('user_id', $userId)
+            ->whereNull('parent_id')
+            ->first(['kategori']);
+        abort_unless($currentTask, 404);
+        $currentCategory = $currentTask->kategori ?? 'daily';
+
         $data = $request->validate([
             'nama_tugas' => ['required', 'string', 'max:100'],
             'deadline' => ['required', 'date'],
             'recurring_type' => ['nullable', Rule::in(['none', 'daily', 'weekly', 'monthly', 'yearly'])],
-            'kategori' => ['nullable', 'string', 'max:100'],
+            'kategori' => ['required', Rule::in(array_values(array_unique([...array_keys(self::TASK_CATEGORIES), $currentCategory])))],
         ]);
 
         $updated = DB::table('tugas')
             ->where('id', $task)
-            ->where('user_id', $request->attributes->get('currentUser')->id)
+            ->where('user_id', $userId)
             ->whereNull('parent_id')
             ->update([
                 'nama_tugas' => $data['nama_tugas'],
                 'deadline' => $data['deadline'],
                 'recurring_type' => $data['recurring_type'] ?? 'none',
-                'kategori' => $data['kategori'] ?? 'daily',
+                'kategori' => $data['kategori'],
             ]);
 
         abort_unless($updated, 404);
@@ -243,6 +279,7 @@ class TaskController extends Controller
                     'deadline' => $nextDeadline->toDateString(),
                     'user_id' => $userId,
                     'parent_id' => $nextId,
+                    'kategori' => $item->kategori,
                 ]);
             }
 
@@ -312,6 +349,7 @@ class TaskController extends Controller
                 'deadline' => $parent->deadline,
                 'user_id' => $userId,
                 'parent_id' => $task,
+                'kategori' => $parent->kategori,
                 'image' => $imageName,
             ]);
         } catch (\Throwable $error) {
@@ -462,6 +500,7 @@ class TaskController extends Controller
                     'nama_tugas' => mb_substr($row['nama_tugas'], 0, 100),
                     'deadline' => $row['deadline'],
                     'user_id' => $userId,
+                    'kategori' => 'work',
                 ]);
             }
 
