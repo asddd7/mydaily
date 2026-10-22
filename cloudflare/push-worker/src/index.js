@@ -182,6 +182,7 @@ async function syncDevice(request, env, tokenHash = null, origin = appOrigin) {
         if (!tokenHash) return json({ error: 'Token hash is required' }, 400, origin);
         await env.DB.batch([
             env.DB.prepare('DELETE FROM task_reminder_deliveries WHERE token_hash = ?').bind(tokenHash),
+            env.DB.prepare('DELETE FROM daily_digest_deliveries WHERE token_hash = ?').bind(tokenHash),
             env.DB.prepare('DELETE FROM push_devices WHERE token_hash = ?').bind(tokenHash),
         ]);
         return json({ synced: true, removed: true }, 200, origin);
@@ -209,7 +210,8 @@ async function syncSnapshot(request, env, corsOrigin = appOrigin) {
     const requestOrigin = request.headers.get('origin');
     if (!allowedOrigins(env).has(requestOrigin)) return json({ error: 'Origin not allowed' }, 403, corsOrigin);
     const data = await request.json();
-    if (!data.user_id || !Array.isArray(data.reminders) || !Array.isArray(data.devices)) {
+    if (!data.user_id || !Array.isArray(data.reminders) || !Array.isArray(data.devices)
+        || !Array.isArray(data.daily_items)) {
         return json({ error: 'Invalid snapshot payload' }, 422, corsOrigin);
     }
 
@@ -246,6 +248,7 @@ async function syncSnapshot(request, env, corsOrigin = appOrigin) {
         const tokenHash = String(row.token_hash);
         if (!tokenHashes.has(tokenHash)) {
             deletions.push(env.DB.prepare('DELETE FROM task_reminder_deliveries WHERE token_hash = ?').bind(tokenHash));
+            deletions.push(env.DB.prepare('DELETE FROM daily_digest_deliveries WHERE token_hash = ?').bind(tokenHash));
             deletions.push(env.DB.prepare('DELETE FROM push_devices WHERE token_hash = ? AND user_id = ?').bind(tokenHash, userId));
         }
     }
@@ -291,10 +294,28 @@ async function syncSnapshot(request, env, corsOrigin = appOrigin) {
         `).bind(String(device.token_hash), userId, String(device.token), new Date().toISOString()));
     }
 
+    const dailyItems = data.daily_items.filter(item =>
+        item && ['task', 'mark'].includes(item.type) && item.id && item.title
+        && /^\d{4}-\d{2}-\d{2}$/.test(String(item.due_date)) && item.target_url,
+    ).slice(0, 200).map(item => ({
+        type: String(item.type),
+        id: String(item.id),
+        title: String(item.title).slice(0, 160),
+        due_date: String(item.due_date),
+        target_url: String(item.target_url).startsWith('/') ? String(item.target_url) : '/',
+    }));
+    upserts.push(env.DB.prepare(`
+        INSERT INTO daily_digest_snapshots (user_id, items_json, updated_at)
+        VALUES (?, ?, ?)
+        ON CONFLICT(user_id) DO UPDATE SET
+            items_json = excluded.items_json,
+            updated_at = excluded.updated_at
+    `).bind(userId, JSON.stringify(dailyItems), new Date().toISOString()));
+
     for (let offset = 0; offset < upserts.length; offset += 40) {
         await env.DB.batch(upserts.slice(offset, offset + 40));
     }
-    return json({ synced: true, reminders: validReminders.length, devices: validDevices.length }, 200, corsOrigin);
+    return json({ synced: true, reminders: validReminders.length, devices: validDevices.length, daily_items: dailyItems.length }, 200, corsOrigin);
 }
 
 async function sendReminder(env, reminder, device) {
@@ -327,6 +348,99 @@ async function sendReminder(env, reminder, device) {
     if (errorCode === 'UNREGISTERED' || response.status === 404) return 'unregistered';
     console.error('FCM rejected reminder', response.status, errorCode || 'unknown');
     return 'failed';
+}
+
+async function sendDailyDigest(env, userId, items, device) {
+    const taskCount = items.filter(item => item.type === 'task').length;
+    const markCount = items.filter(item => item.type === 'mark').length;
+    const first = items.slice(0, 2).map(item => item.title).join(', ');
+    const parts = [];
+    if (taskCount) parts.push(`${taskCount} tugas`);
+    if (markCount) parts.push(`${markCount} penanda`);
+    const body = `Ada ${parts.join(' dan ')} aktif${first ? `. Berikutnya: ${first}` : ''}.`;
+    const accessToken = await getFcmAccessToken(env);
+    const response = await fetch(
+        `https://fcm.googleapis.com/v1/projects/${encodeURIComponent(env.FIREBASE_PROJECT_ID)}/messages:send`,
+        {
+            method: 'POST',
+            headers: { authorization: `Bearer ${accessToken}`, 'content-type': 'application/json' },
+            body: JSON.stringify({
+                message: {
+                    token: device.token,
+                    data: { title: 'Pengingat harian MyDaily', body, url: items[0]?.target_url || '/tasks' },
+                    webpush: { headers: { Urgency: 'normal' } },
+                },
+            }),
+        },
+    );
+    if (response.ok) return 'sent';
+    const responseBody = await response.json().catch(() => ({}));
+    const errorCode = responseBody?.error?.details?.find(item => item.errorCode)?.errorCode;
+    if (errorCode === 'UNREGISTERED' || response.status === 404) return 'unregistered';
+    console.error('FCM rejected daily digest', response.status, errorCode || 'unknown');
+    return 'failed';
+}
+
+function jakartaClock(date) {
+    const parts = new Intl.DateTimeFormat('en-CA', {
+        timeZone: 'Asia/Jakarta', year: 'numeric', month: '2-digit', day: '2-digit',
+        hour: '2-digit', minute: '2-digit', hourCycle: 'h23',
+    }).formatToParts(date);
+    return Object.fromEntries(parts.filter(part => part.type !== 'literal').map(part => [part.type, part.value]));
+}
+
+async function runDailyDigests(env, now) {
+    const clock = jakartaClock(now);
+    // Run once after 08:00 WIB; delivery keys prevent repeats for the local day.
+    if (Number(clock.hour) < 8) return { sent: 0, failed: 0 };
+
+    await env.DB.prepare(`
+        DELETE FROM daily_digest_deliveries WHERE local_date < ?
+    `).bind(`${clock.year}-${clock.month}-${clock.day}`).run();
+
+    const { results: snapshots } = await env.DB.prepare(`
+        SELECT user_id, items_json FROM daily_digest_snapshots
+        WHERE updated_at >= ?
+        ORDER BY updated_at DESC
+        LIMIT 500
+    `).bind(new Date(now.getTime() - 45 * 86_400_000).toISOString()).all();
+
+    let sent = 0;
+    let failed = 0;
+    for (const snapshot of snapshots) {
+        let items;
+        try { items = JSON.parse(snapshot.items_json); } catch { continue; }
+        if (!Array.isArray(items) || items.length === 0) continue;
+        const { results: devices } = await env.DB.prepare(
+            'SELECT token_hash, token FROM push_devices WHERE user_id = ? LIMIT 20',
+        ).bind(snapshot.user_id).all();
+        for (const device of devices) {
+            const delivered = await env.DB.prepare(
+                'SELECT 1 FROM daily_digest_deliveries WHERE local_date = ? AND user_id = ? AND token_hash = ? LIMIT 1',
+            ).bind(`${clock.year}-${clock.month}-${clock.day}`, snapshot.user_id, device.token_hash).first();
+            if (delivered) continue;
+            try {
+                const result = await sendDailyDigest(env, snapshot.user_id, items, device);
+                if (result === 'sent') {
+                    await env.DB.prepare(`
+                        INSERT OR IGNORE INTO daily_digest_deliveries (local_date, user_id, token_hash, sent_at)
+                        VALUES (?, ?, ?, ?)
+                    `).bind(`${clock.year}-${clock.month}-${clock.day}`, snapshot.user_id, device.token_hash, now.toISOString()).run();
+                    sent++;
+                } else if (result === 'unregistered') {
+                    await env.DB.batch([
+                        env.DB.prepare('DELETE FROM task_reminder_deliveries WHERE token_hash = ?').bind(device.token_hash),
+                        env.DB.prepare('DELETE FROM daily_digest_deliveries WHERE token_hash = ?').bind(device.token_hash),
+                        env.DB.prepare('DELETE FROM push_devices WHERE token_hash = ?').bind(device.token_hash),
+                    ]);
+                } else failed++;
+            } catch (error) {
+                console.error('Daily digest send error', snapshot.user_id, error?.message || 'unknown');
+                failed++;
+            }
+        }
+    }
+    return { sent, failed };
 }
 
 function dueOccurrenceAt(reminder, now) {
@@ -453,6 +567,6 @@ export default {
     },
 
     async scheduled(_event, env, ctx) {
-        ctx.waitUntil(runScheduledReminders(env));
+        ctx.waitUntil(Promise.all([runScheduledReminders(env), runDailyDigests(env, new Date())]));
     },
 };

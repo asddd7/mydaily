@@ -17,6 +17,7 @@ class CloudflarePushSyncService
      */
     public function snapshotForUser(int|string $userId): array
     {
+        $through = now()->addDays(7)->toDateString();
         $reminders = DB::table('tugas')
             ->where('user_id', $userId)
             ->whereNull('parent_id')
@@ -24,6 +25,23 @@ class CloudflarePushSyncService
             ->whereNotNull('reminder_at')
             ->whereNull('reminder_sent_at')
             ->get(['id', 'nama_tugas', 'reminder_at', 'reminder_repeat_type']);
+        $dailyTasks = DB::table('tugas')
+            ->where('user_id', $userId)
+            ->whereNull('parent_id')
+            ->where('selesai', 0)
+            ->whereDate('deadline', '<=', $through)
+            ->orderBy('deadline')
+            ->limit(100)
+            ->get(['id', 'nama_tugas as title', 'deadline']);
+        $dailyMarks = DB::table('calendar_marks')
+            ->where('user_id', $userId)
+            ->where(function ($query): void {
+                $query->whereNull('selesai')->orWhere('selesai', 0);
+            })
+            ->whereDate('tanggal', '<=', $through)
+            ->orderBy('tanggal')
+            ->limit(100)
+            ->get(['id', 'title', 'tanggal']);
         $devices = DB::table('push_subscriptions')
             ->where('user_id', $userId)
             ->get(['token', 'token_hash']);
@@ -37,6 +55,22 @@ class CloudflarePushSyncService
                 'repeat_type' => $task->reminder_repeat_type ?: 'once',
                 'target_url' => '/tasks/'.rawurlencode((string) $task->id),
             ])->all(),
+            'daily_items' => [
+                ...$dailyTasks->map(fn ($task): array => [
+                    'type' => 'task',
+                    'id' => (string) $task->id,
+                    'title' => (string) $task->title,
+                    'due_date' => (string) $task->deadline,
+                    'target_url' => '/tasks/'.rawurlencode((string) $task->id),
+                ])->all(),
+                ...$dailyMarks->map(fn ($mark): array => [
+                    'type' => 'mark',
+                    'id' => (string) $mark->id,
+                    'title' => (string) $mark->title,
+                    'due_date' => (string) $mark->tanggal,
+                    'target_url' => '/calendar',
+                ])->all(),
+            ],
             'devices' => $devices->map(fn ($device): array => [
                 'token' => $device->token,
                 'token_hash' => $device->token_hash,
