@@ -628,6 +628,112 @@
     text-decoration: none;
 }
 
+
+.notes-dialog {
+    width: min(680px, calc(100% - 32px));
+    max-width: none;
+    max-height: min(90dvh, 850px);
+    margin: auto;
+    padding: 0;
+    border: 1px solid var(--border-color, rgba(128, 128, 128, 0.25));
+    border-radius: 22px;
+    background: var(--card-bg, #fff);
+    color: var(--text-color, #222);
+    box-shadow: 0 24px 80px rgba(0, 0, 0, 0.24);
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+.notes-dialog[open] {
+    animation: notes-modal-enter 180ms ease-out;
+}
+
+.notes-dialog::backdrop {
+    background: rgba(12, 18, 30, 0.58);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+}
+
+.notes-dialog .notes-create-card {
+    margin: 0;
+    border: 0;
+    border-radius: inherit;
+    box-shadow: none;
+}
+
+.notes-dialog .notes-section-heading {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.notes-section-heading-text {
+    flex: 1;
+    min-width: 0;
+}
+
+.notes-modal-close {
+    display: inline-grid;
+    place-items: center;
+    flex: 0 0 40px;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    border: 0;
+    border-radius: 12px;
+    background: var(--input-bg, #f2f3f5);
+    color: inherit;
+    font-size: 1.15rem;
+    cursor: pointer;
+    transition: background 160ms ease, transform 160ms ease;
+}
+
+.notes-modal-close:hover {
+    background: var(--hover-bg, #e6e8ec);
+    transform: rotate(4deg);
+}
+
+.notes-modal-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.notes-cancel-button {
+    min-height: 42px;
+    padding: 10px 16px;
+    border: 1px solid var(--border-color, #d9dce2);
+    border-radius: 12px;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 160ms ease;
+}
+
+.notes-cancel-button:hover {
+    background: var(--hover-bg, #f2f3f5);
+}
+
+.notes-dialog .notes-form-footer {
+    gap: 16px;
+}
+
+@keyframes notes-modal-enter {
+    from {
+        opacity: 0;
+        transform: translateY(12px) scale(0.985);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
 /* Responsive */
 
 @media (min-width: 900px) {
@@ -777,6 +883,41 @@
 
     .notes-empty-state {
         padding: 40px 18px;
+    }
+
+    .notes-dialog {
+        width: calc(100% - 20px);
+        max-height: 92dvh;
+        border-radius: 18px;
+    }
+
+    .notes-dialog .notes-create-card {
+        padding: 20px 16px;
+    }
+
+    .notes-dialog .notes-form-footer {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .notes-modal-actions {
+        width: 100%;
+    }
+
+    .notes-modal-actions button {
+        flex: 1;
+        justify-content: center;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .notes-dialog[open] {
+        animation: none;
+    }
+
+    .notes-modal-close,
+    .notes-cancel-button {
+        transition: none;
     }
 }
 

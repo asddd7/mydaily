@@ -54,9 +54,7 @@
                     dialog.querySelector('[name="type"]')?.focus();
                 }
             } else if (toggle.dataset.fabAction === 'note') {
-                const target = document.getElementById('noteCreateForm');
-                target?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                target?.querySelector('input:not([type="file"]), textarea, select')?.focus({ preventScroll: true });
+                document.dispatchEvent(new CustomEvent('note:open-create'));
             } else if (toggle.dataset.fabAction === 'file') {
                 document.getElementById('fileUploadInput')?.click();
             } else if (toggle.dataset.fabAction === 'calendar') {
