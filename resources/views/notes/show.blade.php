@@ -11,7 +11,7 @@
 <div class="notes-edit-page">
 
     {{-- Header halaman --}}
-    <header class="notes-edit-header">
+    <section class="notes-edit-header" aria-labelledby="notesEditTitle">
         <a href="{{ route('notes.index') }}" class="notes-edit-back">
             <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
             <span>Kembali ke catatan</span>
@@ -23,34 +23,10 @@
                 RUANG PRIBADI
             </span>
 
-            <h1>Edit catatan</h1>
+            <h1 id="notesEditTitle">Edit catatan</h1>
             <p>Perbarui ide, cerita, atau informasi yang ingin kamu simpan.</p>
         </div>
-    </header>
-
-    {{-- Pesan status --}}
-    @if (session('status'))
-        <div class="notes-alert notes-alert-success" role="status">
-            <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
-            <span>{{ session('status') }}</span>
-        </div>
-    @endif
-
-    {{-- Pesan validasi --}}
-    @if ($errors->any())
-        <div class="notes-alert notes-alert-error" role="alert">
-            <i class="fa-solid fa-circle-exclamation" aria-hidden="true"></i>
-
-            <div>
-                <strong>Catatan belum berhasil diperbarui.</strong>
-                <ul>
-                    @foreach ($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-            </div>
-        </div>
-    @endif
+    </section>
 
     <div class="notes-edit-layout">
 
@@ -222,37 +198,6 @@
             </form>
         </section>
 
-        {{-- Panel informasi --}}
-        <aside class="notes-edit-sidebar">
-            <div class="notes-edit-tip-icon">
-                <i class="fa-regular fa-lightbulb" aria-hidden="true"></i>
-            </div>
-
-            <h2>Tips mengelola catatan</h2>
-            <p>
-                Simpan judul yang mudah dikenali agar catatanmu lebih mudah ditemukan.
-            </p>
-
-            <div class="notes-edit-tip-item">
-                <i class="fa-solid fa-check" aria-hidden="true"></i>
-                <span>Gunakan judul yang singkat dan jelas.</span>
-            </div>
-
-            <div class="notes-edit-tip-item">
-                <i class="fa-solid fa-check" aria-hidden="true"></i>
-                <span>Perbarui isi ketika ada informasi baru.</span>
-            </div>
-
-            <div class="notes-edit-tip-item">
-                <i class="fa-solid fa-check" aria-hidden="true"></i>
-                <span>Tambahkan gambar pendukung jika diperlukan.</span>
-            </div>
-
-            <div class="notes-edit-sidebar-footer">
-                <i class="fa-solid fa-lock" aria-hidden="true"></i>
-                Catatan ini dikelola melalui akunmu.
-            </div>
-        </aside>
     </div>
 </div>
 @endsection
