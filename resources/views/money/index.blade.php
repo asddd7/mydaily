@@ -71,7 +71,11 @@
         @endif
         <div class="money-receipt-scan" data-receipt-scan>
             <label for="receiptImage">Foto struk
-                <input id="receiptImage" type="file" accept="image/jpeg,image/png,image/webp" capture="environment">
+                <input
+                    id="receiptImage"
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                >
             </label>
             <button type="button" class="money-scan-button" data-scan-submit>
                 <i class="fa-solid fa-camera" aria-hidden="true"></i> Baca struk
