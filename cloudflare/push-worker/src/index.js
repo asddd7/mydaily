@@ -3,12 +3,22 @@ const appOrigin = 'https://mydaily.infinityfreeapp.com';
 let cachedAccessToken = null;
 let cachedTokenExpiry = 0;
 
-function json(data, status = 200) {
+function allowedOrigins(env) {
+    return new Set([
+        appOrigin,
+        ...(env.ALLOWED_ORIGINS || '')
+            .split(',')
+            .map(origin => origin.trim().replace(/\/$/, ''))
+            .filter(Boolean),
+    ]);
+}
+
+function json(data, status = 200, origin = appOrigin) {
     return new Response(JSON.stringify(data), {
         status,
         headers: {
             'content-type': 'application/json; charset=utf-8',
-            'access-control-allow-origin': appOrigin,
+            'access-control-allow-origin': origin,
             'access-control-allow-methods': 'GET, POST, DELETE, OPTIONS',
             'access-control-allow-headers': 'Authorization, Content-Type',
             'access-control-max-age': '86400',
@@ -124,21 +134,21 @@ async function verifyBrowserTicket(request, env, expectedUserId) {
     }
 }
 
-async function syncTask(request, env, taskId = null) {
-    if (!await authorize(request, env)) return json({ error: 'Unauthorized' }, 401);
+async function syncTask(request, env, taskId = null, origin = appOrigin) {
+    if (!await authorize(request, env)) return json({ error: 'Unauthorized' }, 401, origin);
 
     if (request.method === 'DELETE') {
-        if (!taskId) return json({ error: 'Task ID is required' }, 400);
+        if (!taskId) return json({ error: 'Task ID is required' }, 400, origin);
         await env.DB.batch([
             env.DB.prepare('DELETE FROM task_reminder_deliveries WHERE task_id = ?').bind(taskId),
             env.DB.prepare('DELETE FROM task_reminders WHERE task_id = ?').bind(taskId),
         ]);
-        return json({ synced: true, removed: true });
+        return json({ synced: true, removed: true }, 200, origin);
     }
 
     const data = await request.json();
     if (!data.task_id || !data.user_id || !data.title || !data.reminder_at || !data.target_url) {
-        return json({ error: 'Invalid reminder payload' }, 422);
+        return json({ error: 'Invalid reminder payload' }, 422, origin);
     }
     const repeatType = ['once', 'every_minute', 'hourly', 'daily', 'weekly'].includes(data.repeat_type)
         ? data.repeat_type : 'once';
@@ -162,24 +172,24 @@ async function syncTask(request, env, taskId = null) {
         taskKey, String(data.user_id), String(data.title),
         String(data.reminder_at), repeatType, String(data.target_url), new Date().toISOString(),
     ).run();
-    return json({ synced: true });
+    return json({ synced: true }, 200, origin);
 }
 
-async function syncDevice(request, env, tokenHash = null) {
-    if (!await authorize(request, env)) return json({ error: 'Unauthorized' }, 401);
+async function syncDevice(request, env, tokenHash = null, origin = appOrigin) {
+    if (!await authorize(request, env)) return json({ error: 'Unauthorized' }, 401, origin);
 
     if (request.method === 'DELETE') {
-        if (!tokenHash) return json({ error: 'Token hash is required' }, 400);
+        if (!tokenHash) return json({ error: 'Token hash is required' }, 400, origin);
         await env.DB.batch([
             env.DB.prepare('DELETE FROM task_reminder_deliveries WHERE token_hash = ?').bind(tokenHash),
             env.DB.prepare('DELETE FROM push_devices WHERE token_hash = ?').bind(tokenHash),
         ]);
-        return json({ synced: true, removed: true });
+        return json({ synced: true, removed: true }, 200, origin);
     }
 
     const data = await request.json();
     if (!data.user_id || !data.token || !data.token_hash) {
-        return json({ error: 'Invalid device payload' }, 422);
+        return json({ error: 'Invalid device payload' }, 422, origin);
     }
 
     await env.DB.prepare(`
@@ -192,19 +202,19 @@ async function syncDevice(request, env, tokenHash = null) {
     `).bind(
         String(data.token_hash), String(data.user_id), String(data.token), new Date().toISOString(),
     ).run();
-    return json({ synced: true });
+    return json({ synced: true }, 200, origin);
 }
 
-async function syncSnapshot(request, env) {
-    const origin = request.headers.get('origin');
-    if (origin !== appOrigin) return json({ error: 'Origin not allowed' }, 403);
+async function syncSnapshot(request, env, corsOrigin = appOrigin) {
+    const requestOrigin = request.headers.get('origin');
+    if (!allowedOrigins(env).has(requestOrigin)) return json({ error: 'Origin not allowed' }, 403, corsOrigin);
     const data = await request.json();
     if (!data.user_id || !Array.isArray(data.reminders) || !Array.isArray(data.devices)) {
-        return json({ error: 'Invalid snapshot payload' }, 422);
+        return json({ error: 'Invalid snapshot payload' }, 422, corsOrigin);
     }
 
     const userId = String(data.user_id);
-    if (!await verifyBrowserTicket(request, env, userId)) return json({ error: 'Unauthorized' }, 401);
+    if (!await verifyBrowserTicket(request, env, userId)) return json({ error: 'Unauthorized' }, 401, corsOrigin);
 
     const validReminders = data.reminders.filter(reminder =>
         reminder.task_id && reminder.title && reminder.reminder_at && reminder.target_url,
@@ -284,7 +294,7 @@ async function syncSnapshot(request, env) {
     for (let offset = 0; offset < upserts.length; offset += 40) {
         await env.DB.batch(upserts.slice(offset, offset + 40));
     }
-    return json({ synced: true, reminders: validReminders.length, devices: validDevices.length });
+    return json({ synced: true, reminders: validReminders.length, devices: validDevices.length }, 200, corsOrigin);
 }
 
 async function sendReminder(env, reminder, device) {
@@ -403,12 +413,14 @@ export default {
     async fetch(request, env) {
         const url = new URL(request.url);
         const origin = request.headers.get('origin');
+        const origins = allowedOrigins(env);
+        const corsOrigin = origin && origins.has(origin) ? origin : appOrigin;
         if (request.method === 'OPTIONS') {
-            if (origin !== appOrigin) return json({ error: 'Origin not allowed' }, 403);
+            if (!origin || !origins.has(origin)) return json({ error: 'Origin not allowed' }, 403);
             return new Response(null, {
                 status: 204,
                 headers: {
-                    'access-control-allow-origin': appOrigin,
+                    'access-control-allow-origin': origin,
                     'access-control-allow-methods': 'GET, POST, DELETE, OPTIONS',
                     'access-control-allow-headers': 'Authorization, Content-Type',
                     'access-control-max-age': '86400',
@@ -416,28 +428,28 @@ export default {
                 },
             });
         }
-        if (origin && origin !== appOrigin) return json({ error: 'Origin not allowed' }, 403);
+        if (origin && !origins.has(origin)) return json({ error: 'Origin not allowed' }, 403);
         if (url.pathname === '/health' && request.method === 'GET') {
-            return json({ ok: true, service: 'mydaily-push-reminders' });
+            return json({ ok: true, service: 'mydaily-push-reminders' }, 200, corsOrigin);
         }
         if (url.pathname === '/sync/task' && request.method === 'POST') {
-            return syncTask(request, env);
+            return syncTask(request, env, null, corsOrigin);
         }
         const taskDelete = url.pathname.match(/^\/sync\/task\/([0-9]+)$/);
         if (taskDelete && request.method === 'DELETE') {
-            return syncTask(request, env, taskDelete[1]);
+            return syncTask(request, env, taskDelete[1], corsOrigin);
         }
         if (url.pathname === '/sync/device' && request.method === 'POST') {
-            return syncDevice(request, env);
+            return syncDevice(request, env, null, corsOrigin);
         }
         if (url.pathname === '/sync/snapshot' && request.method === 'POST') {
-            return syncSnapshot(request, env);
+            return syncSnapshot(request, env, corsOrigin);
         }
         const deviceDelete = url.pathname.match(/^\/sync\/device\/([a-f0-9]{64})$/);
         if (deviceDelete && request.method === 'DELETE') {
-            return syncDevice(request, env, deviceDelete[1]);
+            return syncDevice(request, env, deviceDelete[1], corsOrigin);
         }
-        return json({ error: 'Not found' }, 404);
+        return json({ error: 'Not found' }, 404, corsOrigin);
     },
 
     async scheduled(_event, env, ctx) {

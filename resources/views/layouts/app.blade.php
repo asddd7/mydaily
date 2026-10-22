@@ -9,7 +9,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-title" content="MyDaily">
-    <link rel="manifest" href="/manifest.php?v=4">
+    <link rel="manifest" href="{{ app()->environment('local') ? route('pwa.manifest') : '/manifest.php?v=4' }}">
     <link rel="apple-touch-icon" href="/icons/icon-192.png">
     <title>@yield('title', 'MyDaily')</title>
     @vite(['resources/css/style.css', 'resources/css/app.css', 'resources/js/page-loader.js', 'resources/js/push-notifications.js', 'resources/js/pwa-install.js'])
