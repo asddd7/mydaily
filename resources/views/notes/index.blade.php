@@ -11,13 +11,13 @@
 <div class="notes-page">
 
     {{-- Header --}}
-    <header class="notes-header">
+    <section class="notes-header" aria-labelledby="notesPageTitle">
         <div class="notes-header-content">
             <span class="notes-eyebrow">
                 <i class="fa-regular fa-bookmark" aria-hidden="true"></i>
                 RUANG PRIBADI
             </span>
-            <h1>Catatan</h1>
+            <h1 id="notesPageTitle">Catatan</h1>
             <p>Simpan ide, cerita, dan hal penting dalam satu tempat.</p>
         </div>
 
@@ -25,7 +25,7 @@
             <i class="fa-solid fa-plus" aria-hidden="true"></i>
             <span>Catatan baru</span>
         </a>
-    </header>
+    </section>
 
     {{-- Pesan status --}}
     @if (session('status'))
