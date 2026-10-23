@@ -114,10 +114,10 @@ if (enableButton && disableButton && status && firebaseConfig && pushConfig) {
         }
 
         try {
-            void syncExistingReminders();
             if (!await isSupported()) {
                 enableButton.disabled = true;
                 updateStatus('Push notification tidak didukung oleh browser ini.');
+                void syncExistingReminders();
                 return;
             }
 
@@ -126,6 +126,7 @@ if (enableButton && disableButton && status && firebaseConfig && pushConfig) {
             const registration = await navigator.serviceWorker.register(pushConfig.serviceWorkerUrl);
             const savedToken = localStorage.getItem('mydaily-push-token');
 
+            let snapshotSynced = false;
             const registerToken = async token => {
                 await requestJson(pushConfig.subscribeUrl, {
                     method: 'POST',
@@ -142,6 +143,7 @@ if (enableButton && disableButton && status && firebaseConfig && pushConfig) {
                 localStorage.removeItem('mydaily-push-disabled');
                 disableButton.hidden = false;
                 const cloudflareSynced = await syncExistingReminders();
+                snapshotSynced = true;
                 updateStatus(cloudflareSynced
                     ? 'Notifikasi aktif dan perangkat tersinkron ke pengingat Cloudflare.'
                     : 'Notifikasi aktif, tetapi pengingat Cloudflare belum tersinkron.');
@@ -173,6 +175,10 @@ if (enableButton && disableButton && status && firebaseConfig && pushConfig) {
                 });
                 localStorage.removeItem('mydaily-push-token');
             }
+
+            // Refresh task data once per page load. If a push token was just
+            // registered, registerToken already sent the up-to-date snapshot.
+            if (!snapshotSynced) void syncExistingReminders();
 
             onMessage(messaging, payload => {
                 const data = payload.data || {};

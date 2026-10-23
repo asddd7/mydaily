@@ -566,14 +566,17 @@ export default {
         return json({ error: 'Not found' }, 404, corsOrigin);
     },
 
-    async scheduled(_event, env, ctx) {
+    async scheduled(event, env, ctx) {
         ctx.waitUntil((async () => {
             try {
-                const [reminders, dailyDigests] = await Promise.all([
-                    runScheduledReminders(env),
-                    runDailyDigests(env, new Date()),
-                ]);
-                console.log('Scheduled push summary', JSON.stringify({ reminders, dailyDigests }));
+                if (event.cron === '0 1 * * *') {
+                    const dailyDigests = await runDailyDigests(env, new Date());
+                    console.log('Daily digest summary', JSON.stringify(dailyDigests));
+                    return;
+                }
+
+                const reminders = await runScheduledReminders(env);
+                console.log('Task reminder summary', JSON.stringify(reminders));
             } catch (error) {
                 console.error('Scheduled push run failed', error?.message || 'unknown');
                 throw error;
