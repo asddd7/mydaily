@@ -117,21 +117,38 @@ class TaskController extends Controller
         return view('tasks.show', compact('task', 'subtasks'));
     }
 
+
     public function store(Request $request): RedirectResponse
     {
+        $recurringType = $request->input('recurring_type', 'none');
+
+        $usesDeadline = $recurringType === 'none'
+            && $request->boolean('deadline_enabled');
+
         $data = $request->validate([
             'nama_tugas' => ['required', 'string', 'max:100'],
-            'deadline' => ['required', 'date'],
+            'deadline_enabled' => ['required', 'boolean'],
+            'deadline' => $usesDeadline
+                ? ['required', 'date']
+                : ['nullable', 'date'],
             'reminder_enabled' => ['required', 'boolean'],
             'reminder_at' => ['nullable', 'required_if:reminder_enabled,1', 'date'],
-            'reminder_repeat_type' => ['nullable', 'required_if:reminder_enabled,1', Rule::in(['once', 'every_minute', 'hourly', 'daily', 'weekly'])],
-            'recurring_type' => ['nullable', Rule::in(['none', 'daily', 'weekly', 'monthly', 'yearly'])],
+            'reminder_repeat_type' => [
+                'nullable',
+                'required_if:reminder_enabled,1',
+                Rule::in(['once', 'every_minute', 'hourly', 'daily', 'weekly']),
+            ],
+            'recurring_type' => [
+                'nullable',
+                Rule::in(['none', 'daily', 'weekly', 'monthly', 'yearly']),
+            ],
             'kategori' => ['required', Rule::in(array_keys(self::TASK_CATEGORIES))],
             'image' => ['nullable', 'image', 'mimes:jpeg,png,gif,webp', 'max:5120'],
         ]);
 
         $imageName = $request->file('image')?->hashName();
         $imagePath = null;
+
         if ($imageName) {
             $imageDirectory = base_path('uploads/tasks');
             File::ensureDirectoryExists($imageDirectory);
@@ -139,30 +156,46 @@ class TaskController extends Controller
             $request->file('image')->move($imageDirectory, $imageName);
         }
 
+        $recurringType = $data['recurring_type'] ?? 'none';
+
+        // Tugas berulang menggunakan hari ini sebagai tanggal awal.
+        // Tugas biasa boleh tidak memiliki tenggat.
+        $deadline = $recurringType !== 'none'
+            ? today()->toDateString()
+            : ($usesDeadline ? $data['deadline'] : null);
+
         try {
-            $taskId = DB::table('tugas')->insertGetId([
+            DB::table('tugas')->insert([
                 'nama_tugas' => $data['nama_tugas'],
-                'deadline' => $data['deadline'],
+                'deadline' => $deadline,
                 'reminder_at' => $request->boolean('reminder_enabled')
                     ? Carbon::parse($data['reminder_at'])->format('Y-m-d H:i:s')
                     : null,
-                'reminder_repeat_type' => $request->boolean('reminder_enabled') ? $data['reminder_repeat_type'] : 'once',
+                'reminder_repeat_type' => $request->boolean('reminder_enabled')
+                    ? $data['reminder_repeat_type']
+                    : 'once',
                 'reminder_sent_at' => null,
                 'user_id' => $request->attributes->get('currentUser')->id,
-                'recurring_type' => $data['recurring_type'] ?? 'none',
+                'recurring_type' => $recurringType,
                 'kategori' => $data['kategori'],
                 'image' => $imageName,
             ]);
         } catch (\Throwable $error) {
             if ($imagePath && File::exists($imagePath) && !File::delete($imagePath)) {
-                throw new \RuntimeException('Unable to remove the task image after a failed task save.', 0, $error);
+                throw new \RuntimeException(
+                    'Unable to remove the task image after a failed task save.',
+                    0,
+                    $error
+                );
             }
 
             throw $error;
         }
 
-        return redirect()->route('tasks.index')->with('status', 'Tugas berhasil ditambahkan.');
+        return redirect()->route('tasks.index')
+            ->with('status', 'Tugas berhasil ditambahkan.');
     }
+
 
     public function image(Request $request, int $task): BinaryFileResponse
     {
@@ -179,26 +212,72 @@ class TaskController extends Controller
         return response()->file($path, ['X-Content-Type-Options' => 'nosniff']);
     }
 
+
     public function update(Request $request, int $task): RedirectResponse
     {
         $userId = $request->attributes->get('currentUser')->id;
+
         $currentTask = DB::table('tugas')
             ->where('id', $task)
             ->where('user_id', $userId)
             ->whereNull('parent_id')
-            ->first(['kategori', 'reminder_at', 'reminder_sent_at', 'reminder_repeat_type']);
+            ->first([
+                'kategori',
+                'deadline',
+                'reminder_at',
+                'reminder_sent_at',
+                'reminder_repeat_type',
+            ]);
+
         abort_unless($currentTask, 404);
+
         $currentCategory = $currentTask->kategori ?? 'daily';
+        $recurringType = $request->input('recurring_type', 'none');
+
+        $usesDeadline = $recurringType === 'none'
+            && $request->boolean('deadline_enabled');
 
         $data = $request->validate([
             'nama_tugas' => ['required', 'string', 'max:100'],
-            'deadline' => ['required', 'date'],
+            'deadline_enabled' => ['required', 'boolean'],
+            'deadline' => $usesDeadline
+                ? ['required', 'date']
+                : ['nullable', 'date'],
             'reminder_enabled' => ['required', 'boolean'],
             'reminder_at' => ['nullable', 'required_if:reminder_enabled,1', 'date'],
-            'reminder_repeat_type' => ['nullable', 'required_if:reminder_enabled,1', Rule::in(['once', 'every_minute', 'hourly', 'daily', 'weekly'])],
-            'recurring_type' => ['nullable', Rule::in(['none', 'daily', 'weekly', 'monthly', 'yearly'])],
-            'kategori' => ['required', Rule::in(array_values(array_unique([...array_keys(self::TASK_CATEGORIES), $currentCategory])))],
+            'reminder_repeat_type' => [
+                'nullable',
+                'required_if:reminder_enabled,1',
+                Rule::in(['once', 'every_minute', 'hourly', 'daily', 'weekly']),
+            ],
+            'recurring_type' => [
+                'nullable',
+                Rule::in(['none', 'daily', 'weekly', 'monthly', 'yearly']),
+            ],
+            'kategori' => [
+                'required',
+                Rule::in(array_values(array_unique([
+                    ...array_keys(self::TASK_CATEGORIES),
+                    $currentCategory,
+                ]))),
+            ],
         ]);
+
+        $recurringType = $data['recurring_type'] ?? 'none';
+
+        $deadline = $recurringType !== 'none'
+            ? today()->toDateString()
+            : ($usesDeadline ? $data['deadline'] : null);
+
+        $reminderEnabled = $request->boolean('reminder_enabled');
+
+        $reminderAt = $reminderEnabled
+            ? Carbon::parse($data['reminder_at'])->format('Y-m-d H:i:s')
+            : null;
+
+        $reminderRepeatType = $reminderEnabled
+            ? $data['reminder_repeat_type']
+            : 'once';
 
         $updated = DB::table('tugas')
             ->where('id', $task)
@@ -206,23 +285,22 @@ class TaskController extends Controller
             ->whereNull('parent_id')
             ->update([
                 'nama_tugas' => $data['nama_tugas'],
-                'deadline' => $data['deadline'],
-                'reminder_at' => $request->boolean('reminder_enabled')
-                    ? Carbon::parse($data['reminder_at'])->format('Y-m-d H:i:s')
-                    : null,
-                'reminder_repeat_type' => $request->boolean('reminder_enabled') ? $data['reminder_repeat_type'] : 'once',
-                'reminder_sent_at' => $request->boolean('reminder_enabled')
-                    && $currentTask->reminder_at === Carbon::parse($data['reminder_at'])->format('Y-m-d H:i:s')
-                    && ($currentTask->reminder_repeat_type ?? 'once') === $data['reminder_repeat_type']
-                    ? $currentTask->reminder_sent_at
-                    : null,
-                'recurring_type' => $data['recurring_type'] ?? 'none',
+                'deadline' => $deadline,
+                'reminder_at' => $reminderAt,
+                'reminder_repeat_type' => $reminderRepeatType,
+                'reminder_sent_at' => $reminderEnabled
+                    && $currentTask->reminder_at === $reminderAt
+                    && ($currentTask->reminder_repeat_type ?? 'once') === $reminderRepeatType
+                        ? $currentTask->reminder_sent_at
+                        : null,
+                'recurring_type' => $recurringType,
                 'kategori' => $data['kategori'],
             ]);
 
         abort_unless($updated, 404);
 
-        return redirect()->route('tasks.index')->with('status', 'Tugas berhasil diperbarui.');
+        return redirect()->route('tasks.index')
+            ->with('status', 'Tugas berhasil diperbarui.');
     }
 
     public function destroy(Request $request, int $task): RedirectResponse
@@ -274,11 +352,15 @@ class TaskController extends Controller
                 return;
             }
 
+            $baseDeadline = Carbon::parse(
+                $item->deadline ?? today()->toDateString()
+            );
+
             $nextDeadline = match ($item->recurring_type) {
-                'daily' => Carbon::parse($item->deadline)->addDay(),
-                'weekly' => Carbon::parse($item->deadline)->addWeek(),
-                'monthly' => Carbon::parse($item->deadline)->addMonth(),
-                'yearly' => Carbon::parse($item->deadline)->addYear(),
+                'daily' => $baseDeadline->copy()->addDay(),
+                'weekly' => $baseDeadline->copy()->addWeek(),
+                'monthly' => $baseDeadline->copy()->addMonth(),
+                'yearly' => $baseDeadline->copy()->addYear(),
                 default => null,
             };
 

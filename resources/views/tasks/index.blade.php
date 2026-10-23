@@ -70,9 +70,36 @@
             <label class="task-field task-field-wide">Nama tugas
                 <input name="nama_tugas" value="{{ old('nama_tugas') }}" maxlength="100" placeholder="Contoh: Selesaikan laporan" required autofocus>
             </label>
-            <label class="task-field" data-deadline-field>Tenggat
-                <input type="date" name="deadline" value="{{ old('deadline', today()->toDateString()) }}" required>
+            <div class="task-field-wide" data-deadline-option>
+                <label class="task-reminder-toggle">
+                    <input type="hidden" name="deadline_enabled" value="0">
+                    <input
+                        type="checkbox"
+                        name="deadline_enabled"
+                        value="1"
+                        data-deadline-toggle
+                        @checked(old('deadline_enabled', '1') === '1')
+                    >
+                    <span>Gunakan tenggat tanggal</span>
+                </label>
+            </div>
+
+            <label class="task-field" data-deadline-field>
+                Tenggat
+                <input
+                    type="date"
+                    name="deadline"
+                    value="{{ old('deadline', today()->toDateString()) }}"
+                >
             </label>
+
+            <p
+                class="task-recurring-deadline-note task-field-wide"
+                data-deadline-note
+                hidden
+            >
+                Tugas berulang akan dimulai hari ini.
+            </p>
             <p class="task-recurring-deadline-note task-field-wide" data-deadline-note hidden>Tugas berulang akan dimulai hari ini.</p>
             <div class="task-reminder-field task-field-wide" data-reminder-control>
                 <label class="task-reminder-toggle">
@@ -272,9 +299,42 @@
                         <label class="task-field task-field-wide">Nama tugas
                             <input name="nama_tugas" value="{{ $isEditError ? old('nama_tugas', $task->nama_tugas) : $task->nama_tugas }}" maxlength="100" required>
                         </label>
-                        <label class="task-field" data-deadline-field>Tenggat
-                            <input type="date" name="deadline" value="{{ $isEditError ? old('deadline', $task->deadline) : $task->deadline }}" required>
+                        <div class="task-field-wide" data-deadline-option>
+                            <label class="task-reminder-toggle">
+                                <input type="hidden" name="deadline_enabled" value="0">
+                                <input
+                                    type="checkbox"
+                                    name="deadline_enabled"
+                                    value="1"
+                                    data-deadline-toggle
+                                    @checked(
+                                        $isEditError
+                                            ? old('deadline_enabled', $task->deadline !== null ? '1' : '0') === '1'
+                                            : $task->deadline !== null
+                                    )
+                                >
+                                <span>Gunakan tenggat tanggal</span>
+                            </label>
+                        </div>
+
+                        <label class="task-field" data-deadline-field>
+                            Tenggat
+                            <input
+                                type="date"
+                                name="deadline"
+                                value="{{ $isEditError
+                                    ? old('deadline', $task->deadline)
+                                    : $task->deadline }}"
+                            >
                         </label>
+
+                        <p
+                            class="task-recurring-deadline-note task-field-wide"
+                            data-deadline-note
+                            hidden
+                        >
+                            Tugas berulang akan dimulai hari ini.
+                        </p>
                         <p class="task-recurring-deadline-note task-field-wide" data-deadline-note hidden>Tanggal tugas saat ini tetap digunakan sebagai tanggal awal.</p>
                         @php($reminderEnabled = $isEditError ? (bool) old('reminder_enabled', $task->reminder_at ? '1' : '0') : (bool) $task->reminder_at)
                         <div class="task-reminder-field task-field-wide" data-reminder-control>
@@ -438,19 +498,42 @@
         }
 
         const recurrence = form.querySelector('[name="recurring_type"]');
+        const deadlineOption = form.querySelector('[data-deadline-option]');
+        const deadlineToggle = form.querySelector('[data-deadline-toggle]');
         const deadlineField = form.querySelector('[data-deadline-field]');
         const deadlineInput = deadlineField?.querySelector('[name="deadline"]');
         const deadlineNote = form.querySelector('[data-deadline-note]');
-        if (!(recurrence instanceof HTMLSelectElement) || !(deadlineField instanceof HTMLElement) || !(deadlineInput instanceof HTMLInputElement)) return;
+
+        if (
+            !(recurrence instanceof HTMLSelectElement) ||
+            !(deadlineField instanceof HTMLElement) ||
+            !(deadlineInput instanceof HTMLInputElement) ||
+            !(deadlineToggle instanceof HTMLInputElement)
+        ) {
+            return;
+        }
 
         const updateDeadlineVisibility = () => {
             const recurring = recurrence.value !== 'none';
-            deadlineField.hidden = recurring;
-            deadlineInput.required = !recurring;
-            if (deadlineNote instanceof HTMLElement) deadlineNote.hidden = !recurring;
+            const useDeadline = deadlineToggle.checked && !recurring;
+
+            if (deadlineOption instanceof HTMLElement) {
+                deadlineOption.hidden = recurring;
+            }
+
+            deadlineToggle.disabled = recurring;
+            deadlineField.hidden = !useDeadline;
+            deadlineInput.disabled = !useDeadline;
+            deadlineInput.required = useDeadline;
+
+            if (deadlineNote instanceof HTMLElement) {
+                deadlineNote.hidden = !recurring;
+            }
         };
 
         recurrence.addEventListener('change', updateDeadlineVisibility);
+        deadlineToggle.addEventListener('change', updateDeadlineVisibility);
+
         updateDeadlineVisibility();
     });
 
