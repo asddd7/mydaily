@@ -211,7 +211,7 @@ async function syncSnapshot(request, env, corsOrigin = appOrigin) {
     if (!allowedOrigins(env).has(requestOrigin)) return json({ error: 'Origin not allowed' }, 403, corsOrigin);
     const data = await request.json();
     if (!data.user_id || !Array.isArray(data.reminders) || !Array.isArray(data.devices)
-        || !Array.isArray(data.daily_items)) {
+        || (data.daily_items !== undefined && !Array.isArray(data.daily_items))) {
         return json({ error: 'Invalid snapshot payload' }, 422, corsOrigin);
     }
 
@@ -294,7 +294,7 @@ async function syncSnapshot(request, env, corsOrigin = appOrigin) {
         `).bind(String(device.token_hash), userId, String(device.token), new Date().toISOString()));
     }
 
-    const dailyItems = data.daily_items.filter(item =>
+    const dailyItems = (data.daily_items || []).filter(item =>
         item && ['task', 'mark'].includes(item.type) && item.id && item.title
         && /^\d{4}-\d{2}-\d{2}$/.test(String(item.due_date)) && item.target_url,
     ).slice(0, 200).map(item => ({
@@ -567,6 +567,17 @@ export default {
     },
 
     async scheduled(_event, env, ctx) {
-        ctx.waitUntil(Promise.all([runScheduledReminders(env), runDailyDigests(env, new Date())]));
+        ctx.waitUntil((async () => {
+            try {
+                const [reminders, dailyDigests] = await Promise.all([
+                    runScheduledReminders(env),
+                    runDailyDigests(env, new Date()),
+                ]);
+                console.log('Scheduled push summary', JSON.stringify({ reminders, dailyDigests }));
+            } catch (error) {
+                console.error('Scheduled push run failed', error?.message || 'unknown');
+                throw error;
+            }
+        })());
     },
 };
