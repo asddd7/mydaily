@@ -61,15 +61,28 @@
             </div>
 
             @if ($subtasks->isNotEmpty())
-                <ul>
-                    @foreach ($subtasks as $subtask)
-                        <li class="{{ $subtask->selesai ? 'is-complete' : '' }}">
-                            <form method="post" action="{{ route('tasks.subtasks.update', $subtask->id) }}" class="task-detail-subtask-check" data-loader-action="subtask-update">
+            <ul class="task-detail-subtask-list">
+                @foreach ($subtasks as $subtask)
+                    @php
+                        $isSubtaskEditError = $errors->any()
+                            && old('_form') === 'subtask_edit'
+                            && (string) old('_subtask_id') === (string) $subtask->id;
+                    @endphp
+
+                    <li class="{{ $subtask->selesai ? 'is-complete' : '' }}">
+                        <div class="task-detail-subtask-row">
+                            <form
+                                method="post"
+                                action="{{ route('tasks.subtasks.update', $subtask->id) }}"
+                                class="task-detail-subtask-check"
+                                data-loader-action="subtask-update"
+                            >
                                 @csrf
                                 @method('put')
                                 <input type="hidden" name="nama_tugas" value="{{ $subtask->nama_tugas }}">
                                 <input type="hidden" name="selesai" value="0">
                                 <input type="hidden" name="return_to_detail" value="1">
+
                                 <input
                                     class="task-checkbox"
                                     type="checkbox"
@@ -79,16 +92,136 @@
                                     onchange="this.form.requestSubmit()"
                                     aria-label="Tandai subtugas {{ $subtask->nama_tugas }} sebagai {{ $subtask->selesai ? 'belum selesai' : 'selesai' }}"
                                 >
-                                <span class="{{ $subtask->selesai ? 'is-complete' : '' }}">{{ $subtask->nama_tugas }}</span>
+
+                                <span class="{{ $subtask->selesai ? 'is-complete' : '' }}">
+                                    {{ $subtask->nama_tugas }}
+                                </span>
                             </form>
-                            @if ($subtask->image)
-                                <a class="task-detail-subtask-image-link" href="{{ route('tasks.image', $subtask->id) }}" target="_blank" rel="noopener">
-                                    <img class="task-detail-subtask-image" src="{{ route('tasks.image', $subtask->id) }}" alt="Gambar untuk subtugas {{ $subtask->nama_tugas }}" loading="lazy">
-                                </a>
+
+                            <div class="task-detail-subtask-actions">
+                                <button
+                                    class="task-icon-button"
+                                    type="button"
+                                    data-open-subtask-edit
+                                    data-dialog-target="editSubtaskDialog{{ $subtask->id }}"
+                                    aria-label="Edit subtugas {{ $subtask->nama_tugas }}"
+                                    title="Edit subtugas"
+                                >
+                                    <i class="fa-regular fa-pen-to-square" aria-hidden="true"></i>
+                                </button>
+
+                                <form
+                                    method="post"
+                                    action="{{ route('tasks.subtasks.destroy', $subtask->id) }}"
+                                    data-loader-action="subtask-delete"
+                                    onsubmit="return confirm('Yakin ingin menghapus subtugas ini?')"
+                                >
+                                    @csrf
+                                    @method('delete')
+                                    <input type="hidden" name="return_to_detail" value="1">
+
+                                    <button
+                                        class="task-icon-button task-delete-button"
+                                        type="submit"
+                                        aria-label="Hapus subtugas {{ $subtask->nama_tugas }}"
+                                        title="Hapus subtugas"
+                                    >
+                                        <i class="fa-regular fa-trash-can" aria-hidden="true"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+
+                        @if ($subtask->image)
+                            <a
+                                class="task-detail-subtask-image-link"
+                                href="{{ route('tasks.image', $subtask->id) }}"
+                                target="_blank"
+                                rel="noopener"
+                            >
+                                <img
+                                    class="task-detail-subtask-image"
+                                    src="{{ route('tasks.image', $subtask->id) }}"
+                                    alt="Gambar untuk subtugas {{ $subtask->nama_tugas }}"
+                                    loading="lazy"
+                                >
+                            </a>
+                        @endif
+
+                        <dialog
+                            class="task-create-dialog task-subtask-dialog"
+                            id="editSubtaskDialog{{ $subtask->id }}"
+                            data-subtask-edit-dialog
+                            aria-labelledby="editSubtaskTitle{{ $subtask->id }}"
+                            @if ($isSubtaskEditError) data-reopen @endif
+                        >
+                            <div class="task-dialog-heading">
+                                <div>
+                                    <p class="tasks-eyebrow">Edit subtugas</p>
+                                    <h2 id="editSubtaskTitle{{ $subtask->id }}">Ubah nama subtugas</h2>
+                                    <p>Perbarui nama langkah pekerjaan ini.</p>
+                                </div>
+
+                                <button
+                                    class="task-icon-button"
+                                    type="button"
+                                    data-close-subtask-dialog
+                                    aria-label="Tutup dialog"
+                                >
+                                    <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+                                </button>
+                            </div>
+
+                            @if ($isSubtaskEditError)
+                                <p class="task-dialog-error" role="alert">
+                                    {{ $errors->first() }}
+                                </p>
                             @endif
-                        </li>
-                    @endforeach
-                </ul>
+
+                            <form
+                                method="post"
+                                action="{{ route('tasks.subtasks.update', $subtask->id) }}"
+                                class="task-form"
+                                data-loader-action="subtask-update"
+                            >
+                                @csrf
+                                @method('put')
+                                <input type="hidden" name="_form" value="subtask_edit">
+                                <input type="hidden" name="_subtask_id" value="{{ $subtask->id }}">
+                                <input type="hidden" name="return_to_detail" value="1">
+                                <input type="hidden" name="selesai" value="{{ $subtask->selesai ? 1 : 0 }}">
+
+                                <label class="task-field task-field-wide">
+                                    Nama subtugas
+                                    <input
+                                        type="text"
+                                        name="nama_tugas"
+                                        value="{{ $isSubtaskEditError ? old('nama_tugas', $subtask->nama_tugas) : $subtask->nama_tugas }}"
+                                        maxlength="100"
+                                        required
+                                        autofocus
+                                    >
+                                </label>
+
+                                <div class="task-dialog-actions task-field-wide">
+                                    <button
+                                        class="task-secondary-button"
+                                        type="button"
+                                        data-close-subtask-dialog
+                                    >
+                                        Batal
+                                    </button>
+
+                                    <button class="task-primary-button" type="submit">
+                                        <i class="fa-solid fa-check" aria-hidden="true"></i>
+                                        Simpan perubahan
+                                    </button>
+                                </div>
+                            </form>
+                        </dialog>
+                    </li>
+                @endforeach
+            </ul>
             @else
                 <p class="task-detail-empty">Belum ada subtugas untuk tugas ini.</p>
             @endif
@@ -145,22 +278,69 @@
 @push('scripts')
 <script>
 (() => {
-    const dialog = document.querySelector('[data-subtask-dialog]');
-    if (!(dialog instanceof HTMLDialogElement)) return;
+    const openDialog = (dialog, focusSelector = '[name="nama_subtask"]') => {
+        if (!(dialog instanceof HTMLDialogElement)) return;
 
-    const openDialog = () => {
-        if (!dialog.open) dialog.showModal();
-        dialog.querySelector('[name="nama_subtask"]')?.focus();
+        if (!dialog.open) {
+            dialog.showModal();
+        }
+
+        dialog.querySelector(focusSelector)?.focus();
     };
 
-    document.addEventListener('task:open-subtask', openDialog);
-    dialog.querySelectorAll('[data-close-subtask-dialog]').forEach(button => {
-        button.addEventListener('click', () => dialog.close());
+    // Dialog tambah subtugas
+    const createDialog = document.querySelector('[data-subtask-dialog]');
+
+    if (createDialog instanceof HTMLDialogElement) {
+        document.addEventListener('task:open-subtask', () => {
+            openDialog(createDialog);
+        });
+
+        createDialog.querySelectorAll('[data-close-subtask-dialog]').forEach(button => {
+            button.addEventListener('click', () => createDialog.close());
+        });
+
+        createDialog.addEventListener('click', event => {
+            if (event.target === createDialog) {
+                createDialog.close();
+            }
+        });
+
+        if (createDialog.hasAttribute('data-reopen')) {
+            openDialog(createDialog);
+        }
+    }
+
+    // Tombol edit setiap subtugas
+    document.querySelectorAll('[data-open-subtask-edit]').forEach(button => {
+        button.addEventListener('click', () => {
+            const targetId = button.dataset.dialogTarget;
+            const editDialog = targetId
+                ? document.getElementById(targetId)
+                : null;
+
+            openDialog(editDialog, '[name="nama_tugas"]');
+        });
     });
-    dialog.addEventListener('click', event => {
-        if (event.target === dialog) dialog.close();
+
+    // Tombol tutup dan buka kembali dialog edit saat validasi gagal
+    document.querySelectorAll('[data-subtask-edit-dialog]').forEach(dialog => {
+        if (!(dialog instanceof HTMLDialogElement)) return;
+
+        dialog.querySelectorAll('[data-close-subtask-dialog]').forEach(button => {
+            button.addEventListener('click', () => dialog.close());
+        });
+
+        dialog.addEventListener('click', event => {
+            if (event.target === dialog) {
+                dialog.close();
+            }
+        });
+
+        if (dialog.hasAttribute('data-reopen')) {
+            openDialog(dialog, '[name="nama_tugas"]');
+        }
     });
-    if (dialog.hasAttribute('data-reopen')) openDialog();
 })();
 </script>
 @endpush

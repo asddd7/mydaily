@@ -1197,6 +1197,44 @@
     text-decoration: none;
 }
 
+.task-detail-subtask-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    width: 100%;
+}
+
+.task-detail-subtask-row .task-detail-subtask-check {
+    flex: 1;
+    min-width: 0;
+}
+
+.task-detail-subtask-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
+.task-detail-subtask-actions form {
+    margin: 0;
+}
+
+.task-detail-subtask-list > li {
+    flex-wrap: wrap;
+}
+
+@media (max-width: 480px) {
+    .task-detail-subtask-row {
+        gap: 8px;
+    }
+
+    .task-detail-subtask-actions {
+        gap: 4px;
+    }
+}
+
 @media (max-width: 760px) {
     .content .tasks-page .tasks-tools {
         grid-template-columns: minmax(0, 1fr);

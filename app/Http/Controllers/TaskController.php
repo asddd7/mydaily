@@ -539,12 +539,28 @@ class TaskController extends Controller
     public function destroySubtask(Request $request, int $task): RedirectResponse
     {
         $userId = $request->attributes->get('currentUser')->id;
-        $subtask = DB::table('tugas')->where('id', $task)->where('user_id', $userId)->whereNotNull('parent_id')->first();
+
+        $subtask = DB::table('tugas')
+            ->where('id', $task)
+            ->where('user_id', $userId)
+            ->whereNotNull('parent_id')
+            ->first();
+
         abort_unless($subtask, 404);
 
-        DB::table('tugas')->where('id', $task)->delete();
+        // Simpan ID tugas induk sebelum subtugas dihapus.
+        $parentId = $subtask->parent_id;
 
-        return redirect()->route('tasks.index')->with('status', 'Subtugas dihapus.');
+        DB::table('tugas')
+            ->where('id', $subtask->id)
+            ->where('user_id', $userId)
+            ->delete();
+
+        $redirect = $request->boolean('return_to_detail')
+            ? redirect()->route('tasks.show', $parentId)
+            : redirect()->route('tasks.index');
+
+        return $redirect->with('status', 'Subtugas berhasil dihapus.');
     }
 
     public function destroySubtasks(Request $request, int $task): RedirectResponse
