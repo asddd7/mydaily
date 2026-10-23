@@ -35,6 +35,15 @@
                 </summary>
 
                 <div class="database-module-content">
+                    <div class="database-module-toolbar">
+                        <button type="button" class="database-copy-module">
+                            <i class="fa-regular fa-copy" aria-hidden="true"></i>
+                            Salin isi modul
+                        </button>
+                        <span class="database-copy-status" aria-live="polite"></span>
+                        <textarea class="database-copy-source" tabindex="-1" aria-hidden="true" hidden>{{ $module['copy_text'] }}</textarea>
+                    </div>
+
                     @if ($module['tables'])
                         <section class="database-module-section">
                             <h2>Tabel database</h2>
@@ -142,6 +151,30 @@
         });
 
         noResults.hidden = visibleCount > 0;
+    });
+
+    document.querySelectorAll('.database-copy-module').forEach(button => {
+        button.addEventListener('click', async () => {
+            const module = button.closest('.database-module');
+            const source = module?.querySelector('.database-copy-source');
+            const status = module?.querySelector('.database-copy-status');
+            if (!source || !status) return;
+
+            try {
+                if (navigator.clipboard && window.isSecureContext) {
+                    await navigator.clipboard.writeText(source.value);
+                } else {
+                    source.hidden = false;
+                    source.select();
+                    const copied = document.execCommand('copy');
+                    source.hidden = true;
+                    if (!copied) throw new Error('Clipboard API unavailable');
+                }
+                status.textContent = 'Isi modul berhasil disalin.';
+            } catch {
+                status.textContent = 'Gagal menyalin. Coba salin secara manual.';
+            }
+        });
     });
 })();
 </script>

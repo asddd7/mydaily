@@ -145,6 +145,46 @@
     border-top: 1px solid #edf1f6;
 }
 
+.database-module-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding-top: 13px;
+}
+
+.database-copy-module {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    min-height: 36px;
+    padding: 7px 11px;
+    border: 1px solid #bfdbfe;
+    border-radius: 8px;
+    background: #eff6ff;
+    color: #1d4ed8;
+    font: inherit;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.database-copy-module:hover {
+    background: #dbeafe;
+}
+
+.database-copy-status {
+    color: #15803d;
+    font-size: 12px;
+}
+
+.database-copy-source {
+    position: fixed;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+}
+
 .database-module-section {
     min-width: 0;
 }

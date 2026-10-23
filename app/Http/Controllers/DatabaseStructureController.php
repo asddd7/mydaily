@@ -249,6 +249,45 @@ class DatabaseStructureController extends Controller
             ];
         }
 
+        foreach ($modules as &$module) {
+            $copyLines = [
+                $module['title'],
+                $module['description'],
+                '',
+                'ROUTES',
+                ...array_map(fn (string $route): string => '- '.$route, $module['routes']),
+                '',
+                'DATABASE TABLES',
+            ];
+
+            foreach ($module['tables'] as $table) {
+                $copyLines[] = '';
+                $copyLines[] = 'TABLE: '.$table;
+                $copyLines[] = $tables[$table]['sql'];
+
+                foreach ($relations[$table]['outgoing'] as $relation) {
+                    $copyLines[] = 'FK: '.$table.'.'.$relation['column'].' -> '
+                        .$relation['referenced_table'].'.'.$relation['referenced_column'];
+                }
+                foreach ($relations[$table]['incoming'] as $relation) {
+                    $copyLines[] = 'FK: '.$relation['source_table'].'.'.$relation['column'].' -> '
+                        .$table.'.'.$relation['referenced_column'];
+                }
+            }
+
+            $copyLines[] = '';
+            $copyLines[] = 'RELATED FILES';
+            foreach ($module['files'] as $category => $paths) {
+                $copyLines[] = $category.':';
+                foreach ($paths as $path) {
+                    $copyLines[] = '- '.$path;
+                }
+            }
+
+            $module['copy_text'] = implode("\n", $copyLines);
+        }
+        unset($module);
+
         return view('admin.database-structure', compact('tables', 'relations', 'modules'));
     }
 }
