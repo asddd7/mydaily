@@ -10,6 +10,7 @@ export default defineConfig({
                 'resources/css/tasks.css',
                 'resources/css/money.css',
                 'resources/css/notes.css',
+                'resources/css/database-structure.css',
                 'resources/js/page-loader.js',
                 'resources/js/push-notifications.js',
                 'resources/js/pwa-install.js',
