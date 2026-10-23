@@ -11,6 +11,40 @@
 @foreach ($tables as $table => $structure)
     <section class="card database-table" data-table="{{ strtolower($table) }}">
         <h2>{{ $table }}</h2>
+        <details class="database-relations">
+            <summary>Relasi tabel</summary>
+            @if ($relations[$table]['outgoing'] || $relations[$table]['incoming'])
+                @if ($relations[$table]['outgoing'])
+                    <h3>Merujuk ke</h3>
+                    <ul>
+                        @foreach ($relations[$table]['outgoing'] as $relation)
+                            <li>
+                                <code>{{ $table }}.{{ $relation['column'] }}</code>
+                                &rarr;
+                                <code>{{ $relation['referenced_table'] }}.{{ $relation['referenced_column'] }}</code>
+                                <small>({{ $relation['constraint'] }})</small>
+                            </li>
+                        @endforeach
+                    </ul>
+                @endif
+
+                @if ($relations[$table]['incoming'])
+                    <h3>Dirujuk oleh</h3>
+                    <ul>
+                        @foreach ($relations[$table]['incoming'] as $relation)
+                            <li>
+                                <code>{{ $relation['source_table'] }}.{{ $relation['column'] }}</code>
+                                &rarr;
+                                <code>{{ $table }}.{{ $relation['referenced_column'] }}</code>
+                                <small>({{ $relation['constraint'] }})</small>
+                            </li>
+                        @endforeach
+                    </ul>
+                @endif
+            @else
+                <p>Tidak ada foreign key yang terdaftar untuk tabel ini.</p>
+            @endif
+        </details>
         <pre>{{ $structure['sql'] }}</pre>
         <button type="button" onclick="navigator.clipboard.writeText(this.previousElementSibling.textContent)">Salin struktur</button>
     </section>
