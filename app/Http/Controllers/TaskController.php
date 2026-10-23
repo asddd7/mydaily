@@ -143,18 +143,34 @@ class TaskController extends Controller
                 Rule::in(['none', 'daily', 'weekly', 'monthly', 'yearly']),
             ],
             'kategori' => ['required', Rule::in(array_keys(self::TASK_CATEGORIES))],
+            // Field image dipertahankan untuk kompatibilitas dengan form lama.
             'image' => ['nullable', 'image', 'mimes:jpeg,png,gif,webp', 'max:5120'],
+            'images' => ['nullable', 'array', 'max:10'],
+            'images.*' => ['image', 'mimes:jpeg,png,gif,webp', 'max:5120'],
         ]);
 
-        $imageName = $request->file('image')?->hashName();
-        $imagePath = null;
+        $uploadedImages = array_values(array_filter(array_merge(
+            $request->file('image') ? [$request->file('image')] : [],
+            $request->file('images', []) ?? [],
+        )));
+        $imageDirectory = base_path('uploads/tasks');
+        $imageNames = [];
+        $imagePaths = [];
 
-        if ($imageName) {
-            $imageDirectory = base_path('uploads/tasks');
+        if ($uploadedImages !== []) {
             File::ensureDirectoryExists($imageDirectory);
-            $imagePath = $imageDirectory.'/'.$imageName;
-            $request->file('image')->move($imageDirectory, $imageName);
+
+            foreach ($uploadedImages as $uploadedImage) {
+                $imageName = $uploadedImage->hashName();
+                $imagePath = $imageDirectory.'/'.$imageName;
+                $uploadedImage->move($imageDirectory, $imageName);
+                $imageNames[] = $imageName;
+                $imagePaths[] = $imagePath;
+            }
         }
+
+        // Kolom image lama berisi gambar pertama agar fitur lama tetap berfungsi.
+        $imageName = $imageNames[0] ?? null;
 
         $recurringType = $data['recurring_type'] ?? 'none';
 
@@ -179,14 +195,17 @@ class TaskController extends Controller
                 'recurring_type' => $recurringType,
                 'kategori' => $data['kategori'],
                 'image' => $imageName,
+                'images' => $imageNames !== [] ? json_encode($imageNames, JSON_THROW_ON_ERROR) : null,
             ]);
         } catch (\Throwable $error) {
-            if ($imagePath && File::exists($imagePath) && !File::delete($imagePath)) {
-                throw new \RuntimeException(
-                    'Unable to remove the task image after a failed task save.',
-                    0,
-                    $error
-                );
+            foreach ($imagePaths as $imagePath) {
+                if (File::exists($imagePath) && !File::delete($imagePath)) {
+                    throw new \RuntimeException(
+                        'Unable to remove task images after a failed task save.',
+                        0,
+                        $error
+                    );
+                }
             }
 
             throw $error;
@@ -202,10 +221,23 @@ class TaskController extends Controller
         $record = DB::table('tugas')
             ->where('id', $task)
             ->where('user_id', $request->attributes->get('currentUser')->id)
-            ->first(['image']);
-        abort_unless($record && $record->image, 404);
+            ->first(['image', 'images']);
+        abort_unless($record, 404);
 
-        $path = base_path('uploads/tasks/'.basename($record->image));
+        $imageNames = is_array($record->images)
+            ? $record->images
+            : json_decode((string) ($record->images ?? ''), true);
+
+        // Tugas lama hanya mempunyai kolom image.
+        if (!is_array($imageNames) || $imageNames === []) {
+            $imageNames = $record->image ? [$record->image] : [];
+        }
+
+        $imageIndex = max(0, (int) $request->query('image_index', 0));
+        $imageName = $imageNames[$imageIndex] ?? null;
+        abort_unless(is_string($imageName) && $imageName !== '', 404);
+
+        $path = base_path('uploads/tasks/'.basename($imageName));
         abort_unless(File::isFile($path), 404);
         abort_unless(in_array(File::mimeType($path), ['image/jpeg', 'image/png', 'image/gif', 'image/webp'], true), 404);
 

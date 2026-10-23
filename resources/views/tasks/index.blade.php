@@ -133,8 +133,14 @@
                     @endforeach
                 </select>
             </label>
-            <label class="task-field task-field-wide">Gambar (opsional)
-                <input type="file" name="image" accept="image/jpeg,image/png,image/gif,image/webp">
+            <label class="task-field task-field-wide">Gambar (opsional, maksimal 10 gambar)
+                <input
+                    type="file"
+                    name="images[]"
+                    accept="image/jpeg,image/png,image/gif,image/webp"
+                    multiple
+                >
+                <small>Pilih beberapa gambar sekaligus. Maksimal 5 MB per gambar.</small>
             </label>
             <div class="task-dialog-actions task-field-wide">
                 <button class="task-secondary-button" type="button" data-close-task-dialog>Batal</button>
@@ -223,8 +229,26 @@
                     </form>
                     <div class="task-card-info">
                         <h3 class="task-name {{ $task->selesai ? 'is-complete' : '' }}">{{ $task->nama_tugas }}</h3>
-                        @if ($task->image)
-                            <img class="task-image-preview" src="{{ route('tasks.image', $task->id) }}" alt="Gambar untuk tugas {{ $task->nama_tugas }}" loading="lazy">
+                        @php
+                            $taskImages = is_array($task->images ?? null)
+                                ? $task->images
+                                : json_decode((string) ($task->images ?? ''), true);
+                            if (!is_array($taskImages) || $taskImages === []) {
+                                $taskImages = !empty($task->image) ? [$task->image] : [];
+                            }
+                        @endphp
+                        @if ($taskImages !== [])
+                            <div class="task-image-gallery" role="group" aria-label="Gambar untuk tugas {{ $task->nama_tugas }}" style="display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.65rem;">
+                                @foreach ($taskImages as $imageIndex => $imageName)
+                                    <img
+                                        class="task-image-preview"
+                                        src="{{ route('tasks.image', [$task->id, 'image_index' => $imageIndex]) }}"
+                                        alt="Gambar {{ $imageIndex + 1 }} untuk tugas {{ $task->nama_tugas }}"
+                                        loading="lazy"
+                                        style="width:96px;height:96px;object-fit:cover;border-radius:8px;"
+                                    >
+                                @endforeach
+                            </div>
                         @endif
                         <div class="task-meta">
                             <span><i class="fa-regular fa-calendar" aria-hidden="true"></i> {{ $task->deadline }}</span>
