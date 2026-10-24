@@ -10,6 +10,10 @@
 /.env
 /.env.*
 !.env.example
+/.dev.vars
+# Firebase Admin SDK credentials downloaded from the Firebase console
+/*-firebase-adminsdk-*.json
+/firebase-service-account*.json
 /bootstrap/cache/*.php
 !/bootstrap/cache/.gitignore
 /storage/*.key
