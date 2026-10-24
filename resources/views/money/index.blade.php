@@ -70,21 +70,39 @@
             <p class="money-dialog-error" role="alert">{{ $errors->first() }}</p>
         @endif
         <div class="money-receipt-scan" data-receipt-scan>
-            <label for="receiptImage">Foto struk
-                <input
-                    id="receiptImage"
-                    type="file"
-                    accept="image/jpeg,image/png,image/webp"
-                >
-            </label>
-            <button type="button" class="money-scan-button" data-scan-submit>
-                <i class="fa-solid fa-camera" aria-hidden="true"></i> Baca struk
-            </button>
-            <p class="money-scan-status" data-scan-status role="status" aria-live="polite"></p>
-            <details class="money-ocr-text" data-ocr-text-container hidden>
-                <summary>Teks hasil pembacaan</summary>
-                <pre data-ocr-text></pre>
-            </details>
+        <label for="receiptImage">
+            Foto struk (bisa pilih beberapa)
+            <input
+                id="receiptImage"
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                multiple
+            >
+        </label>
+        <small>Pilih beberapa foto struk sekaligus. Maksimal 10 MB per foto.</small>
+
+        <small class="money-receipt-selected" data-receipt-selected aria-live="polite">Belum ada foto dipilih.</small>
+
+        <button type="button" class="money-clear-receipts" data-clear-receipt-images disabled>
+            Hapus semua foto
+        </button>
+
+        <button type="button" class="money-scan-button" data-scan-submit>
+            <i class="fa-solid fa-camera" aria-hidden="true"></i>
+            Baca semua foto
+        </button>
+
+        <p
+            class="money-scan-status"
+            data-scan-status
+            role="status"
+            aria-live="polite"
+        ></p>
+
+        <details class="money-ocr-text" data-ocr-text-container hidden>
+            <summary>Teks hasil pembacaan semua foto</summary>
+            <pre data-ocr-text></pre>
+        </details>
         </div>
         <form method="post" action="{{ route('money.store') }}" class="money-entry-form" id="moneyCreateForm">
             @csrf

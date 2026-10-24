@@ -163,104 +163,355 @@ export const extractReceiptFields = text => {
 
 const initializeReceiptScanner = () => {
     const scanner = document.querySelector('[data-receipt-scan]');
-    const dialog = document.querySelector('[data-money-dialog]');
     const transactionForm = document.getElementById('moneyCreateForm');
-    if (!scanner || !dialog || !(transactionForm instanceof HTMLFormElement)) return;
+
+    if (!scanner || !(transactionForm instanceof HTMLFormElement)) {
+        return;
+    }
 
     const fileInput = scanner.querySelector('input[type="file"]');
     const scanButton = scanner.querySelector('[data-scan-submit]');
     const scanStatus = scanner.querySelector('[data-scan-status]');
+    const selectedFilesDisplay = scanner.querySelector('[data-receipt-selected]');
+    const clearFilesButton = scanner.querySelector('[data-clear-receipt-images]');
     const ocrTextContainer = scanner.querySelector('[data-ocr-text-container]');
     const ocrText = scanner.querySelector('[data-ocr-text]');
+
     if (
-        !(fileInput instanceof HTMLInputElement)
-        || !(scanButton instanceof HTMLButtonElement)
-        || !(scanStatus instanceof HTMLElement)
-        || !(ocrTextContainer instanceof HTMLDetailsElement)
-        || !(ocrText instanceof HTMLElement)
-    ) return;
+        !(fileInput instanceof HTMLInputElement) ||
+        !(scanButton instanceof HTMLButtonElement) ||
+        !(scanStatus instanceof HTMLElement) ||
+        !(selectedFilesDisplay instanceof HTMLElement) ||
+        !(clearFilesButton instanceof HTMLButtonElement) ||
+        !(ocrTextContainer instanceof HTMLDetailsElement) ||
+        !(ocrText instanceof HTMLElement)
+    ) {
+        return;
+    }
+
+    // Some mobile pickers replace the previous selection on each open. Keep
+    // selections across opens so users can add receipt photos in batches.
+    const selectedImages = new Map();
+    const fileKey = file => `${file.name}:${file.size}:${file.lastModified}`;
+    const renderSelectedImages = () => {
+        const files = [...selectedImages.values()];
+        selectedFilesDisplay.textContent = files.length
+            ? `${files.length} foto dipilih: ${files.map(file => file.name).join(', ')}`
+            : 'Belum ada foto dipilih.';
+        clearFilesButton.disabled = files.length === 0;
+    };
+
+    fileInput.addEventListener('change', () => {
+        Array.from(fileInput.files ?? []).forEach(file => {
+            selectedImages.set(fileKey(file), file);
+        });
+
+        try {
+            const transfer = new DataTransfer();
+            selectedImages.forEach(file => transfer.items.add(file));
+            fileInput.files = transfer.files;
+            renderSelectedImages();
+            scanStatus.textContent = `${selectedImages.size} foto siap dipindai.`;
+        } catch (error) {
+            console.error('Tidak dapat menggabungkan pilihan foto.', error);
+            renderSelectedImages();
+            scanStatus.textContent =
+                'Browser tidak mendukung penggabungan pilihan. Pilih semua foto sekaligus.';
+        }
+    });
+
+    clearFilesButton.addEventListener('click', () => {
+        selectedImages.clear();
+        fileInput.value = '';
+        renderSelectedImages();
+        scanStatus.textContent = 'Pilihan foto dihapus.';
+    });
 
     scanButton.addEventListener('click', async () => {
-        const [image] = fileInput.files ?? [];
+        const images = Array.from(fileInput.files ?? []);
+
         ocrTextContainer.hidden = true;
         ocrText.textContent = '';
 
-        if (!image) {
-            scanStatus.textContent = 'Pilih foto struk terlebih dahulu.';
+        if (images.length === 0) {
+            scanStatus.textContent = 'Pilih minimal satu foto struk.';
             fileInput.focus();
             return;
         }
-        if (!['image/jpeg', 'image/png', 'image/webp'].includes(image.type)) {
-            scanStatus.textContent = 'Format foto harus JPG, PNG, atau WebP.';
+
+        const allowedTypes = [
+            'image/jpeg',
+            'image/png',
+            'image/webp',
+        ];
+
+        const invalidType = images.find(image =>
+            !allowedTypes.includes(image.type)
+        );
+
+        if (invalidType) {
+            scanStatus.textContent =
+                `Format ${invalidType.name} tidak didukung. ` +
+                'Gunakan JPG, PNG, atau WebP.';
             return;
         }
-        if (image.size > 10 * 1024 * 1024) {
-            scanStatus.textContent = 'Ukuran foto maksimal 10 MB.';
+
+        const oversizedImage = images.find(
+            image => image.size > 10 * 1024 * 1024
+        );
+
+        if (oversizedImage) {
+            scanStatus.textContent =
+                `Ukuran ${oversizedImage.name} melebihi batas 10 MB.`;
             return;
         }
 
         scanButton.disabled = true;
-        scanStatus.textContent = 'Menyiapkan OCR...';
+        fileInput.disabled = true;
+        scanStatus.textContent =
+            `Menyiapkan pemindaian ${images.length} foto...`;
+
         let worker;
+        let currentPhotoNumber = 1;
 
         try {
             worker = await createWorker('ind+eng', 1, {
                 logger: message => {
-                    if (message.status === 'recognizing text' && Number.isFinite(message.progress)) {
-                        scanStatus.textContent = `Membaca struk... ${Math.round(message.progress * 100)}%`;
+                    if (
+                        message.status === 'recognizing text' &&
+                        Number.isFinite(message.progress)
+                    ) {
+                        scanStatus.textContent =
+                            `Membaca foto ${currentPhotoNumber} dari ` +
+                            `${images.length}... ` +
+                            `${Math.round(message.progress * 100)}%`;
                     } else if (message.status) {
-                        scanStatus.textContent = 'Menyiapkan data OCR untuk pertama kali...';
+                        scanStatus.textContent =
+                            `Menyiapkan OCR untuk foto ` +
+                            `${currentPhotoNumber} dari ${images.length}...`;
                     }
                 },
             });
 
-            const result = await worker.recognize(image);
-            const text = result.data.text.trim();
-            if (!text) {
-                scanStatus.textContent = 'Teks pada foto tidak terbaca. Coba foto yang lebih jelas.';
+            const scannedPhotos = [];
+
+            // Proses foto satu per satu menggunakan worker yang sama.
+            for (let index = 0; index < images.length; index++) {
+                const image = images[index];
+                currentPhotoNumber = index + 1;
+
+                scanStatus.textContent =
+                    `Membaca foto ${currentPhotoNumber} dari ${images.length}: ` +
+                    image.name;
+
+                try {
+                    const result = await worker.recognize(image);
+                    const text = result.data.text.trim();
+
+                    scannedPhotos.push({
+                        name: image.name,
+                        text,
+                        fields: text ? extractReceiptFields(text) : null,
+                    });
+                } catch (error) {
+                    console.error(
+                        `Gagal membaca foto ${image.name}.`,
+                        error
+                    );
+
+                    scannedPhotos.push({
+                        name: image.name,
+                        text: '',
+                        fields: null,
+                        failed: true,
+                    });
+                }
+            }
+
+            const readablePhotos = scannedPhotos.filter(
+                photo => photo.fields !== null
+            );
+
+            if (readablePhotos.length === 0) {
+                ocrText.textContent = scannedPhotos
+                    .map(photo =>
+                        `=== ${photo.name} ===\nTeks tidak berhasil dibaca.`
+                    )
+                    .join('\n\n');
+
+                ocrTextContainer.hidden = false;
+                scanStatus.textContent =
+                    'Tidak ada foto yang berhasil dibaca. ' +
+                    'Coba gunakan foto yang lebih jelas.';
                 return;
             }
 
-            const fields = extractReceiptFields(text);
-            if (fields.tanggal) transactionForm.elements.tanggal.value = fields.tanggal;
-            if (fields.category) transactionForm.elements.category.value = fields.category;
-            if (fields.payment_method) transactionForm.elements.payment_method.value = fields.payment_method;
-            const amountInput = transactionForm.querySelector('[data-grand-total]');
-            if (fields.amount !== null && amountInput instanceof HTMLInputElement) {
-                if (amountInput.type === 'number') {
-                    amountInput.value = String(fields.amount);
-                    amountInput.dispatchEvent(new Event('input', { bubbles: true }));
-                    amountInput.dispatchEvent(new Event('change', { bubbles: true }));
-                } else {
-                    setRupiahInputValue(amountInput, fields.amount);
-                }
+            // Ambil nilai pertama yang berhasil terdeteksi.
+            const firstDetected = fieldName =>
+                readablePhotos.find(photo =>
+                    photo.fields[fieldName] !== null &&
+                    photo.fields[fieldName] !== undefined
+                )?.fields[fieldName] ?? null;
+
+            const detectedDate = firstDetected('tanggal');
+            const detectedCategory = firstDetected('category');
+            const detectedPaymentMethod = firstDetected('payment_method');
+
+            // Gabungkan nominal dari setiap foto yang mempunyai total.
+            // Penjumlahan dalam satuan sen untuk mengurangi masalah desimal.
+            const photosWithAmount = readablePhotos.filter(
+                photo => photo.fields.amount !== null
+            );
+
+            const totalCents = photosWithAmount.reduce(
+                (sum, photo) =>
+                    sum + Math.round(photo.fields.amount * 100),
+                0
+            );
+
+            if (detectedDate) {
+                transactionForm.elements.tanggal.value = detectedDate;
             }
+
+            if (detectedCategory) {
+                transactionForm.elements.category.value = detectedCategory;
+            }
+
+            if (detectedPaymentMethod) {
+                transactionForm.elements.payment_method.value =
+                    detectedPaymentMethod;
+            }
+
+            // Semua foto struk dicatat sebagai satu pengeluaran.
             transactionForm.elements.type.value = 'expense';
 
-            ocrText.textContent = text;
+            const amountInput =
+                transactionForm.querySelector('[data-grand-total]');
+
+            if (
+                photosWithAmount.length > 0 &&
+                amountInput instanceof HTMLInputElement
+            ) {
+                const totalAmount = totalCents / 100;
+
+                if (amountInput.type === 'number') {
+                    amountInput.value = String(totalAmount);
+                    amountInput.dispatchEvent(
+                        new Event('input', { bubbles: true })
+                    );
+                    amountInput.dispatchEvent(
+                        new Event('change', { bubbles: true })
+                    );
+                } else {
+                    setRupiahInputValue(amountInput, totalAmount);
+                }
+            }
+
+            // Tampilkan teks OCR dari setiap foto agar bisa diperiksa.
+            ocrText.textContent = scannedPhotos
+                .map(photo =>
+                    `=== ${photo.name} ===\n` +
+                    (photo.text || 'Teks tidak berhasil dibaca.')
+                )
+                .join('\n\n');
+
             ocrTextContainer.hidden = false;
-            scanStatus.textContent = fields.warnings.length
-                ? `Teks berhasil dibaca. ${fields.warnings.join(' ')}`
-                : 'Struk terbaca. Periksa kembali saran transaksi sebelum disimpan.';
+
+            const warnings = [];
+
+            const unreadablePhotos = scannedPhotos.filter(
+                photo => photo.fields === null
+            );
+
+            if (unreadablePhotos.length > 0) {
+                warnings.push(
+                    `${unreadablePhotos.length} foto tidak berhasil dibaca.`
+                );
+            }
+
+            const photosWithoutAmount = readablePhotos.filter(
+                photo => photo.fields.amount === null
+            );
+
+            if (photosWithoutAmount.length > 0) {
+                warnings.push(
+                    `Nominal tidak terdeteksi pada ` +
+                    `${photosWithoutAmount.length} foto. Total hanya ` +
+                    `menjumlahkan ${photosWithAmount.length} foto ` +
+                    `yang nominalnya terbaca.`
+                );
+            }
+
+            if (!detectedDate) {
+                warnings.push(
+                    'Tanggal tidak terdeteksi; isi tanggal secara manual.'
+                );
+            }
+
+            if (!detectedCategory) {
+                warnings.push(
+                    'Kategori tidak terdeteksi; isi kategori secara manual.'
+                );
+            }
+
+            if (photosWithAmount.length > 0) {
+                const formattedTotal = (totalCents / 100).toLocaleString(
+                    'id-ID',
+                    {
+                        minimumFractionDigits: 0,
+                        maximumFractionDigits: 2,
+                    }
+                );
+
+                const amountSummary = photosWithAmount
+                    .map(photo => `${photo.name}: Rp ${photo.fields.amount.toLocaleString('id-ID')}`)
+                    .join(' | ');
+
+                scanStatus.textContent =
+                    `Selesai membaca ${images.length} foto. ${amountSummary}. ` +
+                    `Grand total ${photosWithAmount.length} foto: Rp ${formattedTotal}. ` +
+                    (warnings.length
+                        ? warnings.join(' ')
+                        : 'Periksa kembali data sebelum disimpan.');
+            } else {
+                scanStatus.textContent =
+                    'Foto berhasil diproses, tetapi nominal tidak terdeteksi. ' +
+                    'Isi nominal transaksi secara manual. ' +
+                    warnings.join(' ');
+            }
+
             transactionForm.elements.category.focus();
         } catch (error) {
             console.error('Browser receipt OCR failed.', error);
-            scanStatus.textContent = 'OCR gagal dimuat atau dijalankan. Periksa koneksi internet lalu coba lagi.';
+
+            scanStatus.textContent =
+                'OCR gagal dijalankan. Periksa koneksi internet, ' +
+                'lalu coba lagi.';
         } finally {
             try {
-                if (worker) await worker.terminate();
+                if (worker) {
+                    await worker.terminate();
+                }
             } catch (error) {
-                console.error('Could not terminate the receipt OCR worker.', error);
-            } finally {
-                scanButton.disabled = false;
+                console.error(
+                    'Tidak dapat menghentikan worker OCR.',
+                    error
+                );
             }
+
+            scanButton.disabled = false;
+            fileInput.disabled = false;
         }
     });
 };
 
 if (typeof document !== 'undefined') {
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initializeReceiptScanner, { once: true });
+        document.addEventListener(
+            'DOMContentLoaded',
+            initializeReceiptScanner,
+            { once: true }
+        );
     } else {
         initializeReceiptScanner();
     }
