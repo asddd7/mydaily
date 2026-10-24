@@ -76,6 +76,70 @@ const amountsFromLine = line => {
         .filter(amount => amount !== null && amount > 0 && amount <= 9999999999);
 };
 
+
+const extractReceiptItems = lines => {
+    const items = [];
+    const ignoredLine = /grand\s*total|subtotal|total\s*(?:pembayaran|payment|belanja|tagihan|bayar)?|diskon|discount|hemat|potongan|pajak|ppn|kembalian|uang\s*(?:tunai|diterima)|metode\s*pembayaran|payment\s*method|nominal\s*(?:pembayaran|paid)|dibayar|amount\s*due|amount\s*paid|kode\s*(?:pembayaran|transaksi)|id\s*(?:pembayaran|transaksi)|tanggal|waktu\s*(?:pembayaran|transaksi)/iu;
+
+    for (const line of lines) {
+        const normalized = line.replace(/\s+/gu, ' ').trim();
+
+        if (!normalized || ignoredLine.test(normalized)) continue;
+
+        const matches = [
+            ...normalized.matchAll(
+                /(Rp\.?\s*)?((?:\d{1,3}(?:[.,]\d{3})+|\d+)(?:[.,]\d{1,2})?)\s*([kK])?/giu
+            ),
+        ];
+
+        if (!matches.length) continue;
+
+        // Harga biasanya berada di bagian akhir baris struk.
+        const match = matches[matches.length - 1];
+        const rawAmount = match[2];
+        const suffix = match[3] ?? '';
+        const hasCurrency = Boolean(match[1]);
+        const hasSeparator = /[.,]/u.test(rawAmount);
+        const amount = normalizeAmount(rawAmount, suffix);
+
+        if (
+            amount === null ||
+            amount <= 0 ||
+            amount > 9999999999 ||
+            (!hasCurrency && !hasSeparator && amount < 1000)
+        ) {
+            continue;
+        }
+
+        let name = normalized.slice(0, match.index).trim();
+
+        // Bersihkan nomor urut dan kuantitas sederhana di depan nama.
+        name = name
+            .replace(/^\d{1,3}\s*[.)-]\s*/u, '')
+            .replace(/\s+(?:x|×)\s*\d+\s*$/iu, '')
+            .replace(/\s+\d+\s*$/u, '')
+            .replace(/[\s:|,;=\-]+$/u, '')
+            .trim();
+
+        if (
+            name.length < 2 ||
+            name.length > 150 ||
+            !/\p{L}/u.test(name) ||
+            ignoredLine.test(name)
+        ) {
+            continue;
+        }
+
+        items.push({
+            name,
+            amount: Math.round(amount * 100) / 100,
+        });
+    }
+
+    return items;
+};
+
+
 const ignoredAmountLine = /diskon|discount|hemat|potongan|subtotal|pajak|ppn|kode\s*(?:pembayaran|transaksi)|id\s*(?:pembayaran|transaksi)|(?:waktu|tanggal)\s*(?:pembayaran|transaksi)|payment\s*id|transaction\s*id/u;
 
 const totalScore = line => {
@@ -150,6 +214,7 @@ export const extractReceiptFields = text => {
         tanggal: extractDate(text),
         category: digitalPayment ? 'Pembayaran digital' : category,
         amount: extractTotal(lines),
+        items: extractReceiptItems(lines),
         payment_method: digitalPayment ? 'online' : null,
     };
     const warnings = [];
@@ -356,6 +421,9 @@ const initializeReceiptScanner = () => {
             const detectedDate = firstDetected('tanggal');
             const detectedCategory = firstDetected('category');
             const detectedPaymentMethod = firstDetected('payment_method');
+            const detectedItems = readablePhotos.flatMap(
+                photo => photo.fields.items ?? []
+            );
 
             // Gabungkan nominal dari setiap foto yang mempunyai total.
             // Penjumlahan dalam satuan sen untuk mengurangi masalah desimal.
@@ -385,10 +453,20 @@ const initializeReceiptScanner = () => {
             // Semua foto struk dicatat sebagai satu pengeluaran.
             transactionForm.elements.type.value = 'expense';
 
+            // Isi rincian barang dari seluruh foto yang berhasil dipindai.
+            if (detectedItems.length > 0) {
+                transactionForm.dispatchEvent(
+                    new CustomEvent('money:replace-items', {
+                        detail: detectedItems,
+                    })
+                );
+            }
+
             const amountInput =
                 transactionForm.querySelector('[data-grand-total]');
 
             if (
+                detectedItems.length === 0 &&
                 photosWithAmount.length > 0 &&
                 amountInput instanceof HTMLInputElement
             ) {
