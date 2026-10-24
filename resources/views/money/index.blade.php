@@ -72,14 +72,33 @@
         <div class="money-receipt-scan" data-receipt-scan>
         <label for="receiptImage">
             Foto struk (bisa pilih beberapa)
-            <input
-                id="receiptImage"
-                type="file"
-                accept="image/jpeg,image/png,image/webp"
-                multiple
-            >
+        <input
+            id="receiptImage"
+            type="file"
+            name="receipt_images[]"
+            accept="image/jpeg,image/png,image/webp"
+            multiple
+        >
         </label>
         <small>Pilih beberapa foto struk sekaligus. Maksimal 10 MB per foto.</small>
+
+        <label class="money-receipt-save-option">
+            <input
+                type="checkbox"
+                name="save_receipt_images"
+                value="1"
+                form="moneyCreateForm"
+                data-save-receipt-images
+            >
+
+            <span>
+                <strong>Simpan gambar struk sebagai bukti pembayaran</strong>
+                <small>
+                    Jika dicentang, foto struk akan disimpan secara privat
+                    dan dapat dilihat dari riwayat transaksi.
+                </small>
+            </span>
+        </label>
 
         <small class="money-receipt-selected" data-receipt-selected aria-live="polite">Belum ada foto dipilih.</small>
 
@@ -104,7 +123,13 @@
             <pre data-ocr-text></pre>
         </details>
         </div>
-        <form method="post" action="{{ route('money.store') }}" class="money-entry-form" id="moneyCreateForm">
+        <form
+            method="post"
+            action="{{ route('money.store') }}"
+            class="money-entry-form"
+            id="moneyCreateForm"
+            enctype="multipart/form-data"
+        >
             @csrf
             <input type="hidden" name="_form" value="money_create">
             <label>Tanggal transaksi
@@ -269,6 +294,7 @@
                             </td>
                             <td data-label="Transaksi" class="money-history-description">
                                 @php($items = $transactionItems->get($transaction->id, collect()))
+                                @php($receipts = $transactionReceipts->get($transaction->id, collect()))
                                 <div class="money-history-detail-content" id="money-transaction-detail-{{ $transaction->id }}" hidden>
                                     <span class="money-history-category" title="{{ $transaction->category }}">{{ $transaction->category }}</span>
                                     @if ($transaction->description)
@@ -280,6 +306,30 @@
                                             <ul>
                                                 @foreach ($items as $item)
                                                     <li><span>{{ $item->name }}</span><strong>Rp {{ number_format((float) $item->amount, 0, ',', '.') }}</strong></li>
+                                                @endforeach
+                                            </ul>
+                                        </div>
+                                    @endif
+                                    @if ($receipts->isNotEmpty())
+                                        <div class="money-history-receipts">
+                                            <strong>
+                                                Bukti pembayaran ({{ $receipts->count() }} foto)
+                                            </strong>
+
+                                            <ul>
+                                                @foreach ($receipts as $receipt)
+                                                    <li>
+                                                        <a
+                                                            href="{{ route('money.receipt', [
+                                                                'transaction' => $transaction->id,
+                                                                'receipt' => $receipt->id,
+                                                            ]) }}"
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                        >
+                                                            Lihat foto {{ $loop->iteration }}
+                                                        </a>
+                                                    </li>
                                                 @endforeach
                                             </ul>
                                         </div>

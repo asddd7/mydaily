@@ -332,6 +332,28 @@ const initializeReceiptScanner = () => {
         return;
     }
 
+    const saveReceiptCheckbox = scanner.querySelector(
+        '[data-save-receipt-images]'
+    );
+
+    if (!(saveReceiptCheckbox instanceof HTMLInputElement)) {
+        return;
+    }
+
+    // Foto hanya dikirim bersama form jika pengguna memilih
+    // untuk menyimpannya sebagai bukti pembayaran.
+    const syncReceiptUpload = () => {
+        if (saveReceiptCheckbox.checked) {
+            fileInput.setAttribute('form', transactionForm.id);
+        } else {
+            fileInput.removeAttribute('form');
+        }
+    };
+
+    syncReceiptUpload();
+
+    saveReceiptCheckbox.addEventListener('change', syncReceiptUpload);
+
     // Some mobile pickers replace the previous selection on each open. Keep
     // selections across opens so users can add receipt photos in batches.
     const selectedImages = new Map();

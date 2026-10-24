@@ -892,6 +892,43 @@
     cursor: pointer;
 }
 
+.money-receipt-save-option {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-block: 12px;
+    cursor: pointer;
+}
+
+.money-receipt-save-option input[type="checkbox"] {
+    width: 18px;
+    min-width: 18px;
+    margin-top: 3px;
+}
+
+.money-receipt-save-option span {
+    display: grid;
+    gap: 4px;
+}
+
+.money-receipt-save-option small {
+    display: block;
+    line-height: 1.5;
+    opacity: 0.8;
+}
+
+.money-history-receipts {
+    margin-top: 12px;
+}
+
+.money-history-receipts ul {
+    margin: 6px 0 0;
+    padding-left: 18px;
+}
+
+.money-history-receipts a {
+    overflow-wrap: anywhere;
+}
 
 @media (max-width: 850px) {
     .content .money-form-grid { grid-template-columns: minmax(0, 1fr); }

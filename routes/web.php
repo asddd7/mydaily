@@ -63,6 +63,13 @@ Route::get('/money-plan', [MoneyPlanController::class, 'index'])->name('money.in
 Route::post('/money-plan', [MoneyPlanController::class, 'store'])->name('money.store');
 Route::post('/money-plan/adjust', [MoneyPlanController::class, 'adjust'])->name('money.adjust');
 Route::delete('/money-plan/{transaction}', [MoneyPlanController::class, 'destroy'])->name('money.destroy');
+Route::get(
+    '/money/{transaction}/receipts/{receipt}',
+    [MoneyPlanController::class, 'receipt']
+)
+    ->whereNumber('transaction')
+    ->whereNumber('receipt')
+    ->name('money.receipt');
 
 Route::get('/notes', [NotesController::class, 'index'])->name('notes.index');
 Route::post('/notes', [NotesController::class, 'store'])->name('notes.store');
