@@ -14,6 +14,10 @@
             <h1>Pengatur Keuangan</h1>
             <p>Pantau saldo dan riwayat transaksi dalam satu tempat.</p>
         </div>
+        <button class="money-primary-button money-heading-action" type="button" data-open-money-dialog>
+            <i class="fa-solid fa-plus" aria-hidden="true"></i>
+            Tambah transaksi
+        </button>
     </div>
 
     <section class="money-balance-grid" aria-label="Ringkasan saldo">
