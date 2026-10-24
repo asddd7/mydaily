@@ -14,13 +14,6 @@
     gap: 16px;
 }
 
-.content .money-heading-action {
-    flex: 0 0 auto;
-    width: auto !important;
-    padding: 11px 16px;
-    box-shadow: 0 5px 14px rgba(37, 99, 235, .18);
-}
-
 .content .money-heading h1,
 .content .money-panel-heading h2 {
     margin: 0;
@@ -984,10 +977,6 @@
         align-items: stretch;
         flex-direction: column;
         gap: 12px;
-    }
-
-    .content .money-heading-action {
-        width: 100% !important;
     }
 
     .content .money-adjust-panel {
