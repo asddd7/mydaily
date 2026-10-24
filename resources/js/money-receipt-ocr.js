@@ -78,14 +78,19 @@ const amountsFromLine = line => {
 
 
 
+
 const extractReceiptItems = lines => {
     const items = [];
 
     const ignoredLine =
-        /grand\s*total|subtotal|total\s*(?:pembayaran|payment|belanja|tagihan|bayar)?|diskon|discount|hemat|potongan|pajak|ppn|kembalian|uang\s*(?:tunai|diterima)|metode\s*pembayaran|payment\s*method|nominal\s*(?:pembayaran|paid)|dibayar|amount\s*due|amount\s*paid|kode\s*(?:pembayaran|transaksi)|id\s*(?:pembayaran|transaksi)|tanggal|waktu\s*(?:pembayaran|transaksi)/iu;
+        /grand\s*total|subtotal|total(?:\s*pembayaran|\s*payment|\s*belanja|\s*tagihan|\s*bayar)?|diskon|discount|hemat|potongan|pajak|ppn|kembalian|uang\s*(?:tunai|diterima)|metode\s*pembayaran|payment\s*method|nominal\s*(?:pembayaran|paid)|dibayar|amount\s*due|amount\s*paid|kode\s*(?:pembayaran|transaksi)|id\s*(?:pembayaran|transaksi)|tanggal|waktu\s*(?:pembayaran|transaksi)|cashier|kasir|alamat|telepon|telp|terima\s*kasih/iu;
 
     const amountPattern =
         /(?:Rp\.?\s*)?((?:\d{1,3}(?:[.,]\d{3})+|\d+)(?:[.,]\d{1,2})?)\s*([kK])?/giu;
+
+    const normalizedLines = lines.map(line =>
+        line.replace(/\s+/gu, ' ').trim()
+    );
 
     const isAmountOnly = line =>
         /^(?:Rp\.?\s*)?(?:\d{1,3}(?:[.,]\d{3})+|\d+)(?:[.,]\d{1,2})?\s*[kK]?$/iu.test(
@@ -94,11 +99,13 @@ const extractReceiptItems = lines => {
 
     const cleanName = value => value
         .replace(/^\d{1,3}\s*[.)-]\s*/u, '')
-        .replace(/\s+(?:x|×)\s*\d+\s*$/iu, '')
+        .replace(/\s+\d+\s*(?:pcs?|buah|btl|botol|pack|pak|kg|gram|gr|ml|liter|ltr)\s*$/iu, '')
+        .replace(/\s*[x×]\s*\d+\s*$/iu, '')
+        .replace(/\s+\d+\s*[x×]\s*$/iu, '')
         .replace(/[\s:|,;=\-]+$/u, '')
         .trim();
 
-    const addItem = (name, rawAmount, suffix = '') => {
+    const addItem = (name, rawAmount, suffix = '', options = {}) => {
         const cleanedName = cleanName(name);
         const amount = normalizeAmount(rawAmount, suffix);
 
@@ -114,31 +121,40 @@ const extractReceiptItems = lines => {
             return;
         }
 
-        // Hindari memasukkan barang duplikat akibat teks OCR berulang.
+        // Nominal kecil tanpa penanda mata uang atau pemisah
+        // sering merupakan jumlah barang, bukan harga.
+        if (
+            !options.allowSmallAmount &&
+            !options.hasCurrency &&
+            !options.hasSeparator &&
+            !suffix &&
+            amount < 1000
+        ) {
+            return;
+        }
+
+        const normalizedName = cleanedName.toLocaleLowerCase('id');
+        const roundedAmount = Math.round(amount * 100) / 100;
+
         const duplicate = items.some(item =>
-            item.name.toLocaleLowerCase('id') ===
-                cleanedName.toLocaleLowerCase('id') &&
-            item.amount === Math.round(amount * 100) / 100
+            item.name.toLocaleLowerCase('id') === normalizedName &&
+            item.amount === roundedAmount
         );
 
         if (!duplicate) {
             items.push({
                 name: cleanedName,
-                amount: Math.round(amount * 100) / 100,
+                amount: roundedAmount,
             });
         }
     };
-
-    const normalizedLines = lines.map(line =>
-        line.replace(/\s+/gu, ' ').trim()
-    );
 
     for (let index = 0; index < normalizedLines.length; index++) {
         const line = normalizedLines[index];
 
         if (!line || ignoredLine.test(line)) continue;
 
-        // Pola: "Indomie Goreng 3.000"
+        // Format: "Nama barang 3.000" atau "2. Nama barang 3.000".
         const matches = [...line.matchAll(amountPattern)];
 
         if (matches.length > 0) {
@@ -146,43 +162,60 @@ const extractReceiptItems = lines => {
             const name = line.slice(0, match.index).trim();
 
             if (name.length >= 2 && /\p{L}/u.test(name)) {
-                addItem(name, match[1], match[2] ?? '');
+                const rawAmount = match[1];
+                const suffix = match[2] ?? '';
+                const hasCurrency = /Rp\.?\s*/iu.test(
+                    match[0].slice(0, match[0].indexOf(rawAmount))
+                );
+                const hasSeparator = /[.,]/u.test(rawAmount);
+
+                addItem(name, rawAmount, suffix, {
+                    hasCurrency,
+                    hasSeparator,
+                });
+
                 continue;
             }
         }
 
-        // Pola: nama barang dan harga ada di baris berbeda.
-        // Contoh:
-        // Indomie Goreng
-        // 3.000
+        // Format: nama barang di satu baris, harga di baris selanjutnya.
         if (isAmountOnly(line)) {
             const previousLine = normalizedLines[index - 1];
 
             if (
-                previousLine &&
-                !ignoredLine.test(previousLine) &&
-                !isAmountOnly(previousLine)
+                !previousLine ||
+                ignoredLine.test(previousLine) ||
+                isAmountOnly(previousLine)
             ) {
-                const previousMatches = [
-                    ...previousLine.matchAll(amountPattern),
-                ];
-
-                // Jika baris sebelumnya sudah punya nominal,
-                // jangan memasangkannya lagi dengan nominal berikutnya.
-                if (previousMatches.length === 0) {
-                    addItem(
-                        previousLine,
-                        line.replace(/^(?:Rp\.?\s*)/iu, '').replace(/\s*[kK]$/u, ''),
-                        line.match(/[kK]$/u)?.[0] ?? ''
-                    );
-                }
+                continue;
             }
+
+            const previousMatches = [
+                ...previousLine.matchAll(amountPattern),
+            ];
+
+            // Jangan memasangkan harga dengan baris yang sudah
+            // memiliki angka/harga sendiri.
+            if (previousMatches.length > 0) continue;
+
+            const priceMatch = line.match(
+                /^(?:Rp\.?\s*)?((?:\d{1,3}(?:[.,]\d{3})+|\d+)(?:[.,]\d{1,2})?)\s*([kK])?$/iu
+            );
+
+            if (!priceMatch) continue;
+
+            const rawAmount = priceMatch[1];
+            const suffix = priceMatch[2] ?? '';
+
+            addItem(previousLine, rawAmount, suffix, {
+                hasCurrency: /^Rp/iu.test(line),
+                hasSeparator: /[.,]/u.test(rawAmount),
+            });
         }
     }
 
     return items;
 };
-
 
 
 const ignoredAmountLine = /diskon|discount|hemat|potongan|subtotal|pajak|ppn|kode\s*(?:pembayaran|transaksi)|id\s*(?:pembayaran|transaksi)|(?:waktu|tanggal)\s*(?:pembayaran|transaksi)|payment\s*id|transaction\s*id/u;
@@ -498,20 +531,22 @@ const initializeReceiptScanner = () => {
             // Semua foto struk dicatat sebagai satu pengeluaran.
             transactionForm.elements.type.value = 'expense';
 
-            // Isi rincian barang dari seluruh foto yang berhasil dipindai.
-            if (detectedItems.length > 0) {
-                transactionForm.dispatchEvent(
-                    new CustomEvent('money:replace-items', {
-                        detail: detectedItems,
-                    })
-                );
-            }
+
+            // Kirim kandidat hasil OCR sebagai saran pencarian.
+            // Tidak ada barang yang otomatis dimasukkan ke transaksi.
+            transactionForm.dispatchEvent(
+                new CustomEvent('money:scan-items', {
+                    detail: detectedItems,
+                })
+            );
+
 
             const amountInput =
                 transactionForm.querySelector('[data-grand-total]');
 
+
             if (
-                detectedItems.length === 0 &&
+                transactionForm.querySelectorAll('[data-item-row]').length === 0 &&
                 photosWithAmount.length > 0 &&
                 amountInput instanceof HTMLInputElement
             ) {
@@ -529,6 +564,7 @@ const initializeReceiptScanner = () => {
                     setRupiahInputValue(amountInput, totalAmount);
                 }
             }
+
 
             // Tampilkan teks OCR dari setiap foto agar bisa diperiksa.
             ocrText.textContent = scannedPhotos

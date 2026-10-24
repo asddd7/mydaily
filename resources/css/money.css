@@ -874,6 +874,25 @@
 }
 
 
+.money-item-search-status {
+    display: block;
+    margin-top: 8px;
+    font-size: 12px;
+    line-height: 1.5;
+    color: var(--money-muted, #64748b);
+}
+
+.money-line-item input[type="search"] {
+    box-sizing: border-box;
+    width: 100%;
+    min-width: 0;
+}
+
+.money-line-item input[type="search"]::-webkit-search-cancel-button {
+    cursor: pointer;
+}
+
+
 @media (max-width: 850px) {
     .content .money-form-grid { grid-template-columns: minmax(0, 1fr); }
 }

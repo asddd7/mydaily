@@ -15,65 +15,87 @@ const initializeTransactionItems = () => {
         !(addButton instanceof HTMLButtonElement) ||
         !(totalInput instanceof HTMLInputElement) ||
         !(totalHint instanceof HTMLElement)
-    ) return;
+    ) {
+        return;
+    }
 
+    // Daftar pilihan barang hasil scan OCR.
+    // Barang hanya masuk ke transaksi setelah dipilih pada kolom nama barang.
+    let scannedItems = [];
 
-    // Kolom pencarian rincian barang.
-    const searchLabel = document.createElement('label');
-    searchLabel.className = 'money-item-search';
-    searchLabel.textContent = 'Cari nama barang hasil scan';
+    const datalistId = 'money-scanned-item-options';
+    let datalist = document.getElementById(datalistId);
 
-    const searchInput = document.createElement('input');
-    searchInput.type = 'search';
-    searchInput.placeholder = 'Contoh: Indomie, susu, beras...';
-    searchInput.autocomplete = 'off';
-    searchInput.setAttribute(
-        'aria-label',
-        'Cari nama barang pada rincian transaksi'
-    );
-
-    searchLabel.append(searchInput);
-    itemList.parentElement.insertBefore(searchLabel, itemList);
+    if (!(datalist instanceof HTMLDataListElement)) {
+        datalist = document.createElement('datalist');
+        datalist.id = datalistId;
+        document.body.append(datalist);
+    }
 
     const searchStatus = document.createElement('small');
+    searchStatus.className = 'money-item-search-status';
     searchStatus.setAttribute('aria-live', 'polite');
-    searchLabel.append(searchStatus);
+
+    const addButtonParent = addButton.parentElement;
+    if (addButtonParent) {
+        addButtonParent.append(searchStatus);
+    }
 
     const getRows = () =>
         [...itemList.querySelectorAll('[data-item-row]')];
 
-    const filterItems = () => {
-        const keyword = searchInput.value
+    const normalizeName = value =>
+        String(value ?? '')
             .trim()
-            .toLocaleLowerCase('id');
+            .toLocaleLowerCase('id')
+            .replace(/\s+/gu, ' ');
 
-        let visibleCount = 0;
+    const updateSuggestions = items => {
+        const uniqueItems = new Map();
 
-        getRows().forEach(row => {
-            const nameInput = row.querySelector(
-                'input[name$="[name]"]'
-            );
+        items.forEach(item => {
+            if (
+                !item ||
+                typeof item.name !== 'string' ||
+                !item.name.trim() ||
+                !Number.isFinite(Number(item.amount)) ||
+                Number(item.amount) <= 0
+            ) {
+                return;
+            }
 
-            const name = nameInput instanceof HTMLInputElement
-                ? nameInput.value.toLocaleLowerCase('id')
-                : '';
+            const name = item.name.trim().slice(0, 150);
+            const amount = Math.round(Number(item.amount) * 100) / 100;
+            const key = `${normalizeName(name)}|${amount}`;
 
-            const visible = !keyword || name.includes(keyword);
-
-            row.hidden = !visible;
-
-            if (visible) visibleCount++;
+            if (!uniqueItems.has(key)) {
+                uniqueItems.set(key, { name, amount });
+            }
         });
 
-        const totalRows = getRows().length;
+        scannedItems = [...uniqueItems.values()];
 
-        searchStatus.textContent = keyword
-            ? `${visibleCount} dari ${totalRows} barang ditemukan`
-            : `${totalRows} barang`;
+        datalist.replaceChildren();
+
+        scannedItems.forEach(item => {
+            const option = document.createElement('option');
+            option.value = item.name;
+            option.label = `Rp ${item.amount.toLocaleString('id-ID')}`;
+            datalist.append(option);
+        });
+
+        searchStatus.textContent = scannedItems.length
+            ? `${scannedItems.length} pilihan barang dari hasil scan. Ketik nama barang pada kolom Nama barang.`
+            : 'Belum ada saran barang dari hasil scan. Kamu tetap bisa mengetik nama secara manual.';
     };
 
-    searchInput.addEventListener('input', filterItems);
+    const findScannedItem = name => {
+        const normalized = normalizeName(name);
 
+        return scannedItems.find(item =>
+            normalizeName(item.name) === normalized
+        ) ?? null;
+    };
 
     const updateTotal = () => {
         const rows = getRows();
@@ -81,16 +103,25 @@ const initializeTransactionItems = () => {
 
         if (rows.length === 0) {
             totalHint.textContent =
-                'Isi grand total secara manual, atau tambahkan rincian barang agar total dihitung otomatis.';
+                'Isi grand total secara manual, atau tambahkan barang untuk menghitung total otomatis.';
             return;
         }
 
         const amounts = rows.map(row => {
             const input = row.querySelector('[data-item-amount]');
-            return input instanceof HTMLInputElement ? input.value.trim() : '';
+
+            return input instanceof HTMLInputElement
+                ? input.value.trim()
+                : '';
         });
 
-        if (amounts.some(value => value === '' || !Number.isFinite(Number(value)) || Number(value) <= 0)) {
+        if (
+            amounts.some(value =>
+                value === '' ||
+                !Number.isFinite(Number(value)) ||
+                Number(value) <= 0
+            )
+        ) {
             totalInput.value = '';
             totalHint.textContent =
                 'Lengkapi harga setiap barang untuk menghitung grand total.';
@@ -107,7 +138,7 @@ const initializeTransactionItems = () => {
         totalInput.dispatchEvent(new Event('change', { bubbles: true }));
 
         totalHint.textContent =
-            'Grand total dihitung otomatis dari seluruh harga barang.';
+            'Grand total dihitung dari barang yang sudah dimasukkan.';
     };
 
     const addItemRow = (item = {}) => {
@@ -131,9 +162,14 @@ const initializeTransactionItems = () => {
         nameLabel.append(document.createTextNode('Nama barang'));
 
         const nameInput = document.createElement('input');
+        nameInput.type = 'search';
         nameInput.name = `items[${index}][name]`;
         nameInput.maxLength = 150;
-        nameInput.placeholder = 'Contoh: Nasi goreng';
+        nameInput.placeholder = scannedItems.length
+            ? 'Cari atau ketik nama barang...'
+            : 'Contoh: Nasi goreng';
+        nameInput.autocomplete = 'off';
+        nameInput.setAttribute('list', datalistId);
         nameInput.required = true;
         nameInput.value = typeof item.name === 'string' ? item.name : '';
         nameLabel.append(nameInput);
@@ -163,22 +199,59 @@ const initializeTransactionItems = () => {
 
         row.append(nameLabel, amountLabel, removeButton);
         itemList.append(row);
-        filterItems();
 
         return row;
     };
 
+    // Tambah satu baris kosong; barang tidak ditambahkan otomatis dari OCR.
     addButton.addEventListener('click', () => {
         const row = addItemRow();
         updateTotal();
         row.querySelector('input')?.focus();
     });
 
+    // Saat nama barang dipilih dari saran OCR, isi harganya.
     itemList.addEventListener('input', event => {
+        if (!(event.target instanceof HTMLInputElement)) return;
+
+        if (event.target.matches('input[name$="[name]"]')) {
+            const row = event.target.closest('[data-item-row]');
+            const amountInput = row?.querySelector('[data-item-amount]');
+            const match = findScannedItem(event.target.value);
+
+            if (
+                match &&
+                amountInput instanceof HTMLInputElement
+            ) {
+                amountInput.value = String(match.amount);
+                updateTotal();
+            }
+
+            return;
+        }
+
+        if (event.target.matches('[data-item-amount]')) {
+            updateTotal();
+        }
+    });
+
+    itemList.addEventListener('change', event => {
         if (
-            event.target instanceof HTMLInputElement &&
-            event.target.matches('[data-item-amount]')
+            !(event.target instanceof HTMLInputElement) ||
+            !event.target.matches('input[name$="[name]"]')
         ) {
+            return;
+        }
+
+        const row = event.target.closest('[data-item-row]');
+        const amountInput = row?.querySelector('[data-item-amount]');
+        const match = findScannedItem(event.target.value);
+
+        if (
+            match &&
+            amountInput instanceof HTMLInputElement
+        ) {
+            amountInput.value = String(match.amount);
             updateTotal();
         }
     });
@@ -193,40 +266,57 @@ const initializeTransactionItems = () => {
         updateTotal();
     });
 
-    form.addEventListener('money:replace-items', event => {
-        const items = Array.isArray(event.detail) ? event.detail : [];
+    // Terima kandidat OCR tanpa memasukkan semuanya ke rincian transaksi.
+    form.addEventListener('money:scan-items', event => {
+        updateSuggestions(
+            Array.isArray(event.detail) ? event.detail : []
+        );
 
-        itemList.replaceChildren();
+        // Perbarui saran pada baris yang sudah ada.
+        getRows().forEach(row => {
+            const nameInput = row.querySelector('input[name$="[name]"]');
 
-        items.forEach(item => addItemRow(item));
-
-        filterItems();
-        updateTotal();
-    });
-
-    // Pastikan baris lama dari validasi Laravel juga dihitung.
-    itemList.querySelectorAll('[data-item-row]').forEach(row => {
-        row.querySelectorAll('input').forEach(input => {
-            if (input.name.endsWith('[amount]')) {
-                input.dataset.itemAmount = '';
-                input.type = 'number';
-                input.min = '0.01';
-                input.max = '9999999999';
-                input.step = '0.01';
+            if (nameInput instanceof HTMLInputElement) {
+                nameInput.setAttribute('list', datalistId);
+                nameInput.placeholder = scannedItems.length
+                    ? 'Cari atau ketik nama barang...'
+                    : 'Contoh: Nasi goreng';
             }
         });
     });
 
+    // Dukungan untuk data lama dari validasi Laravel.
+    itemList.querySelectorAll('[data-item-row]').forEach(row => {
+        const nameInput = row.querySelector('input[name$="[name]"]');
+        const amountInput = row.querySelector('input[name$="[amount]"]');
+
+        if (nameInput instanceof HTMLInputElement) {
+            nameInput.type = 'search';
+            nameInput.setAttribute('list', datalistId);
+            nameInput.autocomplete = 'off';
+        }
+
+        if (amountInput instanceof HTMLInputElement) {
+            amountInput.dataset.itemAmount = '';
+            amountInput.type = 'number';
+            amountInput.min = '0.01';
+            amountInput.max = '9999999999';
+            amountInput.step = '0.01';
+        }
+    });
+
+    updateSuggestions([]);
     updateTotal();
 };
 
 if (typeof document !== 'undefined') {
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initializeTransactionItems, {
-            once: true,
-        });
+        document.addEventListener(
+            'DOMContentLoaded',
+            initializeTransactionItems,
+            { once: true }
+        );
     } else {
         initializeTransactionItems();
-        filterItems();
     }
 }
