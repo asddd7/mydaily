@@ -845,6 +845,35 @@
     font-size: 22px;
 }
 
+
+.money-item-search {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin: 12px 0;
+    width: 100%;
+}
+
+.money-item-search input {
+    box-sizing: border-box;
+    width: 100%;
+    min-height: 42px;
+    padding: 10px 12px;
+    border: 1px solid var(--money-border, #d1d5db);
+    border-radius: 10px;
+    font: inherit;
+}
+
+.money-item-search small {
+    font-size: 12px;
+    opacity: 0.75;
+}
+
+.money-line-item[hidden] {
+    display: none !important;
+}
+
+
 @media (max-width: 850px) {
     .content .money-form-grid { grid-template-columns: minmax(0, 1fr); }
 }

@@ -17,7 +17,63 @@ const initializeTransactionItems = () => {
         !(totalHint instanceof HTMLElement)
     ) return;
 
-    const getRows = () => [...itemList.querySelectorAll('[data-item-row]')];
+
+    // Kolom pencarian rincian barang.
+    const searchLabel = document.createElement('label');
+    searchLabel.className = 'money-item-search';
+    searchLabel.textContent = 'Cari nama barang hasil scan';
+
+    const searchInput = document.createElement('input');
+    searchInput.type = 'search';
+    searchInput.placeholder = 'Contoh: Indomie, susu, beras...';
+    searchInput.autocomplete = 'off';
+    searchInput.setAttribute(
+        'aria-label',
+        'Cari nama barang pada rincian transaksi'
+    );
+
+    searchLabel.append(searchInput);
+    itemList.parentElement.insertBefore(searchLabel, itemList);
+
+    const searchStatus = document.createElement('small');
+    searchStatus.setAttribute('aria-live', 'polite');
+    searchLabel.append(searchStatus);
+
+    const getRows = () =>
+        [...itemList.querySelectorAll('[data-item-row]')];
+
+    const filterItems = () => {
+        const keyword = searchInput.value
+            .trim()
+            .toLocaleLowerCase('id');
+
+        let visibleCount = 0;
+
+        getRows().forEach(row => {
+            const nameInput = row.querySelector(
+                'input[name$="[name]"]'
+            );
+
+            const name = nameInput instanceof HTMLInputElement
+                ? nameInput.value.toLocaleLowerCase('id')
+                : '';
+
+            const visible = !keyword || name.includes(keyword);
+
+            row.hidden = !visible;
+
+            if (visible) visibleCount++;
+        });
+
+        const totalRows = getRows().length;
+
+        searchStatus.textContent = keyword
+            ? `${visibleCount} dari ${totalRows} barang ditemukan`
+            : `${totalRows} barang`;
+    };
+
+    searchInput.addEventListener('input', filterItems);
+
 
     const updateTotal = () => {
         const rows = getRows();
@@ -107,6 +163,7 @@ const initializeTransactionItems = () => {
 
         row.append(nameLabel, amountLabel, removeButton);
         itemList.append(row);
+        filterItems();
 
         return row;
     };
@@ -136,13 +193,14 @@ const initializeTransactionItems = () => {
         updateTotal();
     });
 
-    // Dipakai oleh OCR untuk mengganti rincian dengan hasil scan.
     form.addEventListener('money:replace-items', event => {
         const items = Array.isArray(event.detail) ? event.detail : [];
 
         itemList.replaceChildren();
 
         items.forEach(item => addItemRow(item));
+
+        filterItems();
         updateTotal();
     });
 
@@ -169,5 +227,6 @@ if (typeof document !== 'undefined') {
         });
     } else {
         initializeTransactionItems();
+        filterItems();
     }
 }
