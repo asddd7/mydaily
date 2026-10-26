@@ -19,7 +19,7 @@
     const searchInput = root.querySelector('[data-file-search]');
     const filterSelect = root.querySelector('[data-file-filter]');
     const sortSelect = root.querySelector('[data-file-sort]');
-    const clearButton = root.querySelector('[data-file-clear]');
+    const clearButtons = root.querySelectorAll('[data-file-clear]');
     const grid = root.querySelector('[data-file-grid]');
     const emptyState = root.querySelector('[data-file-filter-empty]');
 
@@ -27,11 +27,29 @@
         ? Array.from(grid.querySelectorAll('[data-file-card]'))
         : [];
 
-    const feedback = root.querySelector('.fm-upload-feedback');
-    const selectedLabel = root.querySelector('.fm-upload-selected');
+    const feedback = root.querySelector('[data-file-upload-feedback]');
+    const selectedLabel = root.querySelector('[data-file-selected]');
+    const uploadDialog = root.querySelector('[data-file-upload-dialog]');
+    const nameInput = root.querySelector('[data-file-name-input]');
+    const extensionLabel = root.querySelector('[data-file-extension]');
     const uploadButton = uploadForm
         ? uploadForm.querySelector('button[type="submit"], button:not([type])')
         : null;
+
+    if (uploadDialog instanceof HTMLDialogElement) {
+        root.querySelectorAll('[data-file-upload-close]').forEach((button) => {
+            button.addEventListener('click', () => uploadDialog.close());
+        });
+
+        uploadDialog.addEventListener('click', (event) => {
+            if (event.target === uploadDialog) uploadDialog.close();
+        });
+
+        if (uploadDialog.hasAttribute('data-reopen')) {
+            uploadDialog.showModal();
+            nameInput?.focus();
+        }
+    }
 
     const normalize = (value) => String(value || '')
         .normalize('NFD')
@@ -64,14 +82,42 @@
 
     const getFile = () => input?.files?.[0] || null;
 
+    let suggestedName = '';
     const updateSelectedFile = () => {
         const file = getFile();
 
         if (selectedLabel) {
-            selectedLabel.hidden = !file;
+            selectedLabel.hidden = false;
             selectedLabel.textContent = file
                 ? `${file.name} · ${formatSize(file.size)}`
-                : '';
+                : 'Belum ada file dipilih';
+        }
+
+        if (file) {
+            const dot = file.name.lastIndexOf('.');
+            const baseName = dot > 0 ? file.name.slice(0, dot) : file.name;
+            const extension = dot > 0 ? file.name.slice(dot + 1) : '';
+
+            if (nameInput instanceof HTMLInputElement) {
+                if (!nameInput.value || nameInput.value === suggestedName) {
+                    nameInput.value = baseName;
+                }
+                nameInput.placeholder = 'Nama file';
+            }
+
+            suggestedName = baseName;
+
+            if (extensionLabel) {
+                extensionLabel.textContent = extension ? `.${extension}` : 'Tanpa ekstensi';
+            }
+        } else {
+            if (nameInput instanceof HTMLInputElement) {
+                if (nameInput.value === suggestedName) nameInput.value = '';
+                nameInput.placeholder = 'Pilih file terlebih dahulu';
+            }
+
+            suggestedName = '';
+            if (extensionLabel) extensionLabel.textContent = 'Ekstensi';
         }
 
         if (!file) {
@@ -177,8 +223,8 @@
         const nameB = normalize(b.dataset.fileName);
         const sizeA = Number(a.dataset.fileSize) || 0;
         const sizeB = Number(b.dataset.fileSize) || 0;
-        const dateA = Date.parse(a.dataset.fileCreated || '') || 0;
-        const dateB = Date.parse(b.dataset.fileCreated || '') || 0;
+        const dateA = Number(a.dataset.fileCreated) || 0;
+        const dateB = Number(b.dataset.fileCreated) || 0;
 
         switch (mode) {
             case 'oldest':
@@ -248,7 +294,15 @@
             const hasFilters = Boolean(query) ||
                 (category && category !== 'all' && category !== 'semua');
 
-            clearButton.hidden = !hasFilters;
+            clearButtons.forEach((button) => {
+                button.addEventListener('click', () => {
+                    if (searchInput) searchInput.value = '';
+                    if (filterSelect) filterSelect.value = 'all';
+
+                    applyFilters();
+                    searchInput?.focus();
+                });
+            });
         }
 
         const countLabel = root.querySelector('[data-file-visible-count]');

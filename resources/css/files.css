@@ -316,6 +316,112 @@
         transform 0.2s ease;
 }
 
+.content .fm-page dialog.fm-upload-dialog {
+    position: fixed;
+    inset: 50% auto auto 50%;
+    width: min(540px, calc(100vw - 28px));
+    max-width: none;
+    max-height: min(90vh, 760px);
+    margin: 0;
+    padding: 22px;
+    overflow-y: auto;
+    transform: translate(-50%, -50%);
+    border: 1px solid var(--fm-border);
+    border-radius: 18px;
+    background: #fff;
+    color: var(--fm-text);
+    box-shadow: 0 24px 70px rgb(15 23 42 / 22%);
+}
+
+.content .fm-page dialog.fm-upload-dialog::backdrop {
+    background: rgb(15 23 42 / 52%);
+    backdrop-filter: blur(3px);
+}
+
+.fm-upload-dialog-heading {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 14px;
+    margin-bottom: 18px;
+}
+
+.fm-upload-dialog-heading h2 {
+    margin: 0;
+    color: var(--fm-text);
+    font-size: 20px;
+    font-weight: 800;
+    letter-spacing: -.025em;
+}
+
+.fm-upload-dialog-heading p:last-child {
+    margin: 6px 0 0;
+    color: var(--fm-muted);
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+.fm-upload-dialog .fm-alert {
+    margin-bottom: 15px;
+}
+
+.fm-upload-dialog .fm-upload-zone {
+    min-height: 165px;
+}
+
+.fm-upload-name-label {
+    display: grid;
+    gap: 7px;
+    margin-top: 16px;
+    color: var(--fm-text);
+    font-size: 12px;
+    font-weight: 750;
+}
+
+.fm-upload-name-field {
+    display: flex;
+    min-width: 0;
+}
+
+.content .fm-page .fm-upload-name-field input {
+    min-height: 42px;
+    min-width: 0;
+    margin: 0;
+    padding: 9px 11px;
+    border: 1px solid var(--fm-border) !important;
+    border-right: 0 !important;
+    border-radius: 9px 0 0 9px;
+    background: #fff;
+    color: var(--fm-text) !important;
+    font-size: 13px;
+    box-shadow: none;
+}
+
+.content .fm-page .fm-upload-name-field input:focus {
+    border-color: #9eb8ff !important;
+    background: #fff;
+    box-shadow: 0 0 0 3px rgb(53 104 232 / 8%);
+    outline: none;
+}
+
+.fm-upload-name-field > span {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    padding: 0 12px;
+    border: 1px solid var(--fm-border);
+    border-radius: 0 9px 9px 0;
+    background: var(--fm-soft);
+    color: var(--fm-muted);
+    font-size: 12px;
+}
+
+.fm-upload-name-label > small {
+    color: var(--fm-muted);
+    font-size: 11px;
+    font-weight: 400;
+}
+
 .fm-upload-zone:hover,
 .fm-upload-zone.is-dragging {
     border-color: var(--fm-primary);

@@ -65,11 +65,13 @@ class FileManagerController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $request->validate([
+            '_form' => ['nullable', 'in:files_upload'],
             'file' => [
                 'required',
                 'file',
                 'max:' . self::MAX_FILE_SIZE_KB,
             ],
+            'file_display_name' => ['nullable', 'string', 'max:255'],
         ]);
 
         $upload = $request->file('file');
@@ -115,15 +117,32 @@ class FileManagerController extends Controller
 
         $userId = $this->currentUserId($request);
 
-        $originalName = $this->sanitizeDisplayName(
-            $upload->getClientOriginalName()
+        $displayName = $this->sanitizeDisplayName(
+            (string) $request->input('file_display_name', '')
         );
 
-        if ($originalName === '') {
-            $originalName = 'file.' . $extension;
-        }
+        if ($displayName !== '') {
+            if (strtolower(pathinfo($displayName, PATHINFO_EXTENSION)) === $extension) {
+                $displayName = pathinfo($displayName, PATHINFO_FILENAME);
+            }
 
-        $originalName = Str::limit($originalName, 255, '');
+            $displayName = Str::limit(
+                $displayName,
+                max(1, 254 - strlen($extension)),
+                ''
+            );
+            $originalName = $displayName . '.' . $extension;
+        } else {
+            $originalName = $this->sanitizeDisplayName(
+                $upload->getClientOriginalName()
+            );
+
+            if ($originalName === '') {
+                $originalName = 'file.' . $extension;
+            }
+
+            $originalName = Str::limit($originalName, 255, '');
+        }
 
         // Nama fisik acak, tidak memakai nama yang dikirim pengguna.
         $newName = Str::random(64) . '.' . $extension;

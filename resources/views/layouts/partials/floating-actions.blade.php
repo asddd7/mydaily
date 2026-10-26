@@ -56,7 +56,11 @@
             } else if (toggle.dataset.fabAction === 'note') {
                 document.dispatchEvent(new CustomEvent('note:open-create'));
             } else if (toggle.dataset.fabAction === 'file') {
-                document.getElementById('fileUploadInput')?.click();
+                const dialog = document.querySelector('[data-file-upload-dialog]');
+                if (dialog instanceof HTMLDialogElement && !dialog.open) {
+                    dialog.showModal();
+                    dialog.querySelector('[data-file-name-input]')?.focus();
+                }
             } else if (toggle.dataset.fabAction === 'calendar') {
                 document.dispatchEvent(new CustomEvent('calendar:open-create'));
             }

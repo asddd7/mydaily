@@ -49,10 +49,6 @@
             </p>
         </div>
 
-        <a class="fm-header-button" href="#fm-upload-section">
-            <i class="fa-solid fa-cloud-arrow-up" aria-hidden="true"></i>
-            Upload file
-        </a>
     </header>
 
     {{-- Flash messages --}}
@@ -118,21 +114,29 @@
         </article>
     </section>
 
-    {{-- Upload --}}
-    <section class="fm-panel fm-upload-panel" id="fm-upload-section">
-        <div class="fm-section-heading">
+    {{-- Upload popup --}}
+    <dialog class="fm-upload-dialog" data-file-upload-dialog aria-labelledby="fm-upload-title" @if ($errors->any() && old('_form') === 'files_upload') data-reopen @endif>
+        <div class="fm-upload-dialog-heading">
             <div>
                 <p class="fm-section-kicker">Tambahkan berkas</p>
-                <h2>Upload file baru</h2>
-                <p>
-                    Pilih file dari perangkat atau tarik file ke area upload.
-                </p>
+                <h2 id="fm-upload-title">Upload file baru</h2>
+                <p>Pilih file dan sesuaikan nama yang akan ditampilkan.</p>
             </div>
-
-            <span class="fm-heading-icon" aria-hidden="true">
-                <i class="fa-solid fa-cloud-arrow-up"></i>
-            </span>
+            <button type="button" class="fm-icon-button" data-file-upload-close aria-label="Tutup popup upload">
+                <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+            </button>
         </div>
+
+        @if ($errors->any() && old('_form') === 'files_upload')
+            <div class="fm-alert fm-alert-error" role="alert">
+                <i class="fa-solid fa-circle-exclamation" aria-hidden="true"></i>
+                <ul>
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
 
         <form
             method="post"
@@ -142,6 +146,7 @@
             data-file-upload-form
         >
             @csrf
+            <input type="hidden" name="_form" value="files_upload">
 
             <label class="fm-upload-zone" data-file-dropzone>
                 <input
@@ -171,6 +176,24 @@
                 </span>
             </label>
 
+            <label class="fm-upload-name-label" for="fileDisplayName">
+                Nama file
+                <div class="fm-upload-name-field">
+                    <input
+                        type="text"
+                        id="fileDisplayName"
+                        name="file_display_name"
+                        maxlength="255"
+                        value="{{ old('file_display_name') }}"
+                        placeholder="Pilih file terlebih dahulu"
+                        required
+                        data-file-name-input
+                    >
+                    <span data-file-extension>Ekstensi</span>
+                </div>
+                <small>Ekstensi file akan dipertahankan otomatis.</small>
+            </label>
+
             <div class="fm-upload-footer">
                 <div>
                     <small id="fm-upload-help">
@@ -188,11 +211,11 @@
 
                 <button class="fm-button fm-button-primary" type="submit">
                     <i class="fa-solid fa-upload" aria-hidden="true"></i>
-                    Upload sekarang
+                    Simpan file
                 </button>
             </div>
         </form>
-    </section>
+    </dialog>
 
     {{-- Files library --}}
     <section class="fm-panel fm-library-panel">
@@ -274,8 +297,14 @@
                     @php
                         $originalName = (string) ($file->file_original ?? '');
                         $extension = strtolower(
-                            pathinfo($originalName, PATHINFO_EXTENSION)
+                            pathinfo((string) ($file->file_type ?? ''), PATHINFO_EXTENSION)
                         );
+
+                        if ($extension === '') {
+                            $extension = strtolower(
+                                pathinfo($originalName, PATHINFO_EXTENSION)
+                            );
+                        }
                         $mime = strtolower((string) ($file->file_type ?? ''));
 
                         $category = match (true) {
@@ -490,10 +519,7 @@
                     Mulai dengan mengunggah dokumen, gambar, atau file lainnya.
                 </p>
 
-                <a class="fm-button fm-button-primary" href="#fm-upload-section">
-                    <i class="fa-solid fa-cloud-arrow-up" aria-hidden="true"></i>
-                    Upload file pertama
-                </a>
+                <p>Gunakan tombol upload di pojok kanan bawah untuk menambahkan file.</p>
             </div>
         @endif
     </section>
