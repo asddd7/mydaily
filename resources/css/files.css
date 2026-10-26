@@ -61,6 +61,19 @@
     margin-bottom: 24px;
 }
 
+/* style.css has a site-wide `header` rule intended for the legacy nav bar. */
+.content .fm-page > header.fm-header {
+    position: static;
+    inset: auto;
+    width: auto;
+    height: auto;
+    background: transparent;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    border: 0;
+    z-index: auto;
+}
+
 .fm-header-copy {
     min-width: 0;
 }
