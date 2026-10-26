@@ -823,8 +823,59 @@
 .content .fm-page .fm-file-input {
     min-height: 0;
     padding: 0;
+    margin: 0 !important;
+    width: 100%;
+    height: 100%;
     border: 0 !important;
     background: transparent;
+}
+
+.content .fm-page .fm-search input {
+    min-height: 40px;
+    margin: 0;
+    padding: 8px 0;
+    border: 0 !important;
+    border-radius: 0;
+    background: transparent;
+    color: var(--fm-text) !important;
+    font-size: 13px;
+    box-shadow: none;
+}
+
+.content .fm-page .fm-search input:focus {
+    border: 0 !important;
+    background: transparent;
+    box-shadow: none;
+    outline: none;
+}
+
+.content .fm-page .fm-filter-control select {
+    min-height: 38px;
+    margin: 0;
+    padding: 7px 28px 7px 10px;
+    border: 1px solid var(--fm-border) !important;
+    border-radius: 9px;
+    background: #fff;
+    color: var(--fm-text) !important;
+    font-size: 12px;
+    box-shadow: none;
+}
+
+.content .fm-page .fm-filter-control select:focus {
+    border-color: #9eb8ff !important;
+    background: #fff;
+    box-shadow: 0 0 0 3px rgb(53 104 232 / 8%);
+}
+
+.content .fm-page .fm-rename-form input {
+    min-height: 39px;
+    margin: 0;
+    padding: 8px 10px;
+    border: 1px solid var(--fm-border) !important;
+    border-radius: 8px;
+    background: #fff;
+    color: var(--fm-text) !important;
+    font-size: 12px;
 }
 
 .fm-button-download {
