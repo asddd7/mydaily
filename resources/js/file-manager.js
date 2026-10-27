@@ -290,20 +290,12 @@
             emptyState.hidden = visibleCount > 0 || cards.length === 0;
         }
 
-        if (clearButton) {
-            const hasFilters = Boolean(query) ||
-                (category && category !== 'all' && category !== 'semua');
+        const hasFilters = Boolean(query) ||
+            (category && category !== 'all' && category !== 'semua');
 
-            clearButtons.forEach((button) => {
-                button.addEventListener('click', () => {
-                    if (searchInput) searchInput.value = '';
-                    if (filterSelect) filterSelect.value = 'all';
-
-                    applyFilters();
-                    searchInput?.focus();
-                });
-            });
-        }
+        clearButtons.forEach((button) => {
+            button.hidden = !hasFilters;
+        });
 
         const countLabel = root.querySelector('[data-file-visible-count]');
 
@@ -316,23 +308,44 @@
     filterSelect?.addEventListener('change', applyFilters);
     sortSelect?.addEventListener('change', applyFilters);
 
-    clearButton?.addEventListener('click', () => {
-        if (searchInput) searchInput.value = '';
-        if (filterSelect) filterSelect.selectedIndex = 0;
+    clearButtons.forEach((button) => {
+        button.addEventListener('click', () => {
+            if (searchInput) searchInput.value = '';
+            if (filterSelect) filterSelect.value = 'all';
 
-        applyFilters();
-        searchInput?.focus();
+            applyFilters();
+            searchInput?.focus();
+        });
     });
 
     // Konfirmasi penghapusan file.
     root.querySelectorAll('[data-file-delete-form]').forEach((form) => {
         form.addEventListener('submit', (event) => {
+            const card = form.closest('[data-file-card]');
+
+            const fileName =
+                card?.querySelector('.fm-file-information h3')
+                    ?.textContent
+                    ?.trim() || 'file ini';
+
             const confirmed = window.confirm(
-                'Yakin ingin menghapus file ini? File yang dihapus tidak dapat dipulihkan.'
+                `Yakin ingin menghapus file "${fileName}"?\n\n` +
+                'File yang dihapus tidak dapat dipulihkan.'
             );
 
             if (!confirmed) {
                 event.preventDefault();
+                return;
+            }
+
+            // Cegah tombol ditekan berkali-kali setelah dikonfirmasi.
+            const button = form.querySelector('button[type="submit"]');
+
+            if (button) {
+                button.disabled = true;
+                button.setAttribute('aria-busy', 'true');
+                button.innerHTML =
+                    '<i class="fa-solid fa-spinner fa-spin" aria-hidden="true"></i> Menghapus...';
             }
         });
     });
