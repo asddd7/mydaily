@@ -114,9 +114,69 @@ class CalendarHolidayFileController extends Controller
             ]);
         }
 
-        // Format ulang JSON agar rapi dan tetap UTF-8.
+        // Baca daftar hari libur yang sudah tersimpan.
+        $existingHolidays = [];
+
+        if (File::exists($path)) {
+            try {
+                $existingHolidays = json_decode(
+                    File::get($path),
+                    true,
+                    512,
+                    JSON_THROW_ON_ERROR
+                );
+            } catch (\JsonException $exception) {
+                return back()->withErrors([
+                    'holiday_json' =>
+                        'File hari libur yang lama tidak valid. Import dibatalkan agar data tidak hilang.',
+                ]);
+            }
+
+            if (!is_array($existingHolidays) || !array_is_list($existingHolidays)) {
+                return back()->withErrors([
+                    'holiday_json' =>
+                        'Format file hari libur yang lama tidak valid. Import dibatalkan.',
+                ]);
+            }
+        }
+
+        // Jadikan tanggal sebagai kunci agar data pada tanggal yang sama
+        // diperbarui, sedangkan tanggal lain tetap dipertahankan.
+        $mergedByDate = [];
+
+        foreach ($existingHolidays as $index => $item) {
+            if (
+                !is_array($item)
+                || !isset($item['tanggal'], $item['keterangan'])
+                || !is_string($item['tanggal'])
+                || !is_string($item['keterangan'])
+            ) {
+                return back()->withErrors([
+                    'holiday_json' =>
+                        'Data hari libur lama pada nomor ' . ($index + 1)
+                        . ' tidak valid. Import dibatalkan.',
+                ]);
+            }
+
+            $mergedByDate[$item['tanggal']] = [
+                'tanggal' => $item['tanggal'],
+                'keterangan' => $item['keterangan'],
+            ];
+        }
+
+        // Gabungkan data yang diimpor.
+        // Jika tanggalnya sudah ada, data baru menggantikan data pada tanggal tersebut.
+        foreach ($holidays as $item) {
+            $mergedByDate[$item['tanggal']] = [
+                'tanggal' => $item['tanggal'],
+                'keterangan' => $item['keterangan'],
+            ];
+        }
+
+        $holidaysToSave = array_values($mergedByDate);
+
         $json = json_encode(
-            $holidays,
+            $holidaysToSave,
             JSON_PRETTY_PRINT
                 | JSON_UNESCAPED_UNICODE
                 | JSON_UNESCAPED_SLASHES
@@ -149,7 +209,8 @@ class CalendarHolidayFileController extends Controller
 
         return back()->with(
             'status',
-            'Import berhasil. ' . count($holidays) . ' data hari libur telah dimuat.'
+            count($holidays) . ' data dari file import diproses. Total '
+                . count($holidaysToSave) . ' hari libur tersimpan.'
         );
     }
 }
