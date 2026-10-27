@@ -5,6 +5,63 @@
         <button type="button" data-month-shift="1" aria-label="Bulan berikutnya">❯</button>
     </div>
 
+
+    <div class="calendar-holiday-tools">
+        <a
+            href="{{ route('calendar.holidays.download') }}"
+            class="calendar-holiday-button calendar-holiday-download"
+        >
+            <i class="fa-solid fa-download" aria-hidden="true"></i>
+            Download JSON
+        </a>
+
+        <form
+            action="{{ route('calendar.holidays.import') }}"
+            method="POST"
+            enctype="multipart/form-data"
+            class="calendar-holiday-import"
+            data-holiday-import-form
+        >
+            @csrf
+
+            <label class="calendar-holiday-file-label">
+                <i class="fa-solid fa-file-import" aria-hidden="true"></i>
+                <span data-holiday-file-label>Pilih file JSON</span>
+
+                <input
+                    type="file"
+                    name="holiday_json"
+                    accept=".json,application/json"
+                    required
+                    data-holiday-file-input
+                >
+            </label>
+
+            <button
+                type="submit"
+                class="calendar-holiday-button calendar-holiday-submit"
+            >
+                <i class="fa-solid fa-upload" aria-hidden="true"></i>
+                Import JSON
+            </button>
+        </form>
+    </div>
+
+    @if (session('status'))
+        <p class="calendar-holiday-feedback" role="status">
+            {{ session('status') }}
+        </p>
+    @endif
+
+    @if ($errors->has('holiday_json'))
+        <div class="calendar-holiday-feedback is-error" role="alert">
+            @foreach ($errors->get('holiday_json') as $error)
+                <p>{{ $error }}</p>
+            @endforeach
+        </div>
+    @endif
+
+
     <div data-calendar-status class="calendar-status" role="status" aria-live="polite"></div>
 
     <div class="table-responsive">
@@ -553,6 +610,48 @@
         }
     });
 
+
+    // Tampilkan nama file JSON yang dipilih.
+    const holidayFileInput = widget.querySelector('[data-holiday-file-input]');
+    const holidayFileLabel = widget.querySelector('[data-holiday-file-label]');
+    const holidayImportForm = widget.querySelector('[data-holiday-import-form]');
+
+    holidayFileInput?.addEventListener('change', () => {
+        const file = holidayFileInput.files?.[0];
+
+        if (holidayFileLabel) {
+            holidayFileLabel.textContent = file
+                ? file.name
+                : 'Pilih file JSON';
+        }
+    });
+
+    // Konfirmasi karena import akan mengganti file hari libur aktif.
+    holidayImportForm?.addEventListener('submit', event => {
+        const file = holidayFileInput?.files?.[0];
+
+        if (!file) {
+            event.preventDefault();
+            alert('Pilih file JSON terlebih dahulu.');
+            return;
+        }
+
+        if (!file.name.toLowerCase().endsWith('.json')) {
+            event.preventDefault();
+            alert('File harus berformat .json.');
+            return;
+        }
+
+        const confirmed = window.confirm(
+            'Import file "' + file.name + '"?\n\n' +
+            'Data hari libur pada holidays_2026.json akan diganti ' +
+            'dengan isi file yang dipilih.'
+        );
+
+        if (!confirmed) {
+            event.preventDefault();
+        }
+    });
     render();
 })();
 </script>

@@ -196,6 +196,103 @@
 .calendar-task-item .mark-text {
     opacity: .8;
 }
+
+
+.calendar-holiday-tools {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    margin: 12px 0;
+}
+
+.calendar-holiday-import {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+}
+
+.calendar-holiday-button,
+.calendar-holiday-file-label {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    min-height: 38px;
+    padding: 9px 13px;
+    border: 1px solid #dbe4f0;
+    border-radius: 10px;
+    background: #fff;
+    color: #334155;
+    font: inherit;
+    font-size: 12px;
+    font-weight: 700;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background-color .18s ease, border-color .18s ease;
+}
+
+.calendar-holiday-button:hover,
+.calendar-holiday-file-label:hover {
+    background: #f1f5f9;
+    border-color: #93c5fd;
+}
+
+.calendar-holiday-submit {
+    background: #2563eb;
+    border-color: #2563eb;
+    color: #fff;
+}
+
+.calendar-holiday-submit:hover {
+    background: #1d4ed8;
+    border-color: #1d4ed8;
+    color: #fff;
+}
+
+.calendar-holiday-file-label input[type="file"] {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+}
+
+.calendar-holiday-file-label:focus-within {
+    outline: 2px solid #93c5fd;
+    outline-offset: 2px;
+}
+
+.calendar-holiday-feedback {
+    margin: 8px 0;
+    color: #15803d;
+    font-size: 13px;
+    overflow-wrap: anywhere;
+}
+
+.calendar-holiday-feedback.is-error {
+    color: #b91c1c;
+}
+
+.calendar-holiday-feedback p {
+    margin: 4px 0;
+}
+
+@media (max-width: 480px) {
+    .calendar-holiday-tools,
+    .calendar-holiday-import {
+        width: 100%;
+    }
+
+    .calendar-holiday-import > * {
+        flex: 1 1 auto;
+    }
+}
+
+
 .tasks-page {
     display: grid;
     gap: 24px;
