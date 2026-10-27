@@ -80,6 +80,8 @@ class CalendarHolidayFileController extends Controller
                     'holiday.tanggal' => [
                         'required',
                         'date_format:Y-m-d',
+                        'after_or_equal:2000-01-01',
+                        'before_or_equal:2100-12-31',
                     ],
                     'holiday.keterangan' => [
                         'required',
@@ -105,8 +107,7 @@ class CalendarHolidayFileController extends Controller
             }
         }
 
-        $path = $this->holidayFilePath();
-        $directory = dirname($path);
+        $directory = base_path('calendar');
 
         if (!File::isDirectory($directory) || !is_writable($directory)) {
             return back()->withErrors([
@@ -114,103 +115,102 @@ class CalendarHolidayFileController extends Controller
             ]);
         }
 
-        // Baca daftar hari libur yang sudah tersimpan.
-        $existingHolidays = [];
-
-        if (File::exists($path)) {
-            try {
-                $existingHolidays = json_decode(
-                    File::get($path),
-                    true,
-                    512,
-                    JSON_THROW_ON_ERROR
-                );
-            } catch (\JsonException $exception) {
-                return back()->withErrors([
-                    'holiday_json' =>
-                        'File hari libur yang lama tidak valid. Import dibatalkan agar data tidak hilang.',
-                ]);
-            }
-
-            if (!is_array($existingHolidays) || !array_is_list($existingHolidays)) {
-                return back()->withErrors([
-                    'holiday_json' =>
-                        'Format file hari libur yang lama tidak valid. Import dibatalkan.',
-                ]);
-            }
-        }
-
-        // Jadikan tanggal sebagai kunci agar data pada tanggal yang sama
-        // diperbarui, sedangkan tanggal lain tetap dipertahankan.
-        $mergedByDate = [];
-
-        foreach ($existingHolidays as $index => $item) {
-            if (
-                !is_array($item)
-                || !isset($item['tanggal'], $item['keterangan'])
-                || !is_string($item['tanggal'])
-                || !is_string($item['keterangan'])
-            ) {
-                return back()->withErrors([
-                    'holiday_json' =>
-                        'Data hari libur lama pada nomor ' . ($index + 1)
-                        . ' tidak valid. Import dibatalkan.',
-                ]);
-            }
-
-            $mergedByDate[$item['tanggal']] = [
-                'tanggal' => $item['tanggal'],
-                'keterangan' => $item['keterangan'],
-            ];
-        }
-
-        // Gabungkan data yang diimpor.
-        // Jika tanggalnya sudah ada, data baru menggantikan data pada tanggal tersebut.
+        // Kalender membaca file per tahun. Pisahkan data import berdasarkan
+        // tahunnya agar, misalnya, tanggal 2027 masuk ke holidays_2027.json.
+        $holidaysByYear = [];
         foreach ($holidays as $item) {
-            $mergedByDate[$item['tanggal']] = [
-                'tanggal' => $item['tanggal'],
-                'keterangan' => $item['keterangan'],
-            ];
+            $year = substr($item['tanggal'], 0, 4);
+            $holidaysByYear[$year][] = $item;
         }
 
-        $holidaysToSave = array_values($mergedByDate);
+        $savedCounts = [];
+        foreach ($holidaysByYear as $year => $yearHolidays) {
+            $path = $directory . DIRECTORY_SEPARATOR . "holidays_{$year}.json";
+            $existingHolidays = [];
 
-        $json = json_encode(
-            $holidaysToSave,
-            JSON_PRETTY_PRINT
-                | JSON_UNESCAPED_UNICODE
-                | JSON_UNESCAPED_SLASHES
-                | JSON_THROW_ON_ERROR
-        ) . PHP_EOL;
+            if (File::exists($path)) {
+                try {
+                    $existingHolidays = json_decode(
+                        File::get($path),
+                        true,
+                        512,
+                        JSON_THROW_ON_ERROR
+                    );
+                } catch (\JsonException $exception) {
+                    return back()->withErrors([
+                        'holiday_json' => "File hari libur tahun {$year} tidak valid. Import dibatalkan.",
+                    ]);
+                }
 
-        $temporaryPath = $directory
-            . DIRECTORY_SEPARATOR
-            . 'holidays_import_' . bin2hex(random_bytes(8)) . '.tmp';
-
-        try {
-            if (File::put($temporaryPath, $json) === false) {
-                throw new \RuntimeException('Gagal menulis file sementara.');
+                if (!is_array($existingHolidays) || !array_is_list($existingHolidays)) {
+                    return back()->withErrors([
+                        'holiday_json' => "Format file hari libur tahun {$year} tidak valid. Import dibatalkan.",
+                    ]);
+                }
             }
 
-            if (!@rename($temporaryPath, $path)) {
-                throw new \RuntimeException('Gagal mengganti file JSON hari libur.');
-            }
-        } catch (\Throwable $exception) {
-            if (File::exists($temporaryPath)) {
-                File::delete($temporaryPath);
+            $mergedByDate = [];
+            foreach ($existingHolidays as $index => $item) {
+                if (
+                    !is_array($item)
+                    || !isset($item['tanggal'], $item['keterangan'])
+                    || !is_string($item['tanggal'])
+                    || !is_string($item['keterangan'])
+                    || substr($item['tanggal'], 0, 4) !== (string) $year
+                ) {
+                    return back()->withErrors([
+                        'holiday_json' => "Data hari libur lama tahun {$year} nomor " . ($index + 1) . ' tidak valid.',
+                    ]);
+                }
+
+                $mergedByDate[$item['tanggal']] = [
+                    'tanggal' => $item['tanggal'],
+                    'keterangan' => $item['keterangan'],
+                ];
             }
 
-            report($exception);
+            foreach ($yearHolidays as $item) {
+                $mergedByDate[$item['tanggal']] = [
+                    'tanggal' => $item['tanggal'],
+                    'keterangan' => $item['keterangan'],
+                ];
+            }
 
-            return back()->withErrors([
-                'holiday_json' => 'Import gagal. File hari libur lama tidak berhasil diganti.',
-            ]);
+            $json = json_encode(
+                array_values($mergedByDate),
+                JSON_PRETTY_PRINT
+                    | JSON_UNESCAPED_UNICODE
+                    | JSON_UNESCAPED_SLASHES
+                    | JSON_THROW_ON_ERROR
+            ) . PHP_EOL;
+            $temporaryPath = $directory . DIRECTORY_SEPARATOR
+                . "holidays_{$year}_import_" . bin2hex(random_bytes(8)) . '.tmp';
+
+            try {
+                if (File::put($temporaryPath, $json) === false || !@rename($temporaryPath, $path)) {
+                    throw new \RuntimeException("Gagal menyimpan file hari libur tahun {$year}.");
+                }
+            } catch (\Throwable $exception) {
+                if (File::exists($temporaryPath)) {
+                    File::delete($temporaryPath);
+                }
+
+                report($exception);
+                return back()->withErrors([
+                    'holiday_json' => "Import file hari libur tahun {$year} gagal disimpan.",
+                ]);
+            }
+
+            $savedCounts[$year] = count($mergedByDate);
         }
+
+        $yearSummary = collect($savedCounts)
+            ->map(fn ($count, $year) => "{$year}: {$count} data")
+            ->implode(', ');
 
         return back()->with(
             'status',
-            count($holidays) . ' data dari file import diproses. Total '
-                . count($holidaysToSave) . ' hari libur tersimpan.'
+            count($holidays) . ' data import disimpan. Isi kalender per tahun: ' . $yearSummary . '.'
         );
     }
 }
