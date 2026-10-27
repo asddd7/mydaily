@@ -178,6 +178,61 @@ class FileManagerController extends Controller
             ->with('status', 'File berhasil diunggah.');
     }
 
+    public function preview(Request $request, int $file)
+    {
+        $userId = $this->currentUserId($request);
+
+        $record = \Illuminate\Support\Facades\DB::table('file_manager')
+            ->where('id', $file)
+            ->where('user_id', $userId)
+            ->first();
+
+        // Jangan tampilkan file yang tidak ditemukan
+        // atau bukan milik pengguna yang sedang login.
+        abort_unless($record, 404);
+
+        $filename = basename((string) ($record->file_name ?? ''));
+
+        abort_if(
+            $filename === '' || $filename === '.' || $filename === '..',
+            404
+        );
+
+        $path = $this->storageDirectory()
+            . DIRECTORY_SEPARATOR
+            . $filename;
+
+        abort_unless(is_file($path) && is_readable($path), 404);
+
+        // Kolom file_type pada aplikasi ini menyimpan ekstensi file.
+        $extension = strtolower(trim((string) ($record->file_type ?? '')));
+
+        if ($extension === '' || str_contains($extension, '/')) {
+            $extension = strtolower(
+                pathinfo(
+                    (string) ($record->file_original ?? ''),
+                    PATHINFO_EXTENSION
+                )
+            );
+        }
+
+        // Hanya izinkan format gambar yang didukung untuk preview.
+        $contentTypes = [
+            'jpg'  => 'image/jpeg',
+            'jpeg' => 'image/jpeg',
+            'png'  => 'image/png',
+            'gif'  => 'image/gif',
+        ];
+
+        abort_unless(isset($contentTypes[$extension]), 404);
+
+        return response()->file($path, [
+            'Content-Type' => $contentTypes[$extension],
+            'X-Content-Type-Options' => 'nosniff',
+            'Cache-Control' => 'private, max-age=3600',
+        ]);
+    }
+
     public function update(Request $request, int $file): RedirectResponse
     {
         $data = $request->validate([

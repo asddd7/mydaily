@@ -86,6 +86,7 @@ Route::post('/file-manager', [FileManagerController::class, 'store'])->name('fil
 Route::put('/file-manager/{file}', [FileManagerController::class, 'update'])->name('files.update');
 Route::delete('/file-manager/{file}', [FileManagerController::class, 'destroy'])->name('files.destroy');
 Route::get('/file-manager/{file}/download', [FileManagerController::class, 'download'])->name('files.download');
+Route::get('/file-manager/{file}/preview', [FileManagerController::class, 'preview'])->name('files.preview');
 
 Route::get('/calendar/marks', [CalendarController::class, 'marks'])->name('calendar.marks');
 Route::post('/calendar/marks', [CalendarController::class, 'store'])->name('calendar.store');
