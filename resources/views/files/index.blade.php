@@ -297,14 +297,20 @@
                     @php
                         $originalName = (string) ($file->file_original ?? '');
                         $extension = strtolower(
-                            pathinfo((string) ($file->file_type ?? ''), PATHINFO_EXTENSION)
+                            trim((string) ($file->file_type ?? ''))
                         );
 
-                        if ($extension === '') {
+                        if ($extension === '' || str_contains($extension, '/')) {
                             $extension = strtolower(
                                 pathinfo($originalName, PATHINFO_EXTENSION)
                             );
                         }
+
+                        $isPreviewableImage = in_array(
+                            $extension,
+                            ['jpg', 'jpeg', 'png', 'gif'],
+                            true
+                        );
                         $mime = strtolower((string) ($file->file_type ?? ''));
 
                         $category = match (true) {
@@ -392,12 +398,32 @@
                         data-file-created="{{ $createdTimestamp }}"
                     >
                         <div class="fm-file-card-top">
-                            <span class="fm-file-icon fm-file-icon-{{ $category }}">
-                                <i
-                                    class="fa-solid {{ $categoryIcons[$category] }}"
-                                    aria-hidden="true"
-                                ></i>
-                            </span>
+                            @if ($category === 'image' && $isPreviewableImage)
+                                <a
+                                    class="fm-file-preview"
+                                    href="{{ route('files.preview', $file->id) }}"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    aria-label="Lihat gambar {{ $originalName }}"
+                                    title="Klik untuk melihat gambar ukuran penuh"
+                                >
+                                    <img
+                                        src="{{ route('files.preview', $file->id) }}"
+                                        alt="Preview {{ $originalName }}"
+                                        loading="lazy"
+                                        decoding="async"
+                                        width="64"
+                                        height="64"
+                                    >
+                                </a>
+                            @else
+                                <span class="fm-file-icon fm-file-icon-{{ $category }}">
+                                    <i
+                                        class="fa-solid {{ $categoryIcons[$category] }}"
+                                        aria-hidden="true"
+                                    ></i>
+                                </span>
+                            @endif
 
                             <span class="fm-file-type">
                                 {{ $categoryLabels[$category] }}

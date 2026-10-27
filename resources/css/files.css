@@ -850,20 +850,45 @@
     border-top: 1px solid var(--fm-border);
 }
 
-/* Keep the shared app button theme from overriding file manager controls. */
-.content .fm-page button:not(.toggle-btn):not(.fab-main) {
-    min-height: initial;
-    padding: initial;
-    border-color: transparent;
-    border-radius: initial;
-    background: transparent;
-    color: inherit;
-    font-family: inherit;
-    font-size: inherit;
-    font-weight: inherit;
-    box-shadow: none;
+/* Thumbnail preview untuk file gambar */
+.fm-file-preview {
+    display: flex;
+    flex: 0 0 56px;
+    width: 56px;
+    height: 56px;
+    overflow: hidden;
+    align-items: center;
+    justify-content: center;
+    border-radius: 14px;
+    background: var(--fm-surface, #f3f6fb);
+    text-decoration: none;
 }
 
+.fm-file-preview img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    transition: transform 180ms ease;
+}
+
+.fm-file-preview:hover img {
+    transform: scale(1.08);
+}
+
+.fm-file-preview:focus-visible {
+    outline: 2px solid var(--fm-primary, #2563eb);
+    outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .fm-file-preview img {
+        transition: none;
+    }
+}
+
+/* Keep the shared app button theme from overriding file manager controls. */
 .content .fm-page button.fm-button {
     min-height: 39px;
     padding: 10px 13px;
@@ -874,24 +899,24 @@
     line-height: 1.3;
 }
 
-.content .fm-page button.fm-button-primary {
+.content .fm-page button.fm-button.fm-button-primary {
     border-color: var(--fm-primary);
     background: var(--fm-primary);
     color: #fff;
 }
 
-.content .fm-page button.fm-button-primary:hover {
+.content .fm-page button.fm-button.fm-button-primary:hover {
     border-color: var(--fm-primary-dark);
     background: var(--fm-primary-dark);
 }
 
-.content .fm-page button.fm-button-secondary {
+.content .fm-page button.fm-button.fm-button-secondary {
     border-color: var(--fm-border);
     background: #fff;
     color: var(--fm-text);
 }
 
-.content .fm-page button.fm-button-secondary:hover {
+.content .fm-page button.fm-button.fm-button-secondary:hover {
     background: var(--fm-soft);
 }
 
