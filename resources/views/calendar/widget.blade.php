@@ -6,45 +6,55 @@
     </div>
 
 
-    <div class="calendar-holiday-tools">
-        <a
-            href="{{ route('calendar.holidays.download') }}"
-            class="calendar-holiday-button calendar-holiday-download"
-        >
-            <i class="fa-solid fa-download" aria-hidden="true"></i>
-            Download JSON
-        </a>
+    <div class="calendar-holiday-panel" aria-label="Impor dan ekspor kalender">
+        <div class="calendar-holiday-heading">
+            <span class="calendar-holiday-heading-icon" aria-hidden="true"><i class="fa-solid fa-arrows-rotate"></i></span>
+            <div>
+                <h3>Cadangkan hari libur</h3>
+                <p>Simpan atau pulihkan daftar hari libur menggunakan file JSON.</p>
+            </div>
+        </div>
 
-        <form
-            action="{{ route('calendar.holidays.import') }}"
-            method="POST"
-            enctype="multipart/form-data"
-            class="calendar-holiday-import"
-            data-holiday-import-form
-        >
-            @csrf
-
-            <label class="calendar-holiday-file-label">
-                <i class="fa-solid fa-file-import" aria-hidden="true"></i>
-                <span data-holiday-file-label>Pilih file JSON</span>
-
-                <input
-                    type="file"
-                    name="holiday_json"
-                    accept=".json,application/json"
-                    required
-                    data-holiday-file-input
-                >
-            </label>
-
-            <button
-                type="submit"
-                class="calendar-holiday-button calendar-holiday-submit"
+        <div class="calendar-holiday-tools">
+            <a
+                href="{{ route('calendar.holidays.download') }}"
+                class="calendar-holiday-button calendar-holiday-download"
             >
-                <i class="fa-solid fa-upload" aria-hidden="true"></i>
-                Import JSON
-            </button>
-        </form>
+                <i class="fa-solid fa-download" aria-hidden="true"></i>
+                <span>Unduh JSON</span>
+            </a>
+
+            <form
+                action="{{ route('calendar.holidays.import') }}"
+                method="POST"
+                enctype="multipart/form-data"
+                class="calendar-holiday-import"
+                data-holiday-import-form
+            >
+                @csrf
+
+                <label class="calendar-holiday-file-label">
+                    <i class="fa-regular fa-file-lines" aria-hidden="true"></i>
+                    <span data-holiday-file-label>Pilih file JSON</span>
+
+                    <input
+                        type="file"
+                        name="holiday_json"
+                        accept=".json,application/json"
+                        required
+                        data-holiday-file-input
+                    >
+                </label>
+
+                <button
+                    type="submit"
+                    class="calendar-holiday-button calendar-holiday-submit"
+                >
+                    <i class="fa-solid fa-arrow-up-from-bracket" aria-hidden="true"></i>
+                    <span>Impor kalender</span>
+                </button>
+            </form>
+        </div>
     </div>
 
     @if (session('status'))

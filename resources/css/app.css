@@ -198,12 +198,58 @@
 }
 
 
+.calendar-holiday-panel {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    margin: 16px 0 20px;
+    padding: 16px 18px;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    background: linear-gradient(135deg, #f8fbff 0%, #f1f6ff 100%);
+}
+
+.calendar-holiday-heading {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+}
+
+.calendar-holiday-heading-icon {
+    display: grid;
+    place-items: center;
+    flex: 0 0 42px;
+    width: 42px;
+    height: 42px;
+    border-radius: 13px;
+    background: #e0ebff;
+    color: #2563eb;
+    font-size: 17px;
+}
+
+.calendar-holiday-heading h3 {
+    margin: 0 0 3px;
+    color: #172554;
+    font-size: 14px;
+    font-weight: 750;
+}
+
+.calendar-holiday-heading p {
+    margin: 0;
+    color: #64748b;
+    font-size: 12px;
+    line-height: 1.5;
+}
+
 .calendar-holiday-tools {
     display: flex;
+    flex: 0 0 auto;
     flex-wrap: wrap;
     align-items: center;
-    gap: 10px;
-    margin: 12px 0;
+    justify-content: flex-end;
+    gap: 9px;
 }
 
 .calendar-holiday-import {
@@ -219,37 +265,43 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 7px;
-    min-height: 38px;
+    gap: 8px;
+    min-width: 132px;
+    min-height: 40px;
     padding: 9px 13px;
-    border: 1px solid #dbe4f0;
-    border-radius: 10px;
+    border: 1px solid #d5deec;
+    border-radius: 11px;
     background: #fff;
     color: #334155;
     font: inherit;
     font-size: 12px;
     font-weight: 700;
+    line-height: 1.25;
     text-decoration: none;
     cursor: pointer;
-    transition: background-color .18s ease, border-color .18s ease;
+    transition: background-color .18s ease, border-color .18s ease, transform .18s ease;
 }
 
 .calendar-holiday-button:hover,
 .calendar-holiday-file-label:hover {
-    background: #f1f5f9;
-    border-color: #93c5fd;
+    background: #f8fafc;
+    border-color: #93b4f8;
+    transform: translateY(-1px);
 }
 
-.calendar-holiday-submit {
-    background: #2563eb;
+.calendar-holiday-download {
+    color: #1d4ed8;
+}
+
+.calendar-holiday-submit,
+.calendar-holiday-submit:hover {
     border-color: #2563eb;
+    background: #2563eb;
     color: #fff;
 }
 
 .calendar-holiday-submit:hover {
     background: #1d4ed8;
-    border-color: #1d4ed8;
-    color: #fff;
 }
 
 .calendar-holiday-file-label input[type="file"] {
@@ -282,13 +334,38 @@
 }
 
 @media (max-width: 480px) {
+    .calendar-holiday-panel {
+        align-items: stretch;
+        flex-direction: column;
+        gap: 14px;
+        padding: 14px;
+    }
+
     .calendar-holiday-tools,
     .calendar-holiday-import {
         width: 100%;
     }
 
-    .calendar-holiday-import > * {
-        flex: 1 1 auto;
+    .calendar-holiday-tools {
+        display: grid;
+        grid-template-columns: 1fr;
+    }
+
+    .calendar-holiday-import > *,
+    .calendar-holiday-download,
+    .calendar-holiday-file-label {
+        width: 100%;
+    }
+
+    .calendar-holiday-file-label {
+        min-width: 0;
+        overflow: hidden;
+    }
+
+    .calendar-holiday-file-label span {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
     }
 }
 
