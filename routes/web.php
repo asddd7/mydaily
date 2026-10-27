@@ -10,6 +10,7 @@ use App\Http\Controllers\FileManagerController;
 use App\Http\Controllers\CalendarController;
 use App\Http\Controllers\FcmDeviceController;
 use App\Http\Controllers\ClockController;
+use App\Http\Controllers\CalendarHolidayFileController;
 use App\Http\Controllers\DatabaseStructureController;
 use App\Http\Controllers\FirebaseMessagingServiceWorkerController;
 use App\Http\Controllers\WebAppManifestController;
@@ -93,6 +94,8 @@ Route::post('/calendar/marks', [CalendarController::class, 'store'])->name('cale
 Route::patch('/calendar/marks/{mark}', [CalendarController::class, 'toggle'])->name('calendar.toggle');
 Route::delete('/calendar/marks/{mark}', [CalendarController::class, 'destroy'])->name('calendar.destroy');
 Route::get('/calendar/holidays', [CalendarController::class, 'holidays'])->name('calendar.holidays');
+Route::get('/calendar/holidays/json/download', [CalendarHolidayFileController::class, 'download'])->name('calendar.holidays.download');
+Route::post('/calendar/holidays/json/import', [CalendarHolidayFileController::class, 'import'])->name('calendar.holidays.import');
 Route::get('/calendar', [CalendarController::class, 'index'])->name('calendar.index');
 Route::get('/calendar/task-marks', [CalendarController::class, 'taskMarks'])->name('calendar.task-marks');
 Route::get('/notifications/count', [TaskController::class, 'notificationCount'])->name('notifications.count');
