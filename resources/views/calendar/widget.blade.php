@@ -654,8 +654,8 @@
 
         const confirmed = window.confirm(
             'Import file "' + file.name + '"?\n\n' +
-            'Data hari libur pada holidays_2026.json akan diganti ' +
-            'dengan isi file yang dipilih.'
+            'Data tanggal yang sama di holidays.json akan diperbarui, ' +
+            'sedangkan tanggal lainnya tetap dipertahankan.'
         );
 
         if (!confirmed) {

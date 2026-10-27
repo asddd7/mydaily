@@ -12,7 +12,7 @@ class CalendarHolidayFileController extends Controller
 {
     private function holidayFilePath(): string
     {
-        return base_path('calendar/holidays_2026.json');
+        return base_path('calendar/holidays.json');
     }
 
     /**
@@ -26,7 +26,7 @@ class CalendarHolidayFileController extends Controller
 
         return response()->download(
             $path,
-            'holidays_2026.json',
+            'holidays.json',
             ['Content-Type' => 'application/json; charset=UTF-8']
         );
     }
@@ -115,102 +115,81 @@ class CalendarHolidayFileController extends Controller
             ]);
         }
 
-        // Kalender membaca file per tahun. Pisahkan data import berdasarkan
-        // tahunnya agar, misalnya, tanggal 2027 masuk ke holidays_2027.json.
-        $holidaysByYear = [];
-        foreach ($holidays as $item) {
-            $year = substr($item['tanggal'], 0, 4);
-            $holidaysByYear[$year][] = $item;
-        }
+        $path = $this->holidayFilePath();
+        $existingHolidays = [];
 
-        $savedCounts = [];
-        foreach ($holidaysByYear as $year => $yearHolidays) {
-            $path = $directory . DIRECTORY_SEPARATOR . "holidays_{$year}.json";
-            $existingHolidays = [];
-
-            if (File::exists($path)) {
-                try {
-                    $existingHolidays = json_decode(
-                        File::get($path),
-                        true,
-                        512,
-                        JSON_THROW_ON_ERROR
-                    );
-                } catch (\JsonException $exception) {
-                    return back()->withErrors([
-                        'holiday_json' => "File hari libur tahun {$year} tidak valid. Import dibatalkan.",
-                    ]);
-                }
-
-                if (!is_array($existingHolidays) || !array_is_list($existingHolidays)) {
-                    return back()->withErrors([
-                        'holiday_json' => "Format file hari libur tahun {$year} tidak valid. Import dibatalkan.",
-                    ]);
-                }
-            }
-
-            $mergedByDate = [];
-            foreach ($existingHolidays as $index => $item) {
-                if (
-                    !is_array($item)
-                    || !isset($item['tanggal'], $item['keterangan'])
-                    || !is_string($item['tanggal'])
-                    || !is_string($item['keterangan'])
-                    || substr($item['tanggal'], 0, 4) !== (string) $year
-                ) {
-                    return back()->withErrors([
-                        'holiday_json' => "Data hari libur lama tahun {$year} nomor " . ($index + 1) . ' tidak valid.',
-                    ]);
-                }
-
-                $mergedByDate[$item['tanggal']] = [
-                    'tanggal' => $item['tanggal'],
-                    'keterangan' => $item['keterangan'],
-                ];
-            }
-
-            foreach ($yearHolidays as $item) {
-                $mergedByDate[$item['tanggal']] = [
-                    'tanggal' => $item['tanggal'],
-                    'keterangan' => $item['keterangan'],
-                ];
-            }
-
-            $json = json_encode(
-                array_values($mergedByDate),
-                JSON_PRETTY_PRINT
-                    | JSON_UNESCAPED_UNICODE
-                    | JSON_UNESCAPED_SLASHES
-                    | JSON_THROW_ON_ERROR
-            ) . PHP_EOL;
-            $temporaryPath = $directory . DIRECTORY_SEPARATOR
-                . "holidays_{$year}_import_" . bin2hex(random_bytes(8)) . '.tmp';
-
+        if (File::exists($path)) {
             try {
-                if (File::put($temporaryPath, $json) === false || !@rename($temporaryPath, $path)) {
-                    throw new \RuntimeException("Gagal menyimpan file hari libur tahun {$year}.");
-                }
-            } catch (\Throwable $exception) {
-                if (File::exists($temporaryPath)) {
-                    File::delete($temporaryPath);
-                }
-
-                report($exception);
+                $existingHolidays = json_decode(File::get($path), true, 512, JSON_THROW_ON_ERROR);
+            } catch (\JsonException $exception) {
                 return back()->withErrors([
-                    'holiday_json' => "Import file hari libur tahun {$year} gagal disimpan.",
+                    'holiday_json' => 'File holidays.json yang lama tidak valid. Import dibatalkan.',
                 ]);
             }
 
-            $savedCounts[$year] = count($mergedByDate);
+            if (!is_array($existingHolidays) || !array_is_list($existingHolidays)) {
+                return back()->withErrors([
+                    'holiday_json' => 'Format holidays.json yang lama tidak valid. Import dibatalkan.',
+                ]);
+            }
         }
 
-        $yearSummary = collect($savedCounts)
-            ->map(fn ($count, $year) => "{$year}: {$count} data")
-            ->implode(', ');
+        $mergedByDate = [];
+        foreach ($existingHolidays as $index => $item) {
+            if (
+                !is_array($item)
+                || !isset($item['tanggal'], $item['keterangan'])
+                || !is_string($item['tanggal'])
+                || !is_string($item['keterangan'])
+            ) {
+                return back()->withErrors([
+                    'holiday_json' => 'Data lama nomor ' . ($index + 1) . ' tidak valid. Import dibatalkan.',
+                ]);
+            }
+
+            $mergedByDate[$item['tanggal']] = [
+                'tanggal' => $item['tanggal'],
+                'keterangan' => $item['keterangan'],
+            ];
+        }
+
+        // Tanggal yang sama dari file baru akan memperbarui entri lama.
+        foreach ($holidays as $item) {
+            $mergedByDate[$item['tanggal']] = [
+                'tanggal' => $item['tanggal'],
+                'keterangan' => $item['keterangan'],
+            ];
+        }
+
+        $json = json_encode(
+            array_values($mergedByDate),
+            JSON_PRETTY_PRINT
+                | JSON_UNESCAPED_UNICODE
+                | JSON_UNESCAPED_SLASHES
+                | JSON_THROW_ON_ERROR
+        ) . PHP_EOL;
+        $temporaryPath = $directory . DIRECTORY_SEPARATOR
+            . 'holidays_import_' . bin2hex(random_bytes(8)) . '.tmp';
+
+        try {
+            if (File::put($temporaryPath, $json) === false || !@rename($temporaryPath, $path)) {
+                throw new \RuntimeException('Gagal menyimpan holidays.json.');
+            }
+        } catch (\Throwable $exception) {
+            if (File::exists($temporaryPath)) {
+                File::delete($temporaryPath);
+            }
+
+            report($exception);
+            return back()->withErrors([
+                'holiday_json' => 'Import gagal. File holidays.json tidak berhasil diperbarui.',
+            ]);
+        }
 
         return back()->with(
             'status',
-            count($holidays) . ' data import disimpan. Isi kalender per tahun: ' . $yearSummary . '.'
+            count($holidays) . ' data dari file import diproses. Total '
+                . count($mergedByDate) . ' hari libur tersimpan di holidays.json.'
         );
     }
 }

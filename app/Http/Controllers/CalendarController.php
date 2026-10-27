@@ -93,11 +93,16 @@ class CalendarController extends Controller
     {
         $year = $request->integer('year', (int) now()->year);
         abort_if($year < 2000 || $year > 2100, 422);
-        $path = base_path("calendar/holidays_{$year}.json");
-
-        return response()->json(File::isFile($path)
+        $path = base_path('calendar/holidays.json');
+        $holidays = File::isFile($path)
             ? json_decode(File::get($path), true, flags: JSON_THROW_ON_ERROR)
-            : []);
+            : [];
+
+        return response()->json(array_values(array_filter(
+            $holidays,
+            static fn ($holiday): bool => is_array($holiday)
+                && str_starts_with((string) ($holiday['tanggal'] ?? ''), (string) $year)
+        )));
     }
 
     public function taskMarks(Request $request): JsonResponse
