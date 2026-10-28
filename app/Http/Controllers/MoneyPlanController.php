@@ -51,6 +51,31 @@ class MoneyPlanController extends Controller
             ->selectRaw("SUM(CASE WHEN type = 'expense' THEN amount ELSE 0 END) AS expense")
             ->first();
 
+        // Periode limit selalu mengikuti bulan berjalan,
+        // terlepas dari filter riwayat transaksi.
+        $currentPeriod = now();
+        $currentYear = (int) $currentPeriod->year;
+        $currentMonth = (int) $currentPeriod->month;
+
+        $monthlyLimit = DB::table('money_plan_limits')
+            ->where('username', $username)
+            ->where('period_year', $currentYear)
+            ->where('period_month', $currentMonth)
+            ->value('amount');
+
+        $monthlySpent = DB::table('money_plan')
+            ->where('username', $username)
+            ->where('type', 'expense')
+            ->whereBetween('tanggal', [
+                $currentPeriod->copy()->startOfMonth()->toDateString(),
+                $currentPeriod->copy()->endOfMonth()->toDateString(),
+            ])
+            ->sum('amount');
+
+        $monthlyLimitProgress = $monthlyLimit !== null && (float) $monthlyLimit > 0
+            ? min(100, round(((float) $monthlySpent / (float) $monthlyLimit) * 100, 1))
+            : 0;
+
         return view('money.index', compact(
             'month',
             'year',
@@ -58,7 +83,10 @@ class MoneyPlanController extends Controller
             'transactions',
             'transactionItems',
             'transactionReceipts',
-            'monthly'
+            'monthly',
+            'monthlyLimit',
+            'monthlySpent',
+            'monthlyLimitProgress',
         ));
     }
 
