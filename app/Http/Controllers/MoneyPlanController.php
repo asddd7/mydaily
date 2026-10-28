@@ -51,30 +51,83 @@ class MoneyPlanController extends Controller
             ->selectRaw("SUM(CASE WHEN type = 'expense' THEN amount ELSE 0 END) AS expense")
             ->first();
 
-        // Periode limit selalu mengikuti bulan berjalan,
+        // Limit cash dan online mengikuti bulan kalender berjalan,
         // terlepas dari filter riwayat transaksi.
         $currentPeriod = now();
         $currentYear = (int) $currentPeriod->year;
         $currentMonth = (int) $currentPeriod->month;
 
-        $monthlyLimit = DB::table('money_plan_limits')
+        $periodStart = $currentPeriod->copy()
+            ->startOfMonth()
+            ->toDateString();
+
+        $periodEnd = $currentPeriod->copy()
+            ->endOfMonth()
+            ->toDateString();
+
+        // Ambil limit cash bulan ini.
+        $monthlyCashLimit = DB::table('money_plan_limits')
             ->where('username', $username)
             ->where('period_year', $currentYear)
             ->where('period_month', $currentMonth)
+            ->where('payment_method', 'cash')
             ->value('amount');
 
-        $monthlySpent = DB::table('money_plan')
+        // Ambil limit saldo online bulan ini.
+        $monthlyOnlineLimit = DB::table('money_plan_limits')
+            ->where('username', $username)
+            ->where('period_year', $currentYear)
+            ->where('period_month', $currentMonth)
+            ->where('payment_method', 'online')
+            ->value('amount');
+
+        // Hitung pengeluaran cash bulan ini.
+        // Penyesuaian saldo tidak dihitung sebagai belanja.
+        $monthlyCashSpent = DB::table('money_plan')
             ->where('username', $username)
             ->where('type', 'expense')
-            ->whereBetween('tanggal', [
-                $currentPeriod->copy()->startOfMonth()->toDateString(),
-                $currentPeriod->copy()->endOfMonth()->toDateString(),
-            ])
+            ->where('payment_method', 'cash')
+            ->whereBetween('tanggal', [$periodStart, $periodEnd])
+            ->where(function ($query) {
+                $query->whereNull('category')
+                    ->orWhere('category', '<>', 'Penyesuaian Saldo');
+            })
             ->sum('amount');
 
-        $monthlyLimitProgress = $monthlyLimit !== null && (float) $monthlyLimit > 0
-            ? min(100, round(((float) $monthlySpent / (float) $monthlyLimit) * 100, 1))
-            : 0;
+        // Hitung pengeluaran saldo online bulan ini.
+        $monthlyOnlineSpent = DB::table('money_plan')
+            ->where('username', $username)
+            ->where('type', 'expense')
+            ->where('payment_method', 'online')
+            ->whereBetween('tanggal', [$periodStart, $periodEnd])
+            ->where(function ($query) {
+                $query->whereNull('category')
+                    ->orWhere('category', '<>', 'Penyesuaian Saldo');
+            })
+            ->sum('amount');
+
+        // Hitung progres penggunaan masing-masing limit.
+        $monthlyCashLimitProgress =
+            $monthlyCashLimit !== null && (float) $monthlyCashLimit > 0
+                ? min(
+                    100,
+                    round(
+                        ((float) $monthlyCashSpent / (float) $monthlyCashLimit) * 100,
+                        1
+                    )
+                )
+                : 0;
+
+        $monthlyOnlineLimitProgress =
+            $monthlyOnlineLimit !== null && (float) $monthlyOnlineLimit > 0
+                ? min(
+                    100,
+                    round(
+                        ((float) $monthlyOnlineSpent / (float) $monthlyOnlineLimit) * 100,
+                        1
+                    )
+                )
+                : 0;
 
         return view('money.index', compact(
             'month',
@@ -84,9 +137,12 @@ class MoneyPlanController extends Controller
             'transactionItems',
             'transactionReceipts',
             'monthly',
-            'monthlyLimit',
-            'monthlySpent',
-            'monthlyLimitProgress',
+            'monthlyCashLimit',
+            'monthlyOnlineLimit',
+            'monthlyCashSpent',
+            'monthlyOnlineSpent',
+            'monthlyCashLimitProgress',
+            'monthlyOnlineLimitProgress',
         ));
     }
 
@@ -387,7 +443,7 @@ class MoneyPlanController extends Controller
         return $this->store($request);
     }
 
-    public function saveLimit(Request $request)
+    public function saveLimit(Request $request): RedirectResponse
     {
         $currentUser = $request->attributes->get('currentUser');
 
@@ -398,6 +454,7 @@ class MoneyPlanController extends Controller
 
         $validated = $request->validate([
             '_form' => ['required', 'in:money_limit'],
+            'payment_method' => ['required', 'in:cash,online'],
             'monthly_limit' => [
                 'required',
                 'numeric',
@@ -405,6 +462,8 @@ class MoneyPlanController extends Controller
                 'max:9999999999.99',
             ],
         ], [
+            'payment_method.required' => 'Pilih metode saldo.',
+            'payment_method.in' => 'Metode saldo tidak valid.',
             'monthly_limit.required' => 'Limit bulanan wajib diisi.',
             'monthly_limit.numeric' => 'Limit bulanan harus berupa angka.',
             'monthly_limit.min' => 'Limit bulanan harus lebih besar dari Rp 0.',
@@ -418,6 +477,7 @@ class MoneyPlanController extends Controller
                 'username' => $currentUser->username,
                 'period_year' => (int) $period->year,
                 'period_month' => (int) $period->month,
+                'payment_method' => $validated['payment_method'],
             ],
             [
                 'amount' => $validated['monthly_limit'],
@@ -425,8 +485,15 @@ class MoneyPlanController extends Controller
             ]
         );
 
+        $methodLabel = $validated['payment_method'] === 'cash'
+            ? 'Cash'
+            : 'Saldo online';
+
         return redirect()
             ->route('money.index')
-            ->with('status', 'Limit bulanan berhasil disimpan.');
+            ->with(
+                'status',
+                'Limit bulanan ' . $methodLabel . ' berhasil disimpan.'
+            );
     }
 }
