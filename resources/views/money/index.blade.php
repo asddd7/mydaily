@@ -38,7 +38,66 @@
                 <strong>Rp {{ number_format((float) $totals->online_income - (float) $totals->online_expense, 0, ',', '.') }}</strong>
             </div>
         </article>
+        <article class="money-balance-card money-balance-card-limit">
+            <span class="money-balance-icon money-balance-icon-limit" aria-hidden="true">
+                <i class="fa-solid fa-chart-pie"></i>
+            </span>
+
+            <div class="money-limit-content">
+                <p>Limit bulanan · {{ now()->format('m/Y') }}</p>
+
+                @if ($monthlyLimit !== null)
+                    <strong>
+                        Rp {{ number_format((float) $monthlyLimit, 0, ',', '.') }}
+                    </strong>
+                @else
+                    <strong>Belum diatur</strong>
+                @endif
+
+                <small>
+                    Terpakai: Rp {{ number_format((float) $monthlySpent, 0, ',', '.') }}
+                </small>
+
+                @if ($monthlyLimit !== null)
+                    <div
+                        class="money-limit-progress"
+                        role="progressbar"
+                        aria-label="Penggunaan limit bulanan"
+                        aria-valuemin="0"
+                        aria-valuemax="100"
+                        aria-valuenow="{{ $monthlyLimitProgress }}"
+                    >
+                        <span style="width: {{ $monthlyLimitProgress }}%"></span>
+                    </div>
+
+                    @if ((float) $monthlySpent > (float) $monthlyLimit)
+                        <small class="money-limit-warning">
+                            Pengeluaran sudah melebihi limit.
+                        </small>
+                    @else
+                        <small>
+                            {{ $monthlyLimitProgress }}% dari limit digunakan
+                        </small>
+                    @endif
+                @endif
+
+                <button
+                    class="money-limit-manage-button"
+                    type="button"
+                    data-open-money-limit-dialog
+                    aria-haspopup="dialog"
+                >
+                    <i class="fa-solid fa-sliders" aria-hidden="true"></i>
+                    {{ $monthlyLimit !== null ? 'Atur limit' : 'Tambah limit' }}
+                </button>
+            </div>
+        </article>
     </section>
+    @if (session('status'))
+        <p class="money-limit-notice" role="status">
+            {{ session('status') }}
+        </p>
+    @endif
 
     <div class="money-form-grid">
         <section class="money-panel money-adjust-panel">
@@ -219,6 +278,90 @@
                 <button class="money-dialog-cancel" type="button" data-close-money-adjust-dialog>Batal</button>
                 <button class="money-primary-button" type="submit">
                     <i class="fa-solid fa-scale-balanced" aria-hidden="true"></i> Simpan saldo
+                </button>
+            </div>
+        </form>
+    </dialog>
+
+    <dialog
+        class="money-create-dialog money-limit-dialog"
+        data-money-limit-dialog
+        aria-labelledby="money-limit-dialog-title"
+        aria-describedby="money-limit-dialog-description"
+        @if ($errors->any() && old('_form') === 'money_limit') data-reopen @endif
+    >
+        <div class="money-dialog-heading">
+            <div>
+                <p class="money-eyebrow">Perencanaan keuangan</p>
+                <h2 id="money-limit-dialog-title">Tambah/Atur Limit Bulanan</h2>
+                <p id="money-limit-dialog-description">
+                    Atur batas maksimal pengeluaran untuk bulan berjalan.
+                </p>
+            </div>
+
+            <button
+                class="money-dialog-close"
+                type="button"
+                data-close-money-limit-dialog
+                aria-label="Tutup dialog"
+            >
+                <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+            </button>
+        </div>
+
+        @if ($errors->any() && old('_form') === 'money_limit')
+            <p class="money-dialog-error" role="alert">
+                {{ $errors->first() }}
+            </p>
+        @endif
+
+        <form
+            method="post"
+            action="{{ route('money.limit.store') }}"
+            class="money-entry-form money-limit-form"
+        >
+            @csrf
+            <input type="hidden" name="_form" value="money_limit">
+
+            <label>
+                Bulan limit
+                <input
+                    type="text"
+                    value="{{ now()->format('m/Y') }}"
+                    readonly
+                >
+            </label>
+
+            <label>
+                Limit pengeluaran (Rp)
+                <input
+                    type="number"
+                    name="monthly_limit"
+                    min="0.01"
+                    max="9999999999.99"
+                    step="0.01"
+                    value="{{ old('monthly_limit', $monthlyLimit) }}"
+                    placeholder="Contoh: 1500000"
+                    required
+                    autofocus
+                >
+                <small>
+                    Limit berlaku untuk total transaksi pengeluaran bulan ini.
+                </small>
+            </label>
+
+            <div class="money-dialog-actions money-field-wide">
+                <button
+                    class="money-dialog-cancel"
+                    type="button"
+                    data-close-money-limit-dialog
+                >
+                    Batal
+                </button>
+
+                <button class="money-primary-button" type="submit">
+                    <i class="fa-solid fa-floppy-disk" aria-hidden="true"></i>
+                    Simpan limit
                 </button>
             </div>
         </form>
