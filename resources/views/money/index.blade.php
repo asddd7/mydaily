@@ -419,7 +419,9 @@
                     min="0.01"
                     max="9999999999.99"
                     step="0.01"
-                    value="{{ old('monthly_limit', $monthlyLimit) }}"
+                    value="{{ old('monthly_limit', old('payment_method', 'cash') === 'online' ? $monthlyOnlineLimit : $monthlyCashLimit) }}"
+                    data-cash-limit="{{ $monthlyCashLimit ?? '' }}"
+                    data-online-limit="{{ $monthlyOnlineLimit ?? '' }}"
                     placeholder="Contoh: 1500000"
                     required
                     autofocus
@@ -640,35 +642,72 @@
         if (dialog.hasAttribute('data-reopen')) openDialog();
     }
 
-    const limitDialog = document.querySelector('[data-money-limit-dialog]');
+        const limitDialog = document.querySelector('[data-money-limit-dialog]');
 
-    if (limitDialog instanceof HTMLDialogElement) {
-        const openLimitDialog = () => {
+        if (limitDialog instanceof HTMLDialogElement) {
+            const methodSelect = limitDialog.querySelector(
+                '[data-money-limit-method]'
+            );
+
+        const openLimitDialog = (method = null) => {
+            const amountInput = limitDialog.querySelector(
+                '[name="monthly_limit"]'
+            );
+
+            if (methodSelect instanceof HTMLSelectElement && method) {
+                if (method === 'cash' || method === 'online') {
+                    methodSelect.value = method;
+                }
+            }
+
+            // Saat dialog dibuka dari tombol kartu, isi limit sesuai metodenya.
+            // Saat validasi gagal, pertahankan nominal yang sebelumnya diinput.
+            if (
+                amountInput instanceof HTMLInputElement &&
+                !limitDialog.hasAttribute('data-reopen')
+            ) {
+                amountInput.value = methodSelect.value === 'online'
+                    ? amountInput.dataset.onlineLimit
+                    : amountInput.dataset.cashLimit;
+            }
+
             if (!limitDialog.open) {
                 limitDialog.showModal();
             }
 
-            limitDialog.querySelector('[name="monthly_limit"]')?.focus();
+            amountInput?.focus();
         };
 
-        document.querySelectorAll('[data-open-money-limit-dialog]').forEach(button => {
-            button.addEventListener('click', openLimitDialog);
-        });
+            document
+                .querySelectorAll('[data-open-money-limit-dialog]')
+                .forEach(button => {
+                    button.addEventListener('click', () => {
+                        const method = button.dataset.limitMethod || 'cash';
+                        openLimitDialog(method);
+                    });
+                });
 
-        limitDialog.querySelectorAll('[data-close-money-limit-dialog]').forEach(button => {
-            button.addEventListener('click', () => limitDialog.close());
-        });
+            limitDialog
+                .querySelectorAll('[data-close-money-limit-dialog]')
+                .forEach(button => {
+                    button.addEventListener('click', () => {
+                        limitDialog.close();
+                    });
+                });
 
-        limitDialog.addEventListener('click', event => {
-            if (event.target === limitDialog) {
-                limitDialog.close();
+            limitDialog.addEventListener('click', event => {
+                if (event.target === limitDialog) {
+                    limitDialog.close();
+                }
+            });
+
+            // Saat validasi gagal, pertahankan metode yang dipilih sebelumnya.
+            if (limitDialog.hasAttribute('data-reopen')) {
+                openLimitDialog(methodSelect instanceof HTMLSelectElement
+                    ? methodSelect.value
+                    : 'cash');
             }
-        });
-
-        if (limitDialog.hasAttribute('data-reopen')) {
-            openLimitDialog();
         }
-    }
 
     const adjustDialog = document.querySelector('[data-money-adjust-dialog]');
     if (!(adjustDialog instanceof HTMLDialogElement)) return;
