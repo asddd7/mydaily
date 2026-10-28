@@ -386,4 +386,47 @@ class MoneyPlanController extends Controller
 
         return $this->store($request);
     }
+
+    public function saveLimit(Request $request)
+    {
+        $currentUser = $request->attributes->get('currentUser');
+
+        abort_unless(
+            $currentUser && !empty($currentUser->username),
+            403
+        );
+
+        $validated = $request->validate([
+            '_form' => ['required', 'in:money_limit'],
+            'monthly_limit' => [
+                'required',
+                'numeric',
+                'min:0.01',
+                'max:9999999999.99',
+            ],
+        ], [
+            'monthly_limit.required' => 'Limit bulanan wajib diisi.',
+            'monthly_limit.numeric' => 'Limit bulanan harus berupa angka.',
+            'monthly_limit.min' => 'Limit bulanan harus lebih besar dari Rp 0.',
+            'monthly_limit.max' => 'Limit bulanan melebihi batas yang diperbolehkan.',
+        ]);
+
+        $period = now();
+
+        DB::table('money_plan_limits')->updateOrInsert(
+            [
+                'username' => $currentUser->username,
+                'period_year' => (int) $period->year,
+                'period_month' => (int) $period->month,
+            ],
+            [
+                'amount' => $validated['monthly_limit'],
+                'updated_at' => now(),
+            ]
+        );
+
+        return redirect()
+            ->route('money.index')
+            ->with('status', 'Limit bulanan berhasil disimpan.');
+    }
 }
