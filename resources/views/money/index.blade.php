@@ -38,46 +38,48 @@
                 <strong>Rp {{ number_format((float) $totals->online_income - (float) $totals->online_expense, 0, ',', '.') }}</strong>
             </div>
         </article>
+        {{-- LIMIT CASH --}}
         <article class="money-balance-card money-balance-card-limit">
-            <span class="money-balance-icon money-balance-icon-limit" aria-hidden="true">
-                <i class="fa-solid fa-chart-pie"></i>
+            <span
+                class="money-balance-icon money-balance-icon-limit"
+                aria-hidden="true"
+            >
+                <i class="fa-solid fa-money-bill-wave"></i>
             </span>
 
             <div class="money-limit-content">
-                <p>Limit bulanan · {{ now()->format('m/Y') }}</p>
+                <p>Limit Cash · {{ now()->format('m/Y') }}</p>
 
-                @if ($monthlyLimit !== null)
+                @if ($monthlyCashLimit !== null)
                     <strong>
-                        Rp {{ number_format((float) $monthlyLimit, 0, ',', '.') }}
+                        Rp {{ number_format((float) $monthlyCashLimit, 0, ',', '.') }}
                     </strong>
                 @else
                     <strong>Belum diatur</strong>
                 @endif
 
                 <small>
-                    Terpakai: Rp {{ number_format((float) $monthlySpent, 0, ',', '.') }}
+                    Terpakai: Rp {{ number_format((float) $monthlyCashSpent, 0, ',', '.') }}
                 </small>
 
-                @if ($monthlyLimit !== null)
+                @if ($monthlyCashLimit !== null)
                     <div
                         class="money-limit-progress"
                         role="progressbar"
-                        aria-label="Penggunaan limit bulanan"
+                        aria-label="Penggunaan limit Cash"
                         aria-valuemin="0"
                         aria-valuemax="100"
-                        aria-valuenow="{{ $monthlyLimitProgress }}"
+                        aria-valuenow="{{ $monthlyCashLimitProgress }}"
                     >
-                        <span style="width: {{ $monthlyLimitProgress }}%"></span>
+                        <span style="width: {{ $monthlyCashLimitProgress }}%"></span>
                     </div>
 
-                    @if ((float) $monthlySpent > (float) $monthlyLimit)
+                    @if ((float) $monthlyCashSpent > (float) $monthlyCashLimit)
                         <small class="money-limit-warning">
-                            Pengeluaran sudah melebihi limit.
+                            Pengeluaran cash melebihi limit!
                         </small>
                     @else
-                        <small>
-                            {{ $monthlyLimitProgress }}% dari limit digunakan
-                        </small>
+                        <small>{{ $monthlyCashLimitProgress }}% limit digunakan</small>
                     @endif
                 @endif
 
@@ -85,10 +87,69 @@
                     class="money-limit-manage-button"
                     type="button"
                     data-open-money-limit-dialog
+                    data-limit-method="cash"
                     aria-haspopup="dialog"
                 >
                     <i class="fa-solid fa-sliders" aria-hidden="true"></i>
-                    {{ $monthlyLimit !== null ? 'Atur limit' : 'Tambah limit' }}
+                    {{ $monthlyCashLimit !== null ? 'Atur limit cash' : 'Tambah limit cash' }}
+                </button>
+            </div>
+        </article>
+
+        {{-- LIMIT SALDO ONLINE --}}
+        <article class="money-balance-card money-balance-card-limit">
+            <span
+                class="money-balance-icon money-balance-icon-online"
+                aria-hidden="true"
+            >
+                <i class="fa-solid fa-building-columns"></i>
+            </span>
+
+            <div class="money-limit-content">
+                <p>Limit Online · {{ now()->format('m/Y') }}</p>
+
+                @if ($monthlyOnlineLimit !== null)
+                    <strong>
+                        Rp {{ number_format((float) $monthlyOnlineLimit, 0, ',', '.') }}
+                    </strong>
+                @else
+                    <strong>Belum diatur</strong>
+                @endif
+
+                <small>
+                    Terpakai: Rp {{ number_format((float) $monthlyOnlineSpent, 0, ',', '.') }}
+                </small>
+
+                @if ($monthlyOnlineLimit !== null)
+                    <div
+                        class="money-limit-progress"
+                        role="progressbar"
+                        aria-label="Penggunaan limit saldo online"
+                        aria-valuemin="0"
+                        aria-valuemax="100"
+                        aria-valuenow="{{ $monthlyOnlineLimitProgress }}"
+                    >
+                        <span style="width: {{ $monthlyOnlineLimitProgress }}%"></span>
+                    </div>
+
+                    @if ((float) $monthlyOnlineSpent > (float) $monthlyOnlineLimit)
+                        <small class="money-limit-warning">
+                            Pengeluaran online melebihi limit!
+                        </small>
+                    @else
+                        <small>{{ $monthlyOnlineLimitProgress }}% limit digunakan</small>
+                    @endif
+                @endif
+
+                <button
+                    class="money-limit-manage-button"
+                    type="button"
+                    data-open-money-limit-dialog
+                    data-limit-method="online"
+                    aria-haspopup="dialog"
+                >
+                    <i class="fa-solid fa-sliders" aria-hidden="true"></i>
+                    {{ $monthlyOnlineLimit !== null ? 'Atur limit online' : 'Tambah limit online' }}
                 </button>
             </div>
         </article>
@@ -330,6 +391,24 @@
                     value="{{ now()->format('m/Y') }}"
                     readonly
                 >
+            </label>
+
+            <label>
+                Metode saldo
+                <select name="payment_method" data-money-limit-method required>
+                    <option
+                        value="cash"
+                        @selected(old('payment_method', 'cash') === 'cash')
+                    >
+                        Cash
+                    </option>
+                    <option
+                        value="online"
+                        @selected(old('payment_method') === 'online')
+                    >
+                        Saldo online
+                    </option>
+                </select>
             </label>
 
             <label>
