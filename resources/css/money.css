@@ -1052,6 +1052,106 @@
     font-weight: 400;
 }
 
+/* Dialog pengaturan limit bulanan */
+.content .money-create-dialog.money-limit-dialog {
+    width: min(460px, calc(100vw - 32px));
+    padding: 24px;
+    border-color: #dbeafe;
+    border-radius: 20px;
+}
+
+.content .money-limit-dialog .money-dialog-heading {
+    padding-bottom: 17px;
+    border-bottom: 1px solid #edf2f8;
+}
+
+.content .money-limit-dialog .money-eyebrow {
+    margin: 0 0 6px;
+    color: #2563eb;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+}
+
+.content .money-limit-dialog .money-dialog-heading h2 {
+    font-size: 20px;
+}
+
+.content .money-limit-dialog .money-dialog-heading p:last-child {
+    max-width: 330px;
+    line-height: 1.6;
+}
+
+.content .money-limit-dialog .money-limit-form {
+    grid-template-columns: minmax(0, 1fr);
+    align-items: stretch;
+    gap: 15px;
+    margin-top: 18px;
+}
+
+.content .money-limit-dialog .money-limit-form label {
+    color: #334155;
+    font-size: 12px;
+    font-weight: 750;
+}
+
+.content .money-limit-dialog .money-limit-form input {
+    min-height: 46px;
+    margin-top: 7px;
+    padding: 11px 13px;
+    border-radius: 11px;
+    font-size: 14px;
+}
+
+.content .money-limit-dialog .money-limit-form input[readonly] {
+    border-color: #e2e8f0 !important;
+    background: #f8fafc;
+    color: #64748b !important;
+    font-weight: 650;
+}
+
+.content .money-limit-dialog .money-limit-form input[name="monthly_limit"]:focus {
+    border-color: #60a5fa !important;
+    outline: 3px solid rgba(96, 165, 250, .18);
+}
+
+.content .money-limit-dialog .money-limit-form label small {
+    margin-top: 7px;
+    line-height: 1.5;
+}
+
+.content .money-limit-dialog .money-dialog-actions {
+    justify-content: stretch;
+    gap: 10px;
+    margin-top: 4px;
+}
+
+.content .money-limit-dialog .money-dialog-actions > button {
+    flex: 1 1 0;
+    min-height: 43px;
+    border-radius: 11px;
+}
+
+.content .money-limit-dialog .money-primary-button {
+    justify-content: center;
+}
+
+.content .money-limit-dialog .money-primary-button:hover {
+    filter: brightness(.96);
+}
+
+.content .money-limit-dialog .money-dialog-error {
+    margin: 12px 0 0;
+    padding: 10px 12px;
+    border: 1px solid #fecaca;
+    border-radius: 10px;
+    background: #fef2f2;
+    color: #b91c1c;
+    font-size: 12px;
+    line-height: 1.5;
+}
+
 @media (max-width: 480px) {
     .money-balance-grid {
         grid-template-columns: minmax(0, 1fr);
@@ -1059,6 +1159,11 @@
 
     .money-limit-manage-button {
         width: 100%;
+    }
+
+    .content .money-create-dialog.money-limit-dialog {
+        padding: 19px;
+        border-radius: 17px;
     }
 }
 
