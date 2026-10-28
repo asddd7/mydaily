@@ -561,6 +561,36 @@
         if (dialog.hasAttribute('data-reopen')) openDialog();
     }
 
+    const limitDialog = document.querySelector('[data-money-limit-dialog]');
+
+    if (limitDialog instanceof HTMLDialogElement) {
+        const openLimitDialog = () => {
+            if (!limitDialog.open) {
+                limitDialog.showModal();
+            }
+
+            limitDialog.querySelector('[name="monthly_limit"]')?.focus();
+        };
+
+        document.querySelectorAll('[data-open-money-limit-dialog]').forEach(button => {
+            button.addEventListener('click', openLimitDialog);
+        });
+
+        limitDialog.querySelectorAll('[data-close-money-limit-dialog]').forEach(button => {
+            button.addEventListener('click', () => limitDialog.close());
+        });
+
+        limitDialog.addEventListener('click', event => {
+            if (event.target === limitDialog) {
+                limitDialog.close();
+            }
+        });
+
+        if (limitDialog.hasAttribute('data-reopen')) {
+            openLimitDialog();
+        }
+    }
+
     const adjustDialog = document.querySelector('[data-money-adjust-dialog]');
     if (!(adjustDialog instanceof HTMLDialogElement)) return;
 
