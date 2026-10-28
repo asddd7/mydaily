@@ -71,7 +71,10 @@ Route::get(
     ->whereNumber('transaction')
     ->whereNumber('receipt')
     ->name('money.receipt');
-
+Route::post('/money-plan/limit', [
+    MoneyPlanController::class,
+    'saveLimit',
+])->name('money.limit.store');
 Route::get('/notes', [NotesController::class, 'index'])->name('notes.index');
 Route::post('/notes', [NotesController::class, 'store'])->name('notes.store');
 Route::get('/notes/{note}/image', [NotesController::class, 'image'])->name('notes.image');
