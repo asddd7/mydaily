@@ -947,6 +947,121 @@
     overflow-wrap: anywhere;
 }
 
+/* Kartu limit bulanan pada ringkasan saldo */
+.money-balance-grid {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+}
+
+.money-balance-card-limit {
+    align-items: flex-start;
+    min-width: 0;
+}
+
+.money-balance-icon-limit {
+    color: #2563eb;
+    background: #dbeafe;
+}
+
+.money-limit-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.money-limit-content > p {
+    margin-bottom: 5px;
+}
+
+.money-limit-content > strong {
+    display: block;
+    overflow-wrap: anywhere;
+}
+
+.money-limit-content > small {
+    display: block;
+    margin-top: 5px;
+    color: #64748b;
+    font-size: 12px;
+}
+
+.money-limit-progress {
+    width: 100%;
+    height: 7px;
+    margin-top: 10px;
+    overflow: hidden;
+    border-radius: 999px;
+    background: #e2e8f0;
+}
+
+.money-limit-progress > span {
+    display: block;
+    height: 100%;
+    max-width: 100%;
+    border-radius: inherit;
+    background: #2563eb;
+    transition: width 0.25s ease;
+}
+
+.money-limit-warning {
+    color: #dc2626 !important;
+    font-weight: 700;
+}
+
+.money-limit-manage-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    min-height: 35px;
+    margin-top: 12px;
+    padding: 8px 12px;
+    border: 1px solid #bfdbfe;
+    border-radius: 9px;
+    background: #eff6ff;
+    color: #1d4ed8;
+    font: inherit;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.18s ease;
+}
+
+.money-limit-manage-button:hover {
+    background: #dbeafe;
+}
+
+.money-limit-manage-button:focus-visible {
+    outline: 2px solid #60a5fa;
+    outline-offset: 2px;
+}
+
+.money-limit-notice {
+    margin: 10px 0;
+    color: #15803d;
+    font-size: 13px;
+}
+
+.money-limit-form {
+    margin-top: 10px;
+}
+
+.money-limit-form label small {
+    display: block;
+    margin-top: 5px;
+    color: #64748b;
+    font-size: 12px;
+    font-weight: 400;
+}
+
+@media (max-width: 480px) {
+    .money-balance-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .money-limit-manage-button {
+        width: 100%;
+    }
+}
+
 @media (max-width: 850px) {
     .content .money-form-grid { grid-template-columns: minmax(0, 1fr); }
 }
