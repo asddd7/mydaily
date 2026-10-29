@@ -1,0 +1,339 @@
+
+/* ========================================
+   MyDaily - Authentication
+   File: resources/css/auth.css
+   ======================================== */
+
+.login-page {
+    --auth-primary: #3978f6;
+    --auth-primary-hover: #2864dc;
+    --auth-accent: #61b7ff;
+    --auth-text: #18243a;
+    --auth-muted: #718096;
+    --auth-border: #dce5f1;
+    --auth-surface: #ffffff;
+    --auth-background: #f2f6fc;
+    --auth-danger: #c0392b;
+    --auth-danger-bg: #fff0ef;
+    --auth-success: #18794e;
+    --auth-success-bg: #eafaf1;
+
+    min-height: 100vh;
+    margin: 0;
+    padding: 32px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+
+    font-family: "Poppins", "Segoe UI", Arial, sans-serif;
+    color: var(--auth-text);
+
+    background:
+        radial-gradient(
+            circle at 10% 10%,
+            rgba(97, 183, 255, 0.18),
+            transparent 35%
+        ),
+        radial-gradient(
+            circle at 90% 90%,
+            rgba(57, 120, 246, 0.12),
+            transparent 35%
+        ),
+        var(--auth-background);
+}
+
+.login-page *,
+.login-page *::before,
+.login-page *::after {
+    box-sizing: border-box;
+}
+
+/* Card utama */
+
+.login-page .login-container {
+    width: 100%;
+    max-width: 440px;
+    padding: 38px 34px;
+    margin: auto;
+
+    background: var(--auth-surface);
+    border: 1px solid rgba(220, 229, 241, 0.9);
+    border-radius: 22px;
+
+    box-shadow:
+        0 20px 55px rgba(31, 65, 114, 0.09),
+        0 3px 10px rgba(31, 65, 114, 0.04);
+
+    animation: authFadeIn 0.45s ease both;
+}
+
+.login-page .login-container h2 {
+    margin: 0 0 28px;
+    text-align: center;
+    font-size: clamp(25px, 5vw, 30px);
+    line-height: 1.35;
+    font-weight: 700;
+    letter-spacing: -0.7px;
+    color: var(--auth-text);
+}
+
+.login-page .login-container h2::after {
+    content: "";
+    display: block;
+    width: 44px;
+    height: 4px;
+    margin: 12px auto 0;
+    border-radius: 10px;
+    background: linear-gradient(
+        90deg,
+        var(--auth-primary),
+        var(--auth-accent)
+    );
+}
+
+/* Form */
+
+.login-page .login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 17px;
+    width: 100%;
+}
+
+.login-page .input-group {
+    width: 100%;
+    min-width: 0;
+}
+
+.login-page .input-group input {
+    display: block;
+    width: 100%;
+    min-height: 51px;
+    padding: 13px 15px;
+
+    font: inherit;
+    font-size: 14px;
+    color: var(--auth-text);
+
+    background: #f9fbff;
+    border: 1px solid var(--auth-border);
+    border-radius: 11px;
+    outline: none;
+
+    transition:
+        border-color 0.2s ease,
+        background-color 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.login-page .input-group input::placeholder {
+    color: #98a5b8;
+    opacity: 1;
+}
+
+.login-page .input-group input:hover {
+    border-color: #b9cce8;
+}
+
+.login-page .input-group input:focus {
+    background: #ffffff;
+    border-color: var(--auth-primary);
+    box-shadow: 0 0 0 4px rgba(57, 120, 246, 0.12);
+}
+
+.login-page .input-group input:focus-visible {
+    outline: none;
+}
+
+/* Checkbox ingat saya */
+
+.login-page .login-form > label {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    width: fit-content;
+
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--auth-muted);
+    cursor: pointer;
+    user-select: none;
+}
+
+.login-page .login-form > label input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    margin: 0;
+    accent-color: var(--auth-primary);
+    cursor: pointer;
+}
+
+/* Tombol */
+
+.login-page .login-form button {
+    width: 100%;
+    min-height: 51px;
+    margin-top: 3px;
+    padding: 13px 18px;
+
+    border: none;
+    border-radius: 11px;
+
+    background: linear-gradient(
+        135deg,
+        var(--auth-primary),
+        #5798ff
+    );
+
+    color: #ffffff;
+    font: inherit;
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+
+    cursor: pointer;
+    box-shadow: 0 7px 16px rgba(57, 120, 246, 0.2);
+
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease,
+        filter 0.2s ease;
+}
+
+.login-page .login-form button:hover {
+    background: linear-gradient(
+        135deg,
+        var(--auth-primary-hover),
+        #4388f4
+    );
+    box-shadow: 0 10px 22px rgba(57, 120, 246, 0.27);
+    transform: translateY(-1px);
+}
+
+.login-page .login-form button:active {
+    transform: translateY(0);
+    box-shadow: 0 4px 10px rgba(57, 120, 246, 0.18);
+}
+
+.login-page .login-form button:focus-visible {
+    outline: 3px solid rgba(57, 120, 246, 0.35);
+    outline-offset: 3px;
+}
+
+/* Link dan footer */
+
+.login-page .login-footer {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 25px;
+    padding-top: 21px;
+    border-top: 1px solid #edf1f7;
+}
+
+.login-page .login-footer p,
+.login-page .login-container > p {
+    margin: 0;
+    text-align: center;
+    color: var(--auth-muted);
+    font-size: 13px;
+    line-height: 1.8;
+}
+
+.login-page .login-container > p {
+    margin-top: 23px;
+}
+
+.login-page a {
+    color: var(--auth-primary);
+    font-weight: 600;
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.login-page a:hover {
+    color: var(--auth-primary-hover);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+/* Pesan validasi */
+
+.login-page .error-msg,
+.login-page .success-msg {
+    padding: 12px 14px;
+    margin: 0 0 18px;
+
+    border: 1px solid transparent;
+    border-radius: 10px;
+
+    font-size: 13px;
+    line-height: 1.6;
+    overflow-wrap: anywhere;
+}
+
+.login-page .error-msg {
+    color: var(--auth-danger);
+    background: var(--auth-danger-bg);
+    border-color: #ffd7d3;
+}
+
+.login-page .success-msg {
+    color: var(--auth-success);
+    background: var(--auth-success-bg);
+    border-color: #c6f0d6;
+}
+
+/* Animasi */
+
+@keyframes authFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Tampilan HP */
+
+@media (max-width: 480px) {
+    .login-page {
+        padding: 20px 14px;
+        align-items: center;
+    }
+
+    .login-page .login-container {
+        padding: 30px 22px;
+        border-radius: 18px;
+    }
+
+    .login-page .login-container h2 {
+        margin-bottom: 24px;
+    }
+
+    .login-page .login-form {
+        gap: 15px;
+    }
+
+    .login-page .input-group input,
+    .login-page .login-form button {
+        min-height: 49px;
+    }
+}
+
+/* Hormati pengaturan pengurangan animasi */
+
+@media (prefers-reduced-motion: reduce) {
+    .login-page *,
+    .login-page *::before,
+    .login-page *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
