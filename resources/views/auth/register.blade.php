@@ -4,7 +4,11 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Register - MyDaily</title>
-    @vite(['resources/css/style.css', 'resources/js/page-loader.js'])
+    @vite([
+        'resources/css/style.css',
+        'resources/css/auth.css',
+        'resources/js/page-loader.js'
+    ])
 </head>
 <body class="login-page">
 @include('layouts.partials.page-loader')

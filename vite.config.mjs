@@ -12,6 +12,7 @@ export default defineConfig({
                 'resources/css/notes.css',
                 'resources/css/database-structure.css',
                 'resources/css/files.css',
+                'resources/css/auth.css',
                 'resources/js/page-loader.js',
                 'resources/js/push-notifications.js',
                 'resources/js/pwa-install.js',
