@@ -8,27 +8,80 @@
 
 @section('content')
 <div class="clock-settings-page">
-<section class="card">
-    <h1>Pengaturan Jam</h1>
-    <form method="post" action="{{ route('clock.update') }}">
+<section class="card clock-preferences-card" aria-labelledby="clockSettingsTitle">
+    <div class="clock-settings-heading">
+        <span class="clock-settings-heading-icon" aria-hidden="true"><i class="fa-regular fa-clock"></i></span>
+        <div>
+            <p class="clock-settings-eyebrow">Preferensi waktu</p>
+            <h1 id="clockSettingsTitle">Pengaturan Jam</h1>
+            <p class="clock-settings-description">Pilih tampilan dan pengatur waktu yang ingin digunakan.</p>
+        </div>
+    </div>
+
+    @if (session('status'))
+        <p class="clock-status-message" role="status">{{ session('status') }}</p>
+    @endif
+
+    @if ($errors->any())
+        <p class="clock-status-message is-error" role="alert">{{ $errors->first() }}</p>
+    @endif
+
+    <form method="post" action="{{ route('clock.update') }}" class="clock-settings-form">
         @csrf
         @method('put')
-        @foreach (['clock' => 'Jam digital', 'stopwatch' => 'Stopwatch', 'countdown' => 'Countdown', 'pomodoro' => 'Pomodoro'] as $value => $label)
-            <label style="display:block;margin:.75rem 0">
-                <input type="radio" name="mode" value="{{ $value }}" @checked($mode === $value) required>
-                {{ $label }}
+
+        <fieldset class="clock-mode-fieldset">
+            <legend>Pilih mode jam</legend>
+            <div class="clock-mode-options">
+                @php
+                    $clockModes = [
+                        'clock' => ['Jam digital', 'Lihat waktu saat ini.', 'fa-clock'],
+                        'stopwatch' => ['Stopwatch', 'Ukur durasi aktivitas.', 'fa-stopwatch'],
+                        'countdown' => ['Countdown', 'Hitung mundur dengan durasi pilihan.', 'fa-hourglass-half'],
+                        'pomodoro' => ['Pomodoro', 'Atur sesi fokus dan istirahat.', 'fa-brain'],
+                    ];
+                @endphp
+                @foreach ($clockModes as $value => [$label, $description, $icon])
+                    <label class="clock-mode-option">
+                        <input type="radio" name="mode" value="{{ $value }}" @checked(old('mode', $mode) === $value) required>
+                        <span class="clock-mode-icon" aria-hidden="true"><i class="fa-solid {{ $icon }}"></i></span>
+                        <span>
+                            <strong>{{ $label }}</strong>
+                            <small>{{ $description }}</small>
+                        </span>
+                    </label>
+                @endforeach
+            </div>
+        </fieldset>
+
+        <div class="clock-settings-fields">
+            <label class="clock-field">
+                <span>Durasi countdown</span>
+                <span class="clock-input-wrap">
+                    <input type="number" name="minutes" min="1" max="10080" value="{{ old('minutes', $countdownMinutes) }}">
+                    <small>menit</small>
+                </span>
             </label>
-        @endforeach
-        <label>Durasi countdown (menit)
-            <input type="number" name="minutes" min="1" max="10080" value="{{ $countdownMinutes }}">
-        </label>
-        <label>Durasi fokus pomodoro (menit)
-            <input type="number" name="work" min="1" max="180" value="{{ $workMinutes }}">
-        </label>
-        <label>Durasi istirahat pomodoro (menit)
-            <input type="number" name="break" min="1" max="180" value="{{ $breakMinutes }}">
-        </label>
-        <button type="submit">Simpan</button>
+            <label class="clock-field">
+                <span>Fokus Pomodoro</span>
+                <span class="clock-input-wrap">
+                    <input type="number" name="work" min="1" max="180" value="{{ old('work', $workMinutes) }}">
+                    <small>menit</small>
+                </span>
+            </label>
+            <label class="clock-field">
+                <span>Istirahat Pomodoro</span>
+                <span class="clock-input-wrap">
+                    <input type="number" name="break" min="1" max="180" value="{{ old('break', $breakMinutes) }}">
+                    <small>menit</small>
+                </span>
+            </label>
+        </div>
+
+        <button class="clock-save-button" type="submit">
+            <i class="fa-solid fa-floppy-disk" aria-hidden="true"></i>
+            Simpan pengaturan
+        </button>
     </form>
 </section>
 <section class="card clock-test-card" aria-labelledby="clockTestTitle">

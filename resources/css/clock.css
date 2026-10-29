@@ -36,6 +36,71 @@
     box-shadow: 0 8px 26px rgba(31, 65, 114, 0.05);
 }
 
+.clock-settings-page .clock-preferences-card {
+    position: relative;
+    overflow: hidden;
+}
+
+.clock-settings-page .clock-preferences-card::before {
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #3978f6, #72a6ff);
+    content: '';
+}
+
+.clock-settings-page .clock-settings-heading {
+    display: flex;
+    align-items: flex-start;
+    gap: 15px;
+    margin-bottom: 24px;
+}
+
+.clock-settings-page .clock-settings-heading-icon {
+    display: grid;
+    flex: 0 0 48px;
+    width: 48px;
+    height: 48px;
+    place-items: center;
+    border-radius: 15px;
+    background: #eff5ff;
+    color: var(--clock-primary);
+    font-size: 20px;
+}
+
+.clock-settings-page .clock-settings-eyebrow {
+    margin: 0 0 4px;
+    color: var(--clock-primary);
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+}
+
+.clock-settings-page .clock-settings-heading h1 {
+    margin: 0;
+}
+
+.clock-settings-page .clock-settings-description {
+    margin: 5px 0 0;
+}
+
+.clock-settings-page .clock-mode-fieldset {
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+}
+
+.clock-settings-page .clock-mode-fieldset legend {
+    margin-bottom: 11px;
+    color: var(--clock-text);
+    font-size: 13px;
+    font-weight: 700;
+}
+
 .clock-settings-page h1 {
     margin: 0 0 8px;
     font-size: clamp(24px, 4vw, 30px);
@@ -83,6 +148,22 @@
     transition: border-color .2s, background .2s, box-shadow .2s;
 }
 
+.clock-settings-page .clock-mode-option:focus-within {
+    outline: 3px solid rgba(57, 120, 246, .16);
+    outline-offset: 2px;
+}
+
+.clock-settings-page .clock-mode-icon {
+    display: grid;
+    flex: 0 0 36px;
+    width: 36px;
+    height: 36px;
+    place-items: center;
+    border-radius: 11px;
+    background: #fff;
+    color: #5275b5;
+}
+
 .clock-settings-page .clock-mode-option:has(input:checked) {
     border-color: var(--clock-primary);
     background: #eff5ff;
@@ -116,9 +197,28 @@
     margin-bottom: 19px;
 }
 
-.clock-settings-page .clock-field > span {
+.clock-settings-page .clock-field > span:first-child {
     font-size: 13px;
     font-weight: 600;
+}
+
+.clock-settings-page .clock-settings-fields {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 13px;
+    margin: 20px 0;
+}
+
+.clock-settings-page .clock-input-wrap {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+}
+
+.clock-settings-page .clock-input-wrap small {
+    flex: 0 0 auto;
+    color: var(--clock-muted);
+    font-size: 12px;
 }
 
 .clock-settings-page .clock-field input,
@@ -178,6 +278,11 @@
     color: #18794e;
     background: #eafaf1;
     font-size: 13px;
+}
+
+.clock-settings-page .clock-status-message.is-error {
+    color: #b42318;
+    background: #fff1f0;
 }
 
 .clock-settings-page .clock-test-heading {
@@ -254,6 +359,22 @@
 
     .clock-settings-page .clock-mode-options {
         grid-template-columns: 1fr;
+    }
+
+    .clock-settings-page .clock-settings-fields {
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
+
+    .clock-settings-page .clock-settings-heading {
+        gap: 11px;
+    }
+
+    .clock-settings-page .clock-settings-heading-icon {
+        flex-basis: 42px;
+        width: 42px;
+        height: 42px;
+        border-radius: 13px;
     }
 
     .clock-settings-page .clock-test-controls {
