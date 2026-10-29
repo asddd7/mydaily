@@ -2,7 +2,12 @@
 
 @section('title', 'Pengaturan Jam - MyDaily')
 
+@push('styles')
+    @vite('resources/css/clock.css')
+@endpush
+
 @section('content')
+<div class="clock-settings-page">
 <section class="card">
     <h1>Pengaturan Jam</h1>
     <form method="post" action="{{ route('clock.update') }}">
@@ -127,4 +132,5 @@
 })();
 </script>
 @endpush
+</div>
 @endsection
