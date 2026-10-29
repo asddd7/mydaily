@@ -1,0 +1,270 @@
+
+/* ========================================
+   MyDaily - Pengaturan Jam
+   resources/css/clock.css
+   ======================================== */
+
+.clock-settings-page {
+    --clock-primary: #3978f6;
+    --clock-primary-hover: #2864dc;
+    --clock-text: #18243a;
+    --clock-muted: #718096;
+    --clock-border: #e1e8f2;
+    --clock-surface: #ffffff;
+    --clock-bg: #f7f9fd;
+
+    display: grid;
+    gap: 22px;
+    width: 100%;
+    max-width: 900px;
+    margin: 0 auto;
+    color: var(--clock-text);
+}
+
+.clock-settings-page *,
+.clock-settings-page *::before,
+.clock-settings-page *::after {
+    box-sizing: border-box;
+}
+
+.clock-settings-page .card {
+    min-width: 0;
+    padding: clamp(20px, 4vw, 30px);
+    background: var(--clock-surface);
+    border: 1px solid var(--clock-border);
+    border-radius: 18px;
+    box-shadow: 0 8px 26px rgba(31, 65, 114, 0.05);
+}
+
+.clock-settings-page h1 {
+    margin: 0 0 8px;
+    font-size: clamp(24px, 4vw, 30px);
+    line-height: 1.35;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+}
+
+.clock-settings-page h2 {
+    margin: 0;
+    font-size: 18px;
+    line-height: 1.5;
+    font-weight: 650;
+}
+
+.clock-settings-page p {
+    color: var(--clock-muted);
+    font-size: 14px;
+    line-height: 1.7;
+}
+
+.clock-settings-page .clock-settings-description {
+    margin: 0 0 25px;
+}
+
+.clock-settings-page .clock-mode-options {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    margin-bottom: 26px;
+}
+
+.clock-settings-page .clock-mode-option {
+    position: relative;
+    display: flex !important;
+    align-items: flex-start;
+    gap: 11px;
+    min-width: 0;
+    margin: 0 !important;
+    padding: 16px;
+    border: 1px solid var(--clock-border);
+    border-radius: 13px;
+    background: var(--clock-bg);
+    cursor: pointer;
+    transition: border-color .2s, background .2s, box-shadow .2s;
+}
+
+.clock-settings-page .clock-mode-option:has(input:checked) {
+    border-color: var(--clock-primary);
+    background: #eff5ff;
+    box-shadow: 0 0 0 2px rgba(57, 120, 246, .08);
+}
+
+.clock-settings-page .clock-mode-option input {
+    flex-shrink: 0;
+    width: 17px;
+    height: 17px;
+    margin: 3px 0 0;
+    accent-color: var(--clock-primary);
+}
+
+.clock-settings-page .clock-mode-option strong {
+    display: block;
+    margin-bottom: 4px;
+    font-size: 14px;
+}
+
+.clock-settings-page .clock-mode-option small {
+    display: block;
+    color: var(--clock-muted);
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+.clock-settings-page .clock-field {
+    display: grid;
+    gap: 8px;
+    margin-bottom: 19px;
+}
+
+.clock-settings-page .clock-field > span {
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.clock-settings-page .clock-field input,
+.clock-settings-page .clock-test-controls select {
+    width: 100%;
+    min-height: 46px;
+    padding: 11px 13px;
+    font: inherit;
+    font-size: 14px;
+    color: var(--clock-text);
+    background: #fff;
+    border: 1px solid var(--clock-border);
+    border-radius: 10px;
+    outline: none;
+}
+
+.clock-settings-page .clock-field input:focus,
+.clock-settings-page .clock-test-controls select:focus {
+    border-color: var(--clock-primary);
+    box-shadow: 0 0 0 3px rgba(57, 120, 246, .12);
+}
+
+.clock-settings-page .clock-save-button,
+.clock-settings-page .clock-test-controls button {
+    min-height: 45px;
+    padding: 11px 18px;
+    border: 0;
+    border-radius: 10px;
+    background: var(--clock-primary);
+    color: white;
+    font: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background .2s, transform .2s;
+}
+
+.clock-settings-page .clock-save-button {
+    width: 100%;
+    margin-top: 4px;
+}
+
+.clock-settings-page .clock-save-button:hover,
+.clock-settings-page .clock-test-controls button:hover {
+    background: var(--clock-primary-hover);
+}
+
+.clock-settings-page .clock-save-button:active,
+.clock-settings-page .clock-test-controls button:active {
+    transform: translateY(1px);
+}
+
+.clock-settings-page .clock-status-message {
+    margin: 0 0 20px;
+    padding: 12px 14px;
+    border-radius: 10px;
+    color: #18794e;
+    background: #eafaf1;
+    font-size: 13px;
+}
+
+.clock-settings-page .clock-test-heading {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+}
+
+.clock-settings-page .clock-test-icon {
+    display: grid;
+    flex: 0 0 44px;
+    width: 44px;
+    height: 44px;
+    place-items: center;
+    border-radius: 13px;
+    background: #eff5ff;
+    color: var(--clock-primary);
+    font-size: 18px;
+}
+
+.clock-settings-page .clock-test-heading p {
+    margin: 5px 0 0;
+}
+
+.clock-settings-page .clock-test-time {
+    display: block;
+    margin: 24px 0;
+    text-align: center;
+    font-size: clamp(36px, 8vw, 52px);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 2px;
+}
+
+.clock-settings-page .clock-test-controls {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    align-items: end;
+}
+
+.clock-settings-page .clock-test-controls label {
+    grid-column: 1 / -1;
+    margin-bottom: -5px;
+    color: var(--clock-muted);
+    font-size: 13px;
+}
+
+.clock-settings-page .clock-test-controls button {
+    width: 100%;
+}
+
+.clock-settings-page .clock-test-controls .clock-test-cancel {
+    background: #eef2f7;
+    color: #374151;
+}
+
+.clock-settings-page .clock-test-controls .clock-test-cancel:hover {
+    background: #dfe6ef;
+}
+
+.clock-settings-page .clock-test-status {
+    margin: 18px 0 0;
+    padding: 12px 14px;
+    border-radius: 10px;
+    background: var(--clock-bg);
+    overflow-wrap: anywhere;
+}
+
+@media (max-width: 520px) {
+    .clock-settings-page {
+        gap: 16px;
+    }
+
+    .clock-settings-page .clock-mode-options {
+        grid-template-columns: 1fr;
+    }
+
+    .clock-settings-page .clock-test-controls {
+        grid-template-columns: 1fr;
+    }
+
+    .clock-settings-page .clock-test-controls label {
+        grid-column: auto;
+    }
+
+    .clock-settings-page .clock-test-heading {
+        gap: 10px;
+    }
+}
