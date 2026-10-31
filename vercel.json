@@ -1,0 +1,27 @@
+{
+    "$schema": "https://openapi.vercel.sh/vercel.json",
+    "buildCommand": "npm run build && mkdir -p vercel-public && cp -R public/. vercel-public/ && rm -f vercel-public/index.php",
+    "outputDirectory": "vercel-public",
+    "functions": {
+        "api/index.php": {
+            "runtime": "vercel-php@0.9.0"
+        }
+    },
+    "routes": [
+        {
+            "src": "^/$",
+            "dest": "/api/index.php"
+        },
+        {
+            "src": "^/index\\.php$",
+            "dest": "/api/index.php"
+        },
+        {
+            "handle": "filesystem"
+        },
+        {
+            "src": "/(.*)",
+            "dest": "/api/index.php"
+        }
+    ]
+}
