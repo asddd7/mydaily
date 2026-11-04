@@ -31,12 +31,21 @@
     const selectedLabel = root.querySelector('[data-file-selected]');
     const uploadDialog = root.querySelector('[data-file-upload-dialog]');
     const nameInput = root.querySelector('[data-file-name-input]');
+    const nameGroup = root.querySelector('[data-file-name-group]');
     const extensionLabel = root.querySelector('[data-file-extension]');
+    const submitLabel = root.querySelector('[data-file-submit-label]');
     const uploadButton = uploadForm
         ? uploadForm.querySelector('button[type="submit"], button:not([type])')
         : null;
 
     if (uploadDialog instanceof HTMLDialogElement) {
+        root.querySelectorAll('[data-file-upload-open]').forEach((button) => {
+            button.addEventListener('click', () => {
+                if (!uploadDialog.open) uploadDialog.showModal();
+                input?.focus();
+            });
+        });
+
         root.querySelectorAll('[data-file-upload-close]').forEach((button) => {
             button.addEventListener('click', () => uploadDialog.close());
         });
@@ -80,17 +89,30 @@
         }
     };
 
-    const getFile = () => input?.files?.[0] || null;
+    const getFiles = () => Array.from(input?.files || []);
 
     let suggestedName = '';
     const updateSelectedFile = () => {
-        const file = getFile();
+        const files = getFiles();
+        const file = files.length === 1 ? files[0] : null;
 
         if (selectedLabel) {
             selectedLabel.hidden = false;
-            selectedLabel.textContent = file
-                ? `${file.name} · ${formatSize(file.size)}`
-                : 'Belum ada file dipilih';
+            if (files.length === 0) {
+                selectedLabel.textContent = 'Belum ada file dipilih';
+                if (submitLabel) submitLabel.textContent = 'Upload file';
+            } else if (file) {
+                selectedLabel.textContent = `${file.name} · ${formatSize(file.size)}`;
+                if (submitLabel) submitLabel.textContent = 'Upload 1 file';
+            } else {
+                const totalSize = files.reduce((total, selectedFile) => total + selectedFile.size, 0);
+                const names = files.slice(0, 3).map((selectedFile) => selectedFile.name);
+                const remaining = files.length - names.length;
+                selectedLabel.textContent =
+                    `${files.length} file dipilih · ${formatSize(totalSize)}: ` +
+                    `${names.join(', ')}${remaining > 0 ? `, dan ${remaining} lainnya` : ''}`;
+                if (submitLabel) submitLabel.textContent = `Upload ${files.length} file`;
+            }
         }
 
         if (file) {
@@ -110,31 +132,49 @@
             if (extensionLabel) {
                 extensionLabel.textContent = extension ? `.${extension}` : 'Tanpa ekstensi';
             }
+            if (nameGroup) nameGroup.hidden = false;
+            if (nameInput instanceof HTMLInputElement) nameInput.disabled = false;
+        } else if (files.length > 1) {
+            if (nameInput instanceof HTMLInputElement) {
+                nameInput.value = '';
+                nameInput.disabled = true;
+            }
+            if (nameGroup) nameGroup.hidden = true;
+            suggestedName = '';
+            if (extensionLabel) extensionLabel.textContent = 'Ekstensi';
         } else {
             if (nameInput instanceof HTMLInputElement) {
                 if (nameInput.value === suggestedName) nameInput.value = '';
+                nameInput.disabled = false;
                 nameInput.placeholder = 'Pilih file terlebih dahulu';
             }
 
+            if (nameGroup) nameGroup.hidden = false;
             suggestedName = '';
             if (extensionLabel) extensionLabel.textContent = 'Ekstensi';
         }
 
-        if (!file) {
+        if (files.length === 0) {
             showFeedback('');
             return true;
         }
 
-        if (file.size > MAX_FILE_SIZE) {
-            showFeedback('Ukuran file melebihi batas 50 MB.', true);
+        const invalidFile = files.find((selectedFile) =>
+            selectedFile.size === 0 || selectedFile.size > MAX_FILE_SIZE
+        );
+        if (invalidFile) {
+            showFeedback(
+                invalidFile.size === 0
+                    ? `${invalidFile.name} kosong dan tidak dapat diunggah.`
+                    : `${invalidFile.name} melebihi batas 50 MB.`,
+                true
+            );
             return false;
         }
 
-        if (file.size === 0) {
-            showFeedback('File kosong tidak dapat diunggah.', true);
-            return false;
+        if (submitLabel) {
+            submitLabel.textContent = `Upload ${files.length} file`;
         }
-
         showFeedback('');
         return true;
     };
@@ -143,11 +183,11 @@
     input?.addEventListener('change', updateSelectedFile);
 
     uploadForm?.addEventListener('submit', (event) => {
-        const file = getFile();
+        const files = getFiles();
 
-        if (!file) {
+        if (files.length === 0) {
             event.preventDefault();
-            showFeedback('Pilih file terlebih dahulu.', true);
+            showFeedback('Pilih minimal satu file terlebih dahulu.', true);
             input?.focus();
             return;
         }
@@ -196,14 +236,9 @@
 
             if (!files?.length) return;
 
-            if (files.length > 1) {
-                showFeedback('Pilih satu file untuk setiap proses upload.', true);
-                return;
-            }
-
             try {
                 const transfer = new DataTransfer();
-                transfer.items.add(files[0]);
+                Array.from(files).forEach((file) => transfer.items.add(file));
                 input.files = transfer.files;
                 input.dispatchEvent(new Event('change', { bubbles: true }));
             } catch {
@@ -346,6 +381,17 @@
                 button.setAttribute('aria-busy', 'true');
                 button.innerHTML =
                     '<i class="fa-solid fa-spinner fa-spin" aria-hidden="true"></i> Menghapus...';
+            }
+        });
+
+    });
+
+    root.querySelectorAll('[data-folder-delete-form]').forEach((form) => {
+        form.addEventListener('submit', (event) => {
+            if (!window.confirm(
+                'Hapus grup ini? File di dalamnya tetap tersimpan di Semua file.'
+            )) {
+                event.preventDefault();
             }
         });
     });

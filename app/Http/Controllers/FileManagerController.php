@@ -56,16 +56,43 @@ class FileManagerController extends Controller
     {
         $userId = $this->currentUserId($request);
 
-        $folders = DB::table('file_folders')
+        $folderFileCounts = DB::table('file_manager')
+            ->select('folder_id')
+            ->selectRaw('COUNT(*) as files_count')
             ->where('user_id', $userId)
-            ->orderBy('name')
+            ->whereNotNull('folder_id')
+            ->groupBy('folder_id');
+
+        $folders = DB::table('file_folders')
+            ->leftJoinSub($folderFileCounts, 'folder_counts', function ($join) {
+                $join->on('file_folders.id', '=', 'folder_counts.folder_id');
+            })
+            ->where('file_folders.user_id', $userId)
+            ->select('file_folders.*')
+            ->selectRaw('COALESCE(folder_counts.files_count, 0) as files_count')
+            ->orderBy('file_folders.name')
             ->get();
 
         $activeFolder = null;
         $folderId = $request->query('folder');
 
+        if ($folderId !== null && $folderId !== '') {
+            abort_unless(filter_var($folderId, FILTER_VALIDATE_INT) !== false, 404);
+
+            $activeFolder = DB::table('file_folders')
+                ->where('id', $folderId)
+                ->where('user_id', $userId)
+                ->first();
+
+            abort_unless($activeFolder, 404);
+        }
+
         $filesQuery = DB::table('file_manager')
             ->where('user_id', $userId);
+
+        if ($activeFolder) {
+            $filesQuery->where('folder_id', $activeFolder->id);
+        }
 
         $files = $filesQuery
             ->orderByDesc('id')
@@ -308,7 +335,7 @@ class FileManagerController extends Controller
             ]);
 
         return redirect()
-            ->route('files.index')
+            ->route('files.index', $record->folder_id ? ['folder' => $record->folder_id] : [])
             ->with('status', 'Nama file berhasil diubah.');
     }
 
@@ -341,7 +368,7 @@ class FileManagerController extends Controller
             ->delete();
 
         return redirect()
-            ->route('files.index')
+            ->route('files.index', $record->folder_id ? ['folder' => $record->folder_id] : [])
             ->with('status', 'File berhasil dihapus.');
     }
 

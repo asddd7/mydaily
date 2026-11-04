@@ -10,10 +10,6 @@
 @php
     $fileCollection = collect($files ?? []);
 
-    $totalFileBytes = $fileCollection->sum(
-        fn ($file) => (int) ($file->file_size ?? 0)
-    );
-
     $formatFileSize = static function ($bytes): string {
         $bytes = max(0, (float) $bytes);
 
@@ -48,7 +44,10 @@
                 Simpan, cari, dan kelola semua file kamu di satu tempat.
             </p>
         </div>
-
+        <button class="fm-header-button" type="button" data-file-upload-open>
+            <i class="fa-solid fa-upload" aria-hidden="true"></i>
+            Upload file
+        </button>
     </header>
 
     {{-- Flash messages --}}
@@ -84,7 +83,7 @@
 
             <div class="fm-stat-content">
                 <span>Total file</span>
-                <strong>{{ $fileCollection->count() }}</strong>
+                <strong>{{ $totalFiles }}</strong>
                 <small>File tersimpan</small>
             </div>
         </article>
@@ -96,7 +95,7 @@
 
             <div class="fm-stat-content">
                 <span>Total ukuran</span>
-                <strong>{{ $formatFileSize($totalFileBytes) }}</strong>
+                <strong>{{ $formatFileSize($totalSize) }}</strong>
                 <small>Akumulasi ukuran file</small>
             </div>
         </article>
@@ -114,13 +113,91 @@
         </article>
     </section>
 
+    <section class="fm-panel fm-folder-panel" aria-labelledby="fm-folder-title">
+        <div class="fm-folder-heading">
+            <div>
+                <p class="fm-section-kicker">Pengelompokan</p>
+                <h2 id="fm-folder-title">Grup file</h2>
+                <p>Buat grup untuk merapikan dan mengelompokkan file.</p>
+            </div>
+            <form method="post" action="{{ route('files.folders.store') }}" class="fm-folder-create-form">
+                @csrf
+                <label class="fm-visually-hidden" for="fm-folder-name">Nama grup baru</label>
+                <input
+                    type="text"
+                    id="fm-folder-name"
+                    name="name"
+                    maxlength="100"
+                    placeholder="Nama grup baru"
+                    required
+                >
+                <button class="fm-button fm-button-primary" type="submit">
+                    <i class="fa-solid fa-plus" aria-hidden="true"></i>
+                    Buat grup
+                </button>
+            </form>
+        </div>
+
+        <nav class="fm-folder-list" aria-label="Pilih grup file">
+            <a
+                class="fm-folder-link {{ $activeFolder ? '' : 'is-active' }}"
+                href="{{ route('files.index') }}"
+                @if (! $activeFolder) aria-current="page" @endif
+            >
+                <i class="fa-solid fa-layer-group" aria-hidden="true"></i>
+                <span>Semua file</span>
+                <small>{{ $totalFiles }}</small>
+            </a>
+
+            @foreach ($folders as $folder)
+                <div class="fm-folder-item">
+                    <a
+                        class="fm-folder-link {{ (int) ($activeFolder->id ?? 0) === (int) $folder->id ? 'is-active' : '' }}"
+                        href="{{ route('files.index', ['folder' => $folder->id]) }}"
+                        @if ((int) ($activeFolder->id ?? 0) === (int) $folder->id) aria-current="page" @endif
+                    >
+                        <i class="fa-solid fa-folder" aria-hidden="true"></i>
+                        <span>{{ $folder->name }}</span>
+                        <small>{{ $folder->files_count }}</small>
+                    </a>
+
+                    <details class="fm-folder-actions">
+                        <summary class="fm-icon-button" aria-label="Kelola grup {{ $folder->name }}" title="Kelola grup">
+                            <i class="fa-solid fa-ellipsis" aria-hidden="true"></i>
+                        </summary>
+                        <div class="fm-folder-action-menu">
+                            <form method="post" action="{{ route('files.folders.update', $folder->id) }}" class="fm-folder-rename-form">
+                                @csrf
+                                @method('put')
+                                <label>
+                                    Ubah nama grup
+                                    <input type="text" name="name" value="{{ $folder->name }}" maxlength="100" required>
+                                </label>
+                                <button class="fm-button fm-button-secondary" type="submit">Simpan nama</button>
+                            </form>
+                            <form method="post" action="{{ route('files.folders.destroy', $folder->id) }}" data-folder-delete-form>
+                                @csrf
+                                @method('delete')
+                                <button class="fm-folder-delete-button" type="submit">
+                                    <i class="fa-regular fa-trash-can" aria-hidden="true"></i>
+                                    Hapus grup
+                                </button>
+                                <small>File di dalamnya tetap tersimpan di Semua file.</small>
+                            </form>
+                        </div>
+                    </details>
+                </div>
+            @endforeach
+        </nav>
+    </section>
+
     {{-- Upload popup --}}
     <dialog class="fm-upload-dialog" data-file-upload-dialog aria-labelledby="fm-upload-title" @if ($errors->any() && old('_form') === 'files_upload') data-reopen @endif>
         <div class="fm-upload-dialog-heading">
             <div>
                 <p class="fm-section-kicker">Tambahkan berkas</p>
-                <h2 id="fm-upload-title">Upload file baru</h2>
-                <p>Pilih file dan sesuaikan nama yang akan ditampilkan.</p>
+                <h2 id="fm-upload-title">Upload file</h2>
+                <p>Pilih satu atau beberapa file, lalu tentukan grup tujuan.</p>
             </div>
             <button type="button" class="fm-icon-button" data-file-upload-close aria-label="Tutup popup upload">
                 <i class="fa-solid fa-xmark" aria-hidden="true"></i>
@@ -151,9 +228,10 @@
             <label class="fm-upload-zone" data-file-dropzone>
                 <input
                     type="file"
-                    name="file"
+                    name="files[]"
                     id="fileUploadInput"
                     class="fm-file-input"
+                    multiple
                     required
                     data-file-input
                     aria-describedby="fm-upload-help fm-upload-feedback"
@@ -164,7 +242,7 @@
                 </span>
 
                 <span class="fm-upload-title">
-                    Pilih file atau tarik ke sini
+                    Pilih file atau tarik beberapa file ke sini
                 </span>
 
                 <span class="fm-upload-description">
@@ -176,7 +254,7 @@
                 </span>
             </label>
 
-            <label class="fm-upload-name-label" for="fileDisplayName">
+            <label class="fm-upload-name-label" for="fileDisplayName" data-file-name-group>
                 Nama file
                 <div class="fm-upload-name-field">
                     <input
@@ -185,19 +263,33 @@
                         name="file_display_name"
                         maxlength="255"
                         value="{{ old('file_display_name') }}"
-                        placeholder="Pilih file terlebih dahulu"
-                        required
+                        placeholder="Opsional untuk satu file"
                         data-file-name-input
                     >
                     <span data-file-extension>Ekstensi</span>
                 </div>
-                <small>Ekstensi file akan dipertahankan otomatis.</small>
+                <small>Untuk satu file saja. Jika memilih beberapa file, nama asli tiap file dipakai.</small>
+            </label>
+
+            <label class="fm-upload-folder-label">
+                Simpan ke grup
+                <select name="folder_id" aria-label="Grup tujuan upload">
+                    <option value="">Semua file (tanpa grup)</option>
+                    @foreach ($folders as $folder)
+                        <option
+                            value="{{ $folder->id }}"
+                            @selected((string) old('folder_id', $activeFolder->id ?? '') === (string) $folder->id)
+                        >
+                            {{ $folder->name }}
+                        </option>
+                    @endforeach
+                </select>
             </label>
 
             <div class="fm-upload-footer">
                 <div>
                     <small id="fm-upload-help">
-                        Maksimal 50 MB untuk setiap file.
+                        Maksimal 50 MB per file. Beberapa file dapat diunggah sekaligus.
                     </small>
 
                     <small
@@ -211,7 +303,7 @@
 
                 <button class="fm-button fm-button-primary" type="submit">
                     <i class="fa-solid fa-upload" aria-hidden="true"></i>
-                    Simpan file
+                    <span data-file-submit-label>Upload file</span>
                 </button>
             </div>
         </form>
@@ -223,8 +315,8 @@
             <div class="fm-section-heading fm-section-heading-compact">
                 <div>
                     <p class="fm-section-kicker">Pustaka file</p>
-                    <h2>File tersimpan</h2>
-                    <p>Kelola nama dan unduh file yang kamu butuhkan.</p>
+                    <h2>{{ $activeFolder ? $activeFolder->name : 'File tersimpan' }}</h2>
+                    <p>{{ $activeFolder ? 'File yang tersimpan di grup ini.' : 'Kelola nama, grup, dan unduh file yang kamu butuhkan.' }}</p>
                 </div>
             </div>
 
@@ -447,6 +539,39 @@
                             </p>
                         </div>
 
+                        @if ($folders->isNotEmpty())
+                            <form
+                                method="post"
+                                action="{{ route('files.move', $file->id) }}"
+                                class="fm-file-move-form"
+                            >
+                                @csrf
+                                @method('patch')
+                                <label for="file-folder-{{ $file->id }}">Grup</label>
+                                <div>
+                                    <select id="file-folder-{{ $file->id }}" name="folder_id">
+                                        <option value="">Tanpa grup</option>
+                                        @foreach ($folders as $folder)
+                                            <option
+                                                value="{{ $folder->id }}"
+                                                @selected((int) ($file->folder_id ?? 0) === (int) $folder->id)
+                                            >
+                                                {{ $folder->name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    <button
+                                        class="fm-icon-button"
+                                        type="submit"
+                                        aria-label="Simpan grup untuk {{ $originalName }}"
+                                        title="Simpan grup"
+                                    >
+                                        <i class="fa-solid fa-check" aria-hidden="true"></i>
+                                    </button>
+                                </div>
+                            </form>
+                        @endif
+
                         <div class="fm-file-actions">
                             <a
                                 class="fm-button fm-button-download"
@@ -539,13 +664,16 @@
                     <i class="fa-regular fa-folder-open" aria-hidden="true"></i>
                 </span>
 
-                <h3>Belum ada file tersimpan</h3>
+                <h3>{{ $activeFolder ? 'Grup ini masih kosong' : 'Belum ada file tersimpan' }}</h3>
 
                 <p>
-                    Mulai dengan mengunggah dokumen, gambar, atau file lainnya.
+                    {{ $activeFolder ? 'Unggah file dan pilih grup ini sebagai tujuan penyimpanan.' : 'Mulai dengan mengunggah dokumen, gambar, atau file lainnya.' }}
                 </p>
 
-                <p>Gunakan tombol upload di pojok kanan bawah untuk menambahkan file.</p>
+                <button class="fm-button fm-button-primary" type="button" data-file-upload-open>
+                    <i class="fa-solid fa-upload" aria-hidden="true"></i>
+                    Upload file
+                </button>
             </div>
         @endif
     </section>
