@@ -2257,7 +2257,7 @@ body {
     padding: 0 15px;
     border-radius: 11px;
     background: #4f46e5;
-    color: #fff;
+    color: #fff !important;
     font-size: 13px;
     font-weight: 700;
     text-decoration: none;
