@@ -326,4 +326,137 @@ class FileManagerController extends Controller
 
         return response()->download($path, $downloadName);
     }
+
+    public function storeFolder(Request $request): RedirectResponse
+    {
+        $userId = $this->currentUserId($request);
+
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:100'],
+        ]);
+
+        $name = trim($validated['name']);
+
+        $exists = DB::table('file_folders')
+            ->where('user_id', $userId)
+            ->whereRaw('LOWER(name) = ?', [mb_strtolower($name)])
+            ->exists();
+
+        if ($exists) {
+            return back()->withErrors([
+                'folder' => 'Nama folder tersebut sudah digunakan.',
+            ]);
+        }
+
+        DB::table('file_folders')->insert([
+            'user_id' => $userId,
+            'name' => $name,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        return back()->with('status', 'Folder berhasil dibuat.');
+    }
+
+    public function updateFolder(Request $request, int $folder): RedirectResponse
+    {
+        $userId = $this->currentUserId($request);
+
+        $folderQuery = DB::table('file_folders')
+            ->where('id', $folder)
+            ->where('user_id', $userId);
+
+        abort_unless($folderQuery->exists(), 404);
+
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:100'],
+        ]);
+
+        $name = trim($validated['name']);
+
+        $duplicate = DB::table('file_folders')
+            ->where('user_id', $userId)
+            ->where('id', '!=', $folder)
+            ->whereRaw('LOWER(name) = ?', [mb_strtolower($name)])
+            ->exists();
+
+        if ($duplicate) {
+            return back()->withErrors([
+                'folder' => 'Nama folder tersebut sudah digunakan.',
+            ]);
+        }
+
+        $folderQuery->update([
+            'name' => $name,
+            'updated_at' => now(),
+        ]);
+
+        return back()->with('status', 'Nama folder berhasil diperbarui.');
+    }
+
+    public function destroyFolder(Request $request, int $folder): RedirectResponse
+    {
+        $userId = $this->currentUserId($request);
+
+        DB::transaction(function () use ($folder, $userId) {
+            $folderExists = DB::table('file_folders')
+                ->where('id', $folder)
+                ->where('user_id', $userId)
+                ->lockForUpdate()
+                ->exists();
+
+            abort_unless($folderExists, 404);
+
+            // File tetap disimpan; hanya dilepas dari folder.
+            DB::table('file_manager')
+                ->where('user_id', $userId)
+                ->where('folder_id', $folder)
+                ->update(['folder_id' => null]);
+
+            DB::table('file_folders')
+                ->where('id', $folder)
+                ->where('user_id', $userId)
+                ->delete();
+        });
+
+        return redirect()
+            ->route('files.index')
+            ->with('status', 'Folder dihapus. File di dalamnya tetap ada di Semua File.');
+    }
+
+    public function move(Request $request, int $file): RedirectResponse
+    {
+        $userId = $this->currentUserId($request);
+
+        $validated = $request->validate([
+            'folder_id' => ['nullable', 'integer'],
+        ]);
+
+        $fileQuery = DB::table('file_manager')
+            ->where('id', $file)
+            ->where('user_id', $userId);
+
+        abort_unless($fileQuery->exists(), 404);
+
+        $folderId = $validated['folder_id'] ?? null;
+
+        if ($folderId !== null) {
+            $folderExists = DB::table('file_folders')
+                ->where('id', $folderId)
+                ->where('user_id', $userId)
+                ->exists();
+
+            if (! $folderExists) {
+                return back()->withErrors([
+                    'folder_id' => 'Folder tujuan tidak valid.',
+                ]);
+            }
+        }
+
+        $fileQuery->update([
+            'folder_id' => $folderId,
+        ]);
+
+        return back()->with('status', 'File berhasil dipindahkan.');
+    }
 }
