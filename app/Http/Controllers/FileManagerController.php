@@ -67,21 +67,6 @@ class FileManagerController extends Controller
         $filesQuery = DB::table('file_manager')
             ->where('user_id', $userId);
 
-        if ($folderId !== null && $folderId !== '') {
-            abort_unless(
-                filter_var($folderId, FILTER_VALIDATE_INT) !== false,
-                404
-            );
-
-            $activeFolder = $folders->firstWhere('id', (int) $folderId);
-
-            abort_unless($activeFolder, 404);
-
-            $filesQuery->where('folder_id', $activeFolder->id);
-        } else {
-            $filesQuery->whereNull('folder_id');
-        }
-
         $files = $filesQuery
             ->orderByDesc('id')
             ->get();
@@ -105,118 +90,137 @@ class FileManagerController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
+        $userId = $this->currentUserId($request);
+
         $request->validate([
-            '_form' => ['nullable', 'in:files_upload'],
-            'file' => [
+            'files' => ['nullable', 'array'],
+            'files.*' => [
                 'required',
                 'file',
-                'max:' . self::MAX_FILE_SIZE_KB,
+                'max:51200',
+                'mimes:jpg,jpeg,png,gif,mp4,mov,avi,mkv,webm,pdf,doc,docx,xls,xlsx,zip,rar,txt',
             ],
+            'file' => [
+                'nullable',
+                'file',
+                'max:51200',
+                'mimes:jpg,jpeg,png,gif,mp4,mov,avi,mkv,webm,pdf,doc,docx,xls,xlsx,zip,rar,txt',
+            ],
+            'folder_id' => ['nullable', 'integer'],
             'file_display_name' => ['nullable', 'string', 'max:255'],
         ]);
 
-        $upload = $request->file('file');
+        // Mendukung input baru files[] dan input lama file.
+        $uploads = array_values(array_filter(
+            $request->file('files', [])
+        ));
 
-        abort_unless($upload && $upload->isValid(), 422, 'Upload file gagal.');
-
-        $extension = strtolower($upload->getClientOriginalExtension());
-
-        abort_unless(
-            in_array($extension, self::ALLOWED_EXTENSIONS, true),
-            422,
-            'Format file tidak diizinkan.'
-        );
-
-        $allowedMime = [
-            'image/jpeg',
-            'image/png',
-            'image/gif',
-            'video/mp4',
-            'video/webm',
-            'video/x-msvideo',
-            'video/quicktime',
-            'video/x-matroska',
-            'application/octet-stream',
-            'application/pdf',
-            'application/msword',
-            'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-            'application/vnd.ms-excel',
-            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-            'application/zip',
-            'application/x-rar-compressed',
-            'application/vnd.rar',
-            'text/plain',
-        ];
-
-        $mime = $upload->getMimeType();
-
-        abort_unless(
-            $mime && in_array($mime, $allowedMime, true),
-            422,
-            'Tipe file tidak valid atau belum didukung.'
-        );
-
-        $userId = $this->currentUserId($request);
-
-        $displayName = $this->sanitizeDisplayName(
-            (string) $request->input('file_display_name', '')
-        );
-
-        if ($displayName !== '') {
-            if (strtolower(pathinfo($displayName, PATHINFO_EXTENSION)) === $extension) {
-                $displayName = pathinfo($displayName, PATHINFO_FILENAME);
-            }
-
-            $displayName = Str::limit(
-                $displayName,
-                max(1, 254 - strlen($extension)),
-                ''
-            );
-            $originalName = $displayName . '.' . $extension;
-        } else {
-            $originalName = $this->sanitizeDisplayName(
-                $upload->getClientOriginalName()
-            );
-
-            if ($originalName === '') {
-                $originalName = 'file.' . $extension;
-            }
-
-            $originalName = Str::limit($originalName, 255, '');
+        if ($request->hasFile('file')) {
+            $uploads[] = $request->file('file');
         }
 
-        // Nama fisik acak, tidak memakai nama yang dikirim pengguna.
-        $newName = Str::random(64) . '.' . $extension;
-        $fileSize = (int) $upload->getSize();
+        if (count($uploads) === 0) {
+            return back()->withErrors([
+                'file' => 'Pilih minimal satu file untuk diunggah.',
+            ]);
+        }
+
+        $folderId = $request->input('folder_id');
+
+        if ($folderId !== null && $folderId !== '') {
+            $folderExists = DB::table('file_folders')
+                ->where('id', $folderId)
+                ->where('user_id', $userId)
+                ->exists();
+
+            if (! $folderExists) {
+                return back()->withErrors([
+                    'folder_id' => 'Folder tujuan tidak valid.',
+                ]);
+            }
+        } else {
+            $folderId = null;
+        }
+
         $directory = $this->storageDirectory();
 
         File::ensureDirectoryExists($directory);
 
-        $upload->move($directory, $newName);
-
-        $path = $directory . DIRECTORY_SEPARATOR . $newName;
+        $storedPaths = [];
 
         try {
-            DB::table('file_manager')->insert([
-                'user_id' => $userId,
-                'file_name' => $newName,
-                'file_original' => $originalName,
-                'file_size' => $fileSize,
-                'file_type' => $extension,
-                'created_at' => now(),
-            ]);
-        } catch (Throwable $exception) {
-            // Jangan meninggalkan file tanpa metadata di database.
-            if (File::exists($path)) {
-                File::delete($path);
+            DB::transaction(function () use (
+                $uploads,
+                $userId,
+                $folderId,
+                $request,
+                $directory,
+                &$storedPaths
+            ) {
+                foreach ($uploads as $upload) {
+                    $extension = strtolower($upload->getClientOriginalExtension());
+
+                    $physicalName = Str::random(64) . '.' . $extension;
+
+                    $upload->move($directory, $physicalName);
+
+                    $storedPaths[] = $directory . DIRECTORY_SEPARATOR . $physicalName;
+
+                    // Nama khusus hanya berlaku untuk upload satu file.
+                    if (count($uploads) === 1 && $request->filled('file_display_name')) {
+                        $displayName = $this->sanitizeDisplayName(
+                            $request->input('file_display_name')
+                        );
+
+                        if ($displayName === '') {
+                            $displayName = pathinfo(
+                                $upload->getClientOriginalName(),
+                                PATHINFO_FILENAME
+                            );
+                        }
+
+                        $originalName = $displayName . '.' . $extension;
+                    } else {
+                        $originalName = $this->sanitizeDisplayName(
+                            $upload->getClientOriginalName()
+                        );
+                    }
+
+                    DB::table('file_manager')->insert([
+                        'user_id' => $userId,
+                        'folder_id' => $folderId,
+                        'file_name' => $physicalName,
+                        'file_original' => $originalName,
+                        'file_size' => $upload->getSize(),
+                        'file_type' => $extension,
+                        'created_at' => now(),
+                    ]);
+                }
+            });
+        } catch (Throwable $e) {
+            // Bersihkan file fisik jika penyimpanan database gagal.
+            foreach ($storedPaths as $path) {
+                if (File::exists($path)) {
+                    File::delete($path);
+                }
             }
 
-            throw $exception;
+            throw $e;
+        }
+
+        $message = count($uploads) === 1
+            ? 'File berhasil diunggah.'
+            : count($uploads) . ' file berhasil diunggah.';
+
+        if ($folderId !== null) {
+            return redirect()
+                ->route('files.index', ['folder' => $folderId])
+                ->with('status', $message);
         }
 
         return redirect()
             ->route('files.index')
-            ->with('status', 'File berhasil diunggah.');
+            ->with('status', $message);
     }
 
     public function preview(Request $request, int $file)
