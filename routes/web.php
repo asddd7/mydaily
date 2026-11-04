@@ -87,6 +87,19 @@ Route::put('/profile', [ProfileController::class, 'update'])->name('profile.upda
 
 Route::get('/file-manager', [FileManagerController::class, 'index'])->name('files.index');
 Route::post('/file-manager', [FileManagerController::class, 'store'])->name('files.store');
+// Folder File Manager
+Route::post('/file-manager/folders', [FileManagerController::class, 'storeFolder'])
+    ->name('files.folders.store');
+
+Route::put('/file-manager/folders/{folder}', [FileManagerController::class, 'updateFolder'])
+    ->name('files.folders.update');
+
+Route::delete('/file-manager/folders/{folder}', [FileManagerController::class, 'destroyFolder'])
+    ->name('files.folders.destroy');
+
+// Pindahkan file
+Route::patch('/file-manager/{file}/move', [FileManagerController::class, 'move'])
+    ->name('files.move');
 Route::put('/file-manager/{file}', [FileManagerController::class, 'update'])->name('files.update');
 Route::delete('/file-manager/{file}', [FileManagerController::class, 'destroy'])->name('files.destroy');
 Route::get('/file-manager/{file}/download', [FileManagerController::class, 'download'])->name('files.download');
