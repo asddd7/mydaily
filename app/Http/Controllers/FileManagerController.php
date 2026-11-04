@@ -7,10 +7,11 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 use RuntimeException;
-use Throwable;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Throwable;
 
 class FileManagerController extends Controller
 {
@@ -35,6 +36,34 @@ class FileManagerController extends Controller
     private function storageDirectory(): string
     {
         return base_path('uploads/files');
+    }
+
+    private function findUserFile(int $userId, int $fileId): object
+    {
+        $file = DB::table('file_manager')
+            ->where('id', $fileId)
+            ->where('user_id', $userId)
+            ->first();
+
+        abort_unless($file, 404);
+
+        return $file;
+    }
+
+    private function folderNameExists(
+        int $userId,
+        string $name,
+        ?int $exceptFolderId = null
+    ): bool {
+        $query = DB::table('file_folders')
+            ->where('user_id', $userId)
+            ->whereRaw('LOWER(name) = ?', [mb_strtolower($name)]);
+
+        if ($exceptFolderId !== null) {
+            $query->where('id', '!=', $exceptFolderId);
+        }
+
+        return $query->exists();
     }
 
     /**
@@ -118,22 +147,24 @@ class FileManagerController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $userId = $this->currentUserId($request);
+        $allowedTypes = 'mimes:' . implode(',', self::ALLOWED_EXTENSIONS);
 
         $request->validate([
             'files' => ['nullable', 'array'],
             'files.*' => [
                 'required',
                 'file',
-                'max:51200',
-                'mimes:jpg,jpeg,png,gif,mp4,mov,avi,mkv,webm,pdf,doc,docx,xls,xlsx,zip,rar,txt',
+                'max:' . self::MAX_FILE_SIZE_KB,
+                $allowedTypes,
             ],
             'file' => [
                 'nullable',
                 'file',
-                'max:51200',
-                'mimes:jpg,jpeg,png,gif,mp4,mov,avi,mkv,webm,pdf,doc,docx,xls,xlsx,zip,rar,txt',
+                'max:' . self::MAX_FILE_SIZE_KB,
+                $allowedTypes,
             ],
             'folder_id' => ['nullable', 'integer'],
+            'new_folder_name' => ['nullable', 'string', 'max:100'],
             'file_display_name' => ['nullable', 'string', 'max:255'],
         ]);
 
@@ -146,24 +177,35 @@ class FileManagerController extends Controller
             $uploads[] = $request->file('file');
         }
 
-        if (count($uploads) === 0) {
+        if ($uploads === []) {
             return back()->withErrors([
                 'file' => 'Pilih minimal satu file untuk diunggah.',
-            ]);
+            ])->withInput();
         }
 
         $folderId = $request->input('folder_id');
+        $newFolderName = trim((string) $request->input('new_folder_name', ''));
 
-        if ($folderId !== null && $folderId !== '') {
+        if ($newFolderName !== '' && $folderId !== null && $folderId !== '') {
+            return back()
+                ->withErrors([
+                    'folder_id' => 'Pilih grup yang sudah ada atau buat grup baru, bukan keduanya.',
+                ])
+                ->withInput();
+        }
+
+        if ($newFolderName === '' && $folderId !== null && $folderId !== '') {
             $folderExists = DB::table('file_folders')
                 ->where('id', $folderId)
                 ->where('user_id', $userId)
                 ->exists();
 
             if (! $folderExists) {
-                return back()->withErrors([
-                    'folder_id' => 'Folder tujuan tidak valid.',
-                ]);
+                return back()
+                    ->withErrors([
+                        'folder_id' => 'Grup tujuan tidak valid.',
+                    ])
+                    ->withInput();
             }
         } else {
             $folderId = null;
@@ -176,21 +218,36 @@ class FileManagerController extends Controller
         $storedPaths = [];
 
         try {
-            DB::transaction(function () use (
+            $targetFolderId = DB::transaction(function () use (
                 $uploads,
                 $userId,
                 $folderId,
                 $request,
                 $directory,
+                $newFolderName,
                 &$storedPaths
-            ) {
+            ): ?int {
+                $targetFolderId = $folderId;
+
+                if ($newFolderName !== '') {
+                    if ($this->folderNameExists($userId, $newFolderName)) {
+                        throw ValidationException::withMessages([
+                            'new_folder_name' => 'Nama grup tersebut sudah digunakan.',
+                        ]);
+                    }
+
+                    $targetFolderId = DB::table('file_folders')->insertGetId([
+                        'user_id' => $userId,
+                        'name' => $newFolderName,
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]);
+                }
+
                 foreach ($uploads as $upload) {
                     $extension = strtolower($upload->getClientOriginalExtension());
-
                     $physicalName = Str::random(64) . '.' . $extension;
-
                     $upload->move($directory, $physicalName);
-
                     $storedPaths[] = $directory . DIRECTORY_SEPARATOR . $physicalName;
 
                     // Nama khusus hanya berlaku untuk upload satu file.
@@ -215,7 +272,7 @@ class FileManagerController extends Controller
 
                     DB::table('file_manager')->insert([
                         'user_id' => $userId,
-                        'folder_id' => $folderId,
+                        'folder_id' => $targetFolderId,
                         'file_name' => $physicalName,
                         'file_original' => $originalName,
                         'file_size' => $upload->getSize(),
@@ -223,13 +280,24 @@ class FileManagerController extends Controller
                         'created_at' => now(),
                     ]);
                 }
+
+                return $targetFolderId === null ? null : (int) $targetFolderId;
             });
         } catch (Throwable $e) {
             // Bersihkan file fisik jika penyimpanan database gagal.
+            $failedPaths = [];
+
             foreach ($storedPaths as $path) {
-                if (File::exists($path)) {
-                    File::delete($path);
+                if (File::exists($path) && ! File::delete($path)) {
+                    $failedPaths[] = $path;
                 }
+            }
+
+            if ($failedPaths !== []) {
+                throw new RuntimeException(
+                    count($failedPaths) . ' file sementara gagal dibersihkan setelah upload dibatalkan.',
+                    previous: $e
+                );
             }
 
             throw $e;
@@ -239,9 +307,9 @@ class FileManagerController extends Controller
             ? 'File berhasil diunggah.'
             : count($uploads) . ' file berhasil diunggah.';
 
-        if ($folderId !== null) {
+        if ($targetFolderId !== null) {
             return redirect()
-                ->route('files.index', ['folder' => $folderId])
+                ->route('files.index', ['folder' => $targetFolderId])
                 ->with('status', $message);
         }
 
@@ -250,18 +318,10 @@ class FileManagerController extends Controller
             ->with('status', $message);
     }
 
-    public function preview(Request $request, int $file)
+    public function preview(Request $request, int $file): BinaryFileResponse
     {
         $userId = $this->currentUserId($request);
-
-        $record = \Illuminate\Support\Facades\DB::table('file_manager')
-            ->where('id', $file)
-            ->where('user_id', $userId)
-            ->first();
-
-        // Jangan tampilkan file yang tidak ditemukan
-        // atau bukan milik pengguna yang sedang login.
-        abort_unless($record, 404);
+        $record = $this->findUserFile($userId, $file);
 
         $filename = basename((string) ($record->file_name ?? ''));
 
@@ -312,14 +372,7 @@ class FileManagerController extends Controller
         ]);
 
         $userId = $this->currentUserId($request);
-
-        // Pastikan file memang milik pengguna sebelum mengubah nama.
-        $record = DB::table('file_manager')
-            ->where('id', $file)
-            ->where('user_id', $userId)
-            ->first();
-
-        abort_unless($record, 404);
+        $record = $this->findUserFile($userId, $file);
 
         $newName = $this->sanitizeDisplayName($data['file_original']);
 
@@ -335,20 +388,17 @@ class FileManagerController extends Controller
             ]);
 
         return redirect()
-            ->route('files.index', $record->folder_id ? ['folder' => $record->folder_id] : [])
+            ->route(
+                'files.index',
+                $record->folder_id ? ['folder' => $record->folder_id] : []
+            )
             ->with('status', 'Nama file berhasil diubah.');
     }
 
     public function destroy(Request $request, int $file): RedirectResponse
     {
         $userId = $this->currentUserId($request);
-
-        $record = DB::table('file_manager')
-            ->where('id', $file)
-            ->where('user_id', $userId)
-            ->first();
-
-        abort_unless($record, 404);
+        $record = $this->findUserFile($userId, $file);
 
         // basename memastikan nama file tidak bisa menunjuk ke luar folder.
         $physicalName = basename($record->file_name);
@@ -368,18 +418,19 @@ class FileManagerController extends Controller
             ->delete();
 
         return redirect()
-            ->route('files.index', $record->folder_id ? ['folder' => $record->folder_id] : [])
+            ->route(
+                'files.index',
+                $record->folder_id ? ['folder' => $record->folder_id] : []
+            )
             ->with('status', 'File berhasil dihapus.');
     }
 
     public function download(Request $request, int $file): BinaryFileResponse
     {
-        $record = DB::table('file_manager')
-            ->where('id', $file)
-            ->where('user_id', $this->currentUserId($request))
-            ->first();
-
-        abort_unless($record, 404);
+        $record = $this->findUserFile(
+            $this->currentUserId($request),
+            $file
+        );
 
         $physicalName = basename($record->file_name);
         $path = $this->storageDirectory()
@@ -409,12 +460,7 @@ class FileManagerController extends Controller
 
         $name = trim($validated['name']);
 
-        $exists = DB::table('file_folders')
-            ->where('user_id', $userId)
-            ->whereRaw('LOWER(name) = ?', [mb_strtolower($name)])
-            ->exists();
-
-        if ($exists) {
+        if ($this->folderNameExists($userId, $name)) {
             return back()->withErrors([
                 'folder' => 'Nama folder tersebut sudah digunakan.',
             ]);
@@ -446,13 +492,7 @@ class FileManagerController extends Controller
 
         $name = trim($validated['name']);
 
-        $duplicate = DB::table('file_folders')
-            ->where('user_id', $userId)
-            ->where('id', '!=', $folder)
-            ->whereRaw('LOWER(name) = ?', [mb_strtolower($name)])
-            ->exists();
-
-        if ($duplicate) {
+        if ($this->folderNameExists($userId, $name, $folder)) {
             return back()->withErrors([
                 'folder' => 'Nama folder tersebut sudah digunakan.',
             ]);
@@ -504,11 +544,7 @@ class FileManagerController extends Controller
             'folder_id' => ['nullable', 'integer'],
         ]);
 
-        $fileQuery = DB::table('file_manager')
-            ->where('id', $file)
-            ->where('user_id', $userId);
-
-        abort_unless($fileQuery->exists(), 404);
+        $this->findUserFile($userId, $file);
 
         $folderId = $validated['folder_id'] ?? null;
 
@@ -525,9 +561,10 @@ class FileManagerController extends Controller
             }
         }
 
-        $fileQuery->update([
-            'folder_id' => $folderId,
-        ]);
+        DB::table('file_manager')
+            ->where('id', $file)
+            ->where('user_id', $userId)
+            ->update(['folder_id' => $folderId]);
 
         return back()->with('status', 'File berhasil dipindahkan.');
     }
