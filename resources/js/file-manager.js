@@ -442,4 +442,45 @@
     });
 
     applyFilters();
+
+// Buat grup baru langsung dari popup upload.
+const createFolderToggle = root.querySelector('[data-create-folder-toggle]');
+const newFolderFields = root.querySelector('[data-new-folder-fields]');
+const newFolderInput = root.querySelector('[data-new-folder-input]');
+const cancelNewFolder = root.querySelector('[data-cancel-new-folder]');
+const uploadFolderSelect = root.querySelector('[data-upload-folder-select]');
+
+if (
+    createFolderToggle &&
+    newFolderFields &&
+    newFolderInput &&
+    cancelNewFolder
+) {
+    const showNewFolder = () => {
+        newFolderFields.hidden = false;
+        newFolderInput.required = true;
+
+        if (uploadFolderSelect) {
+            uploadFolderSelect.disabled = true;
+        }
+
+        createFolderToggle.hidden = true;
+        newFolderInput.focus();
+    };
+
+    const hideNewFolder = () => {
+        newFolderFields.hidden = true;
+        newFolderInput.required = false;
+        newFolderInput.value = '';
+
+        if (uploadFolderSelect) {
+            uploadFolderSelect.disabled = false;
+        }
+
+        createFolderToggle.hidden = false;
+    };
+
+    createFolderToggle.addEventListener('click', showNewFolder);
+    cancelNewFolder.addEventListener('click', hideNewFolder);
+}
 })();

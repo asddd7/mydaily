@@ -1590,3 +1590,59 @@
         animation: none !important;
     }
 }
+
+/* Folder creation inside upload dialog */
+.fm-upload-folder-section {
+    display: grid;
+    gap: 12px;
+}
+
+.fm-create-folder-toggle {
+    justify-self: start;
+}
+
+.fm-new-folder-fields {
+    display: grid;
+    gap: 9px;
+    padding: 15px;
+    border: 1px solid var(--fm-border, #e5eaf2);
+    border-radius: 12px;
+    background: var(--fm-soft, #f7f9fc);
+}
+
+.fm-new-folder-fields[hidden] {
+    display: none;
+}
+
+.fm-new-folder-fields label {
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.fm-new-folder-fields input {
+    width: 100%;
+    min-width: 0;
+    padding: 11px 12px;
+    border: 1px solid var(--fm-border, #e5eaf2);
+    border-radius: 9px;
+    background: var(--fm-surface, #fff);
+    color: inherit;
+    font: inherit;
+}
+
+.fm-new-folder-fields small {
+    color: var(--fm-muted, #64748b);
+    font-size: 12px;
+}
+
+.fm-folder-cancel {
+    justify-self: start;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--fm-primary, #3568e8);
+    font: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+}

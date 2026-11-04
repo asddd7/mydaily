@@ -120,22 +120,6 @@
                 <h2 id="fm-folder-title">Grup file</h2>
                 <p>Buat grup untuk merapikan dan mengelompokkan file.</p>
             </div>
-            <form method="post" action="{{ route('files.folders.store') }}" class="fm-folder-create-form">
-                @csrf
-                <label class="fm-visually-hidden" for="fm-folder-name">Nama grup baru</label>
-                <input
-                    type="text"
-                    id="fm-folder-name"
-                    name="name"
-                    maxlength="100"
-                    placeholder="Nama grup baru"
-                    required
-                >
-                <button class="fm-button fm-button-primary" type="submit">
-                    <i class="fa-solid fa-plus" aria-hidden="true"></i>
-                    Buat grup
-                </button>
-            </form>
         </div>
 
         <nav class="fm-folder-list" aria-label="Pilih grup file">
@@ -271,20 +255,64 @@
                 <small>Untuk satu file saja. Jika memilih beberapa file, nama asli tiap file dipakai.</small>
             </label>
 
-            <label class="fm-upload-folder-label">
-                Simpan ke grup
-                <select name="folder_id" aria-label="Grup tujuan upload">
-                    <option value="">Semua file (tanpa grup)</option>
-                    @foreach ($folders as $folder)
-                        <option
-                            value="{{ $folder->id }}"
-                            @selected((string) old('folder_id', $activeFolder->id ?? '') === (string) $folder->id)
-                        >
-                            {{ $folder->name }}
-                        </option>
-                    @endforeach
-                </select>
-            </label>
+            <div class="fm-upload-folder-section">
+                <label class="fm-upload-folder-label" for="fm-upload-folder">
+                    Simpan ke grup
+
+                    <select
+                        name="folder_id"
+                        id="fm-upload-folder"
+                        aria-label="Grup tujuan upload"
+                        data-upload-folder-select
+                    >
+                        <option value="">Semua file (tanpa grup)</option>
+
+                        @foreach ($folders as $folder)
+                            <option
+                                value="{{ $folder->id }}"
+                                @selected((string) old('folder_id', $activeFolder->id ?? '') === (string) $folder->id)
+                            >
+                                {{ $folder->name }}
+                            </option>
+                        @endforeach
+                    </select>
+                </label>
+
+                <button
+                    type="button"
+                    class="fm-button fm-button-secondary fm-create-folder-toggle"
+                    data-create-folder-toggle
+                >
+                    <i class="fa-solid fa-folder-plus" aria-hidden="true"></i>
+                    Buat grup baru
+                </button>
+
+                <div class="fm-new-folder-fields" data-new-folder-fields hidden>
+                    <label for="fm-new-folder-name">
+                        Nama grup baru
+                    </label>
+
+                    <input
+                        type="text"
+                        name="new_folder_name"
+                        id="fm-new-folder-name"
+                        maxlength="100"
+                        placeholder="Contoh: Dokumen, Foto, Pekerjaan"
+                        value="{{ old('new_folder_name') }}"
+                        data-new-folder-input
+                    >
+
+                    <small>Grup akan dibuat ketika file berhasil diunggah.</small>
+
+                    <button
+                        type="button"
+                        class="fm-folder-cancel"
+                        data-cancel-new-folder
+                    >
+                        Batal
+                    </button>
+                </div>
+            </div>
 
             <div class="fm-upload-footer">
                 <div>
