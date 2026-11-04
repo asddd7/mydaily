@@ -245,6 +245,7 @@ class FileManagerController extends Controller
                 }
 
                 foreach ($uploads as $upload) {
+                    $fileSize = $upload->getSize();
                     $extension = strtolower($upload->getClientOriginalExtension());
                     $physicalName = Str::random(64) . '.' . $extension;
                     $upload->move($directory, $physicalName);
@@ -275,7 +276,7 @@ class FileManagerController extends Controller
                         'folder_id' => $targetFolderId,
                         'file_name' => $physicalName,
                         'file_original' => $originalName,
-                        'file_size' => $upload->getSize(),
+                        'file_size' => $fileSize,
                         'file_type' => $extension,
                         'created_at' => now(),
                     ]);
