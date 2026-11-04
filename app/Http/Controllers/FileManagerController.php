@@ -54,12 +54,53 @@ class FileManagerController extends Controller
 
     public function index(Request $request): View
     {
-        $files = DB::table('file_manager')
-            ->where('user_id', $this->currentUserId($request))
+        $userId = $this->currentUserId($request);
+
+        $folders = DB::table('file_folders')
+            ->where('user_id', $userId)
+            ->orderBy('name')
+            ->get();
+
+        $activeFolder = null;
+        $folderId = $request->query('folder');
+
+        $filesQuery = DB::table('file_manager')
+            ->where('user_id', $userId);
+
+        if ($folderId !== null && $folderId !== '') {
+            abort_unless(
+                filter_var($folderId, FILTER_VALIDATE_INT) !== false,
+                404
+            );
+
+            $activeFolder = $folders->firstWhere('id', (int) $folderId);
+
+            abort_unless($activeFolder, 404);
+
+            $filesQuery->where('folder_id', $activeFolder->id);
+        } else {
+            $filesQuery->whereNull('folder_id');
+        }
+
+        $files = $filesQuery
             ->orderByDesc('id')
             ->get();
 
-        return view('files.index', compact('files'));
+        $totalFiles = DB::table('file_manager')
+            ->where('user_id', $userId)
+            ->count();
+
+        $totalSize = DB::table('file_manager')
+            ->where('user_id', $userId)
+            ->sum('file_size');
+
+        return view('files.index', compact(
+            'files',
+            'folders',
+            'activeFolder',
+            'totalFiles',
+            'totalSize'
+        ));
     }
 
     public function store(Request $request): RedirectResponse
