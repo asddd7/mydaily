@@ -120,7 +120,12 @@ class FileManagerController extends Controller
             ->where('user_id', $userId);
 
         if ($activeFolder) {
+            // Jika folder dibuka, tampilkan hanya isi folder tersebut.
             $filesQuery->where('folder_id', $activeFolder->id);
+        } else {
+            // Halaman utama hanya menampilkan file tanpa grup.
+            // File di dalam folder tidak ditampilkan dua kali.
+            $filesQuery->whereNull('folder_id');
         }
 
         $files = $filesQuery
