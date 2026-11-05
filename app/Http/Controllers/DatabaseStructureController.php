@@ -170,7 +170,12 @@ class DatabaseStructureController extends Controller
                 'tables' => ['file_manager', 'file_folders', 'users'],
                 'files' => [
                     'Controller' => ['app/Http/Controllers/FileManagerController.php'],
-                    'View' => ['resources/views/files/index.blade.php'],
+                    'View' => [
+                        'resources/views/files/index.blade.php',
+                        'resources/views/files/partials/folder-navigation.blade.php',
+                        'resources/views/files/partials/upload-dialog.blade.php',
+                        'resources/views/files/partials/file-card.blade.php',
+                    ],
                     'Frontend' => ['resources/css/files.css', 'resources/js/file-manager.js'],
                     'Schema' => [
                         'database/migrations/2026_10_05_000008_create_file_manager_table.php',
