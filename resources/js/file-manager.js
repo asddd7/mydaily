@@ -24,7 +24,9 @@
     const emptyState = root.querySelector('[data-file-filter-empty]');
 
     const cards = grid
-        ? Array.from(grid.querySelectorAll('[data-file-card]'))
+        ? Array.from(
+            grid.querySelectorAll('[data-file-card], [data-folder-card]')
+        )
         : [];
 
     const feedback = root.querySelector('[data-file-upload-feedback]');
