@@ -307,11 +307,13 @@
             const searchableText = normalize(card.textContent);
             const matchesSearch =
                 !query || name.includes(query) || searchableText.includes(query);
+            const isFolder = card.hasAttribute('data-folder-card');
+
             const matchesCategory =
                 !category ||
                 category === 'all' ||
                 category === 'semua' ||
-                fileCategory === category;
+                (!isFolder && fileCategory === category);
 
             const visible = matchesSearch && matchesCategory;
 
