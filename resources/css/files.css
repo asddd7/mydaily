@@ -1646,3 +1646,172 @@
     font-weight: 600;
     cursor: pointer;
 }
+
+
+/* =========================================================
+   Unified folder and file grid
+   ========================================================= */
+
+.fm-library-heading-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.fm-breadcrumb-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    color: var(--fm-primary);
+    font-size: 14px;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.fm-breadcrumb-link:hover {
+    color: var(--fm-primary-dark);
+}
+
+.fm-breadcrumb-separator {
+    margin-inline: 5px;
+    color: var(--fm-muted);
+}
+
+.fm-folder-card {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+    min-height: 104px;
+    padding: 16px;
+    border: 1px solid var(--fm-border);
+    border-radius: 15px;
+    background: var(--fm-surface);
+    transition:
+        border-color .2s ease,
+        box-shadow .2s ease,
+        transform .2s ease;
+}
+
+.fm-folder-card:hover {
+    border-color: rgb(53 104 232 / 35%);
+    box-shadow: 0 8px 22px rgb(30 55 90 / 7%);
+    transform: translateY(-2px);
+}
+
+.fm-folder-card-main {
+    display: flex;
+    align-items: center;
+    flex: 1;
+    gap: 13px;
+    min-width: 0;
+    color: var(--fm-text);
+    text-decoration: none;
+}
+
+.fm-folder-card-icon {
+    display: grid;
+    flex: 0 0 48px;
+    width: 48px;
+    height: 48px;
+    place-items: center;
+    border-radius: 13px;
+    background: #fff6df;
+    color: #e5a52b;
+    font-size: 25px;
+}
+
+.fm-folder-card-info {
+    display: grid;
+    gap: 6px;
+    min-width: 0;
+}
+
+.fm-folder-card-info strong {
+    overflow: hidden;
+    color: var(--fm-text);
+    font-size: 14px;
+    font-weight: 750;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.fm-folder-card-info small {
+    color: var(--fm-muted);
+    font-size: 12px;
+}
+
+.fm-folder-card .fm-folder-actions {
+    flex: 0 0 auto;
+    align-self: flex-start;
+}
+
+.fm-folder-card .fm-folder-actions > summary {
+    width: 34px;
+    height: 34px;
+}
+
+.fm-folder-card .fm-folder-action-menu {
+    right: 0;
+    left: auto;
+    z-index: 15;
+}
+
+/* Grid terpadu */
+.fm-file-grid {
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 235px), 1fr));
+    align-items: stretch;
+}
+
+.fm-folder-card,
+.fm-file-card {
+    min-width: 0;
+}
+
+.fm-folder-card[hidden],
+.fm-file-card[hidden] {
+    display: none !important;
+}
+
+/* Tombol grup dan jumlah item */
+.fm-library-heading-actions .fm-total-badge {
+    white-space: nowrap;
+}
+
+@media (max-width: 640px) {
+    .fm-library-heading {
+        align-items: flex-start;
+        gap: 14px;
+    }
+
+    .fm-library-heading-actions {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .fm-folder-card {
+        min-height: 88px;
+        padding: 12px;
+    }
+
+    .fm-folder-card-icon {
+        flex-basis: 42px;
+        width: 42px;
+        height: 42px;
+        font-size: 22px;
+    }
+
+    .fm-file-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+    }
+}
+
+@media (max-width: 380px) {
+    .fm-file-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
