@@ -454,6 +454,18 @@ const newFolderInput = root.querySelector('[data-new-folder-input]');
 const cancelNewFolder = root.querySelector('[data-cancel-new-folder]');
 const uploadFolderSelect = root.querySelector('[data-upload-folder-select]');
 
+const mainCreateFolderButton = root.querySelector(
+    '[data-create-folder-toggle-main]'
+);
+
+mainCreateFolderButton?.addEventListener('click', () => {
+    if (uploadDialog instanceof HTMLDialogElement && !uploadDialog.open) {
+        uploadDialog.showModal();
+    }
+
+    createFolderToggle?.click();
+});
+
 if (
     createFolderToggle &&
     newFolderFields &&
@@ -486,5 +498,18 @@ if (
 
     createFolderToggle.addEventListener('click', showNewFolder);
     cancelNewFolder.addEventListener('click', hideNewFolder);
+}
+
+if (newFolderInput?.value.trim()) {
+    newFolderFields.hidden = false;
+    newFolderInput.required = true;
+
+    if (uploadFolderSelect) {
+        uploadFolderSelect.disabled = true;
+    }
+
+    if (createFolderToggle) {
+        createFolderToggle.hidden = true;
+    }
 }
 })();
