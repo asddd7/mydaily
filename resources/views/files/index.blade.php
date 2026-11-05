@@ -1,3 +1,4 @@
+
 @extends('layouts.app')
 
 @section('title', 'Berkas - MyDaily')
@@ -27,9 +28,16 @@
 
         return number_format($bytes / (1024 ** 3), 2, ',', '.') . ' GB';
     };
+
+    $isMainPage = ! $activeFolder;
+    $hasFolders = $isMainPage && $folders->isNotEmpty();
+    $hasFiles = $fileCollection->isNotEmpty();
+    $hasItems = $hasFolders || $hasFiles;
+    $totalItems = ($hasFolders ? $folders->count() : 0) + $fileCollection->count();
 @endphp
 
 <div class="fm-page" data-file-manager>
+
     {{-- Header --}}
     <header class="fm-header">
         <div class="fm-header-copy">
@@ -44,6 +52,7 @@
                 Simpan, cari, dan kelola semua file kamu di satu tempat.
             </p>
         </div>
+
         <button class="fm-header-button" type="button" data-file-upload-open>
             <i class="fa-solid fa-upload" aria-hidden="true"></i>
             Upload file
@@ -64,7 +73,6 @@
 
             <div>
                 <strong>Periksa kembali data kamu.</strong>
-
                 <ul>
                     @foreach ($errors->all() as $error)
                         <li>{{ $error }}</li>
@@ -113,42 +121,78 @@
         </article>
     </section>
 
-    @include('files.partials.folder-navigation', [
-        'activeFolder' => $activeFolder,
-        'folders' => $folders,
-        'totalFiles' => $totalFiles,
-    ])
-
+    {{-- Upload dialog --}}
     @include('files.partials.upload-dialog', [
         'activeFolder' => $activeFolder,
         'folders' => $folders,
     ])
 
-    {{-- Files library --}}
+    {{-- Unified library --}}
     <section class="fm-panel fm-library-panel">
+
         <div class="fm-library-heading">
             <div class="fm-section-heading fm-section-heading-compact">
                 <div>
-                    <p class="fm-section-kicker">Pustaka file</p>
-                    <h2>{{ $activeFolder ? $activeFolder->name : 'File tersimpan' }}</h2>
-                    <p>{{ $activeFolder ? 'File yang tersimpan di grup ini.' : 'Kelola nama, grup, dan unduh file yang kamu butuhkan.' }}</p>
+                    <p class="fm-section-kicker">
+                        {{ $activeFolder ? 'Isi grup' : 'Pustaka penyimpanan' }}
+                    </p>
+
+                    <h2>
+                        @if ($activeFolder)
+                            <a href="{{ route('files.index') }}" class="fm-breadcrumb-link">
+                                <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
+                                Semua File
+                            </a>
+                            <span class="fm-breadcrumb-separator">/</span>
+                            {{ $activeFolder->name }}
+                        @else
+                            Semua File
+                        @endif
+                    </h2>
+
+                    <p>
+                        @if ($activeFolder)
+                            File yang tersimpan di grup ini.
+                        @else
+                            Folder dan file ditampilkan dalam satu tempat.
+                        @endif
+                    </p>
                 </div>
             </div>
 
-            <span class="fm-total-badge">
-                {{ $fileCollection->count() }} file
-            </span>
+            <div class="fm-library-heading-actions">
+                @if ($isMainPage)
+                    <button
+                        type="button"
+                        class="fm-button fm-button-secondary"
+                        data-create-folder-toggle-main
+                    >
+                        <i class="fa-solid fa-folder-plus" aria-hidden="true"></i>
+                        Buat Grup
+                    </button>
+                @endif
+
+                <button
+                    type="button"
+                    class="fm-total-badge"
+                    data-file-total
+                >
+                    {{ $totalItems }} item
+                </button>
+            </div>
         </div>
 
-        @if ($fileCollection->isNotEmpty())
+        @if ($hasItems)
+
+            {{-- Toolbar --}}
             <div class="fm-toolbar">
                 <label class="fm-search">
                     <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
 
                     <input
                         type="search"
-                        placeholder="Cari nama file..."
-                        aria-label="Cari nama file"
+                        placeholder="Cari nama file atau grup..."
+                        aria-label="Cari file atau grup"
                         data-file-search
                     >
 
@@ -176,7 +220,7 @@
                     <label class="fm-filter-control">
                         <span>Urutkan</span>
 
-                        <select data-file-sort aria-label="Urutkan file">
+                        <select data-file-sort aria-label="Urutkan item">
                             <option value="newest">Terbaru</option>
                             <option value="oldest">Terlama</option>
                             <option value="name-asc">Nama A–Z</option>
@@ -190,7 +234,7 @@
 
             <div class="fm-library-meta">
                 <span data-file-visible-count>
-                    Menampilkan {{ $fileCollection->count() }} file
+                    Menampilkan {{ $totalItems }} item
                 </span>
 
                 <button type="button" class="fm-clear-filter" data-file-clear>
@@ -199,7 +243,107 @@
                 </button>
             </div>
 
+            {{-- Folder dan file dalam satu grid --}}
             <div class="fm-file-grid" data-file-grid>
+
+                {{-- Folder hanya ditampilkan di halaman utama --}}
+                @if ($hasFolders)
+                    @foreach ($folders as $folder)
+                        @php
+                            $folderTimestamp = $folder->updated_at
+                                ? (strtotime((string) $folder->updated_at) ?: 0)
+                                : 0;
+                        @endphp
+
+                        <article
+                            class="fm-folder-card"
+                            data-folder-card
+                            data-file-name="{{ mb_strtolower($folder->name, 'UTF-8') }}"
+                            data-file-category="folder"
+                            data-file-size="0"
+                            data-file-created="{{ $folderTimestamp }}"
+                        >
+                            <a
+                                class="fm-folder-card-main"
+                                href="{{ route('files.index', ['folder' => $folder->id]) }}"
+                                aria-label="Buka grup {{ $folder->name }}"
+                            >
+                                <span class="fm-folder-card-icon">
+                                    <i class="fa-solid fa-folder" aria-hidden="true"></i>
+                                </span>
+
+                                <span class="fm-folder-card-info">
+                                    <strong title="{{ $folder->name }}">
+                                        {{ $folder->name }}
+                                    </strong>
+                                    <small>{{ $folder->files_count }} file</small>
+                                </span>
+                            </a>
+
+                            <details class="fm-folder-actions">
+                                <summary
+                                    class="fm-icon-button"
+                                    aria-label="Kelola grup {{ $folder->name }}"
+                                    title="Kelola grup"
+                                >
+                                    <i class="fa-solid fa-ellipsis" aria-hidden="true"></i>
+                                </summary>
+
+                                <div class="fm-folder-action-menu">
+                                    <form
+                                        method="post"
+                                        action="{{ route('files.folders.update', $folder->id) }}"
+                                        class="fm-folder-rename-form"
+                                    >
+                                        @csrf
+                                        @method('put')
+
+                                        <label>
+                                            Ubah nama grup
+                                            <input
+                                                type="text"
+                                                name="name"
+                                                value="{{ $folder->name }}"
+                                                maxlength="100"
+                                                required
+                                            >
+                                        </label>
+
+                                        <button
+                                            class="fm-button fm-button-secondary"
+                                            type="submit"
+                                        >
+                                            Simpan nama
+                                        </button>
+                                    </form>
+
+                                    <form
+                                        method="post"
+                                        action="{{ route('files.folders.destroy', $folder->id) }}"
+                                        data-folder-delete-form
+                                    >
+                                        @csrf
+                                        @method('delete')
+
+                                        <button
+                                            class="fm-folder-delete-button"
+                                            type="submit"
+                                        >
+                                            <i class="fa-regular fa-trash-can" aria-hidden="true"></i>
+                                            Hapus grup
+                                        </button>
+
+                                        <small>
+                                            File di dalamnya tetap tersimpan.
+                                        </small>
+                                    </form>
+                                </div>
+                            </details>
+                        </article>
+                    @endforeach
+                @endif
+
+                {{-- File --}}
                 @foreach ($fileCollection as $file)
                     @include('files.partials.file-card', [
                         'file' => $file,
@@ -207,14 +351,16 @@
                         'formatFileSize' => $formatFileSize,
                     ])
                 @endforeach
+
             </div>
 
+            {{-- Filter empty --}}
             <div class="fm-filter-empty" data-file-filter-empty hidden>
                 <span class="fm-empty-icon">
                     <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
                 </span>
 
-                <h3>File tidak ditemukan</h3>
+                <h3>Item tidak ditemukan</h3>
                 <p>Coba gunakan kata kunci atau filter yang berbeda.</p>
 
                 <button
@@ -225,19 +371,28 @@
                     Reset pencarian
                 </button>
             </div>
+
         @else
             <div class="fm-empty-state">
                 <span class="fm-empty-icon">
                     <i class="fa-regular fa-folder-open" aria-hidden="true"></i>
                 </span>
 
-                <h3>{{ $activeFolder ? 'Grup ini masih kosong' : 'Belum ada file tersimpan' }}</h3>
+                <h3>
+                    {{ $activeFolder ? 'Grup ini masih kosong' : 'Belum ada file atau grup' }}
+                </h3>
 
                 <p>
-                    {{ $activeFolder ? 'Unggah file dan pilih grup ini sebagai tujuan penyimpanan.' : 'Mulai dengan mengunggah dokumen, gambar, atau file lainnya.' }}
+                    {{ $activeFolder
+                        ? 'Unggah file dan pilih grup ini sebagai tujuan penyimpanan.'
+                        : 'Mulai dengan membuat grup atau mengunggah file.' }}
                 </p>
 
-                <button class="fm-button fm-button-primary" type="button" data-file-upload-open>
+                <button
+                    class="fm-button fm-button-primary"
+                    type="button"
+                    data-file-upload-open
+                >
                     <i class="fa-solid fa-upload" aria-hidden="true"></i>
                     Upload file
                 </button>
