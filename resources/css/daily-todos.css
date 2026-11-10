@@ -1,0 +1,337 @@
+.daily-todos-page {
+    width: 100%;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 28px 24px 48px;
+    color: #172033;
+}
+
+.daily-todos-page *,
+.daily-todos-page *::before,
+.daily-todos-page *::after {
+    box-sizing: border-box;
+}
+
+.daily-todos-page button,
+.daily-todos-page input {
+    font: inherit;
+}
+
+.daily-todos-page .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    clip-path: inset(50%);
+}
+
+.daily-todos-header,
+.daily-todos-date-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+.daily-todos-header {
+    margin-bottom: 26px;
+}
+
+.daily-todos-header h1,
+.daily-todos-date-heading h2 {
+    margin: 0;
+    color: #172033;
+    font-weight: 800;
+    letter-spacing: -.035em;
+}
+
+.daily-todos-header h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(28px, 4vw, 36px);
+}
+
+.daily-todos-header > div:first-child > p:last-child {
+    margin: 8px 0 0;
+    color: #64748b;
+    font-size: 14px;
+}
+
+.daily-todos-eyebrow {
+    margin: 0 0 7px;
+    color: #2563eb;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+}
+
+.daily-todos-progress {
+    display: grid;
+    min-width: 76px;
+    min-height: 76px;
+    align-content: center;
+    justify-items: center;
+    border: 1px solid #dbeafe;
+    border-radius: 18px;
+    background: #eff6ff;
+    color: #1d4ed8;
+}
+
+.daily-todos-progress strong {
+    font-size: 23px;
+    line-height: 1.1;
+}
+
+.daily-todos-progress strong span,
+.daily-todos-progress > span {
+    color: #64748b;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.daily-todos-card {
+    display: grid;
+    gap: 22px;
+    padding: 24px;
+    border: 1px solid #e2e8f0;
+    border-radius: 18px;
+    background: #fff;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, .05);
+}
+
+.daily-todos-date-heading h2 {
+    font-size: clamp(18px, 3vw, 22px);
+}
+
+.daily-todos-today-link {
+    color: #2563eb;
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.daily-todos-date-navigation {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.daily-todos-date-navigation > a {
+    display: grid;
+    width: 40px;
+    height: 40px;
+    flex: 0 0 auto;
+    place-items: center;
+    border: 1px solid #e2e8f0;
+    border-radius: 11px;
+    color: #475569;
+    text-decoration: none;
+}
+
+.daily-todos-date-navigation > a:hover {
+    border-color: #bfdbfe;
+    background: #eff6ff;
+    color: #1d4ed8;
+}
+
+.daily-todos-date-navigation form {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 9px;
+}
+
+.daily-todos-date-navigation label {
+    color: #64748b;
+    font-size: 12px;
+}
+
+.daily-todos-date-navigation input,
+.daily-todos-add-form input {
+    min-height: 42px;
+    border: 1px solid #cbd5e1;
+    border-radius: 10px;
+    background: #fff;
+    color: #172033;
+}
+
+.daily-todos-date-navigation input {
+    padding: 0 10px;
+}
+
+.daily-todos-date-navigation form button,
+.daily-todos-add-form button {
+    min-height: 42px;
+    padding: 0 15px;
+    border: 0;
+    border-radius: 10px;
+    background: #2563eb;
+    color: #fff;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.daily-todos-date-navigation form button:hover,
+.daily-todos-add-form button:hover {
+    background: #1d4ed8;
+}
+
+.daily-todos-add-form {
+    display: flex;
+    gap: 10px;
+}
+
+.daily-todos-add-form input {
+    width: 100%;
+    min-width: 0;
+    padding: 0 13px;
+}
+
+.daily-todos-list {
+    display: grid;
+    gap: 10px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.daily-todos-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 56px;
+    padding: 8px 10px;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    background: #fff;
+}
+
+.daily-todos-item > form:first-child {
+    display: flex;
+}
+
+.daily-todos-check {
+    display: grid;
+    width: 25px;
+    height: 25px;
+    place-items: center;
+    border: 2px solid #cbd5e1;
+    border-radius: 8px;
+    background: #fff;
+    color: transparent;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+.daily-todos-check:hover {
+    border-color: #2563eb;
+}
+
+.daily-todos-item-title {
+    flex: 1;
+    color: #334155;
+    font-size: 14px;
+    overflow-wrap: anywhere;
+}
+
+.daily-todos-item.is-completed {
+    background: #f8fafc;
+}
+
+.daily-todos-item.is-completed .daily-todos-check {
+    border-color: #2563eb;
+    background: #2563eb;
+    color: #fff;
+}
+
+.daily-todos-item.is-completed .daily-todos-item-title {
+    color: #94a3b8;
+    text-decoration: line-through;
+}
+
+.daily-todos-delete {
+    display: grid;
+    width: 36px;
+    height: 36px;
+    place-items: center;
+    border: 0;
+    border-radius: 9px;
+    background: transparent;
+    color: #94a3b8;
+    cursor: pointer;
+}
+
+.daily-todos-delete:hover {
+    background: #fef2f2;
+    color: #dc2626;
+}
+
+.daily-todos-empty {
+    display: grid;
+    justify-items: center;
+    padding: 22px 10px;
+    text-align: center;
+}
+
+.daily-todos-empty > span {
+    display: grid;
+    width: 52px;
+    height: 52px;
+    place-items: center;
+    border-radius: 16px;
+    background: #eff6ff;
+    color: #2563eb;
+    font-size: 22px;
+}
+
+.daily-todos-empty h3 {
+    margin: 14px 0 0;
+    color: #1e293b;
+    font-size: 16px;
+}
+
+.daily-todos-empty p {
+    margin: 6px 0 0;
+    color: #64748b;
+    font-size: 13px;
+}
+
+@media (max-width: 600px) {
+    .daily-todos-page {
+        padding: 18px 14px 36px;
+    }
+
+    .daily-todos-card {
+        gap: 18px;
+        padding: 18px 14px;
+    }
+
+    .daily-todos-date-heading {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .daily-todos-date-navigation form {
+        flex: 1;
+    }
+
+    .daily-todos-date-navigation label {
+        width: 100%;
+        text-align: center;
+    }
+
+    .daily-todos-date-navigation input {
+        min-width: 0;
+        flex: 1;
+    }
+
+    .daily-todos-date-navigation form button {
+        padding: 0 11px;
+    }
+}

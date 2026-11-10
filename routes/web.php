@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\TaskController;
+use App\Http\Controllers\DailyTodoController;
 use App\Http\Controllers\MoneyPlanController;
 use App\Http\Controllers\NotesController;
 use App\Http\Controllers\ProfileController;
@@ -59,6 +60,11 @@ Route::put('/subtasks/{task}', [TaskController::class, 'updateSubtask'])->name('
 Route::delete('/subtasks/{task}', [TaskController::class, 'destroySubtask'])->name('tasks.subtasks.destroy');
 Route::post('/tasks/reorder', [TaskController::class, 'reorder'])->name('tasks.reorder');
 Route::post('/tasks/import', [TaskController::class, 'import'])->name('tasks.import');
+
+Route::get('/daily-todos', [DailyTodoController::class, 'index'])->name('daily-todos.index');
+Route::post('/daily-todos', [DailyTodoController::class, 'store'])->name('daily-todos.store');
+Route::patch('/daily-todos/{item}/toggle', [DailyTodoController::class, 'toggle'])->name('daily-todos.toggle');
+Route::delete('/daily-todos/{item}', [DailyTodoController::class, 'destroy'])->name('daily-todos.destroy');
 
 Route::get('/money-plan', [MoneyPlanController::class, 'index'])->name('money.index');
 Route::post('/money-plan', [MoneyPlanController::class, 'store'])->name('money.store');
