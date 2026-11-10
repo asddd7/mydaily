@@ -31,9 +31,17 @@ run `php artisan migrate` against an existing `daily` database: its tables
 already exist and these initial migrations are not a baseline/import operation.
 
 The authentication, dashboard attendance, tasks (including recurring tasks,
-subtasks and Excel import), finance, notes, profile, file manager, calendar
-marks, clock settings, and admin database-structure screens use Laravel routes,
-Blade views, validation, sessions and database queries.
+subtasks and Excel import), daily to-do checklists, finance, notes, profile,
+file manager, calendar marks, clock settings, and admin database-structure
+screens use Laravel routes, Blade views, validation, sessions and database
+queries.
+
+Daily to-do checklists are stored separately for each user and date. To add
+the table on an existing deployment, back up the database and run:
+
+```sh
+php artisan migrate --path=database/migrations/2026_11_10_000001_create_daily_todos_table.php
+```
 
 ## Receipt scanning
 
