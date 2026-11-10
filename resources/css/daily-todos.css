@@ -27,6 +27,17 @@
     clip-path: inset(50%);
 }
 
+.content .daily-todos-page header.daily-todos-header {
+    position: static;
+    inset: auto;
+    height: auto;
+    z-index: auto;
+    border: 0;
+    background: transparent;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+}
+
 .daily-todos-header,
 .daily-todos-date-heading {
     display: flex;
@@ -52,13 +63,13 @@
     font-size: clamp(28px, 4vw, 36px);
 }
 
-.daily-todos-header > div:first-child > p:last-child {
+.content .daily-todos-page .daily-todos-header > div:first-child > p:last-child {
     margin: 8px 0 0;
     color: #64748b;
     font-size: 14px;
 }
 
-.daily-todos-eyebrow {
+.content .daily-todos-page .daily-todos-eyebrow {
     margin: 0 0 7px;
     color: #2563eb;
     font-size: 11px;
@@ -119,7 +130,7 @@
     gap: 12px;
 }
 
-.daily-todos-date-navigation > a {
+.content .daily-todos-page .daily-todos-date-navigation > a:not(.sidebar a):not(.app-topbar a):not(.fab-item) {
     display: grid;
     width: 40px;
     height: 40px;
@@ -131,7 +142,7 @@
     text-decoration: none;
 }
 
-.daily-todos-date-navigation > a:hover {
+.content .daily-todos-page .daily-todos-date-navigation > a:not(.sidebar a):not(.app-topbar a):not(.fab-item):hover {
     border-color: #bfdbfe;
     background: #eff6ff;
     color: #1d4ed8;
@@ -150,21 +161,31 @@
     font-size: 12px;
 }
 
-.daily-todos-date-navigation input,
-.daily-todos-add-form input {
+.content .daily-todos-page .daily-todos-date-navigation input,
+.content .daily-todos-page .daily-todos-add-form input {
     min-height: 42px;
-    border: 1px solid #cbd5e1;
+    border: 1px solid #cbd5e1 !important;
     border-radius: 10px;
     background: #fff;
-    color: #172033;
+    color: #172033 !important;
+    font-family: inherit;
+    font-size: 14px;
+    box-shadow: none;
 }
 
-.daily-todos-date-navigation input {
+.content .daily-todos-page .daily-todos-date-navigation input:focus,
+.content .daily-todos-page .daily-todos-add-form input:focus {
+    border-color: #93c5fd !important;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, .12);
+    outline: none;
+}
+
+.content .daily-todos-page .daily-todos-date-navigation input {
     padding: 0 10px;
 }
 
-.daily-todos-date-navigation form button,
-.daily-todos-add-form button {
+.content .daily-todos-page .daily-todos-date-navigation form button,
+.content .daily-todos-page .daily-todos-add-form button {
     min-height: 42px;
     padding: 0 15px;
     border: 0;
@@ -176,9 +197,11 @@
     font-weight: 700;
 }
 
-.daily-todos-date-navigation form button:hover,
-.daily-todos-add-form button:hover {
+.content .daily-todos-page .daily-todos-date-navigation form button:hover,
+.content .daily-todos-page .daily-todos-add-form button:hover {
     background: #1d4ed8;
+    box-shadow: none;
+    transform: none;
 }
 
 .daily-todos-add-form {
@@ -186,7 +209,7 @@
     gap: 10px;
 }
 
-.daily-todos-add-form input {
+.content .daily-todos-page .daily-todos-add-form input {
     width: 100%;
     min-width: 0;
     padding: 0 13px;
@@ -215,7 +238,7 @@
     display: flex;
 }
 
-.daily-todos-check {
+.content .daily-todos-page button.daily-todos-check {
     display: grid;
     width: 25px;
     height: 25px;
@@ -228,8 +251,10 @@
     font-size: 12px;
 }
 
-.daily-todos-check:hover {
+.content .daily-todos-page button.daily-todos-check:hover {
     border-color: #2563eb;
+    box-shadow: none;
+    transform: none;
 }
 
 .daily-todos-item-title {
@@ -243,7 +268,7 @@
     background: #f8fafc;
 }
 
-.daily-todos-item.is-completed .daily-todos-check {
+.content .daily-todos-page .daily-todos-item.is-completed button.daily-todos-check {
     border-color: #2563eb;
     background: #2563eb;
     color: #fff;
@@ -254,7 +279,7 @@
     text-decoration: line-through;
 }
 
-.daily-todos-delete {
+.content .daily-todos-page button.daily-todos-delete {
     display: grid;
     width: 36px;
     height: 36px;
@@ -266,9 +291,11 @@
     cursor: pointer;
 }
 
-.daily-todos-delete:hover {
+.content .daily-todos-page button.daily-todos-delete:hover {
     background: #fef2f2;
     color: #dc2626;
+    box-shadow: none;
+    transform: none;
 }
 
 .daily-todos-empty {
@@ -295,7 +322,7 @@
     font-size: 16px;
 }
 
-.daily-todos-empty p {
+.content .daily-todos-page .daily-todos-empty p {
     margin: 6px 0 0;
     color: #64748b;
     font-size: 13px;
@@ -331,7 +358,7 @@
         flex: 1;
     }
 
-    .daily-todos-date-navigation form button {
+    .content .daily-todos-page .daily-todos-date-navigation form button {
         padding: 0 11px;
     }
 }
