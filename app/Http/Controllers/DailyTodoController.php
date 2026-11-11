@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
@@ -26,8 +25,6 @@ class DailyTodoController extends Controller
         return view('daily-todos.index', [
             'items' => $items,
             'date' => $date,
-            'selectedDate' => Carbon::parse($date),
-            'completedCount' => $items->where('is_completed', true)->count(),
         ]);
     }
 
