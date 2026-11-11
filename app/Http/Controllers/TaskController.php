@@ -26,6 +26,7 @@ class TaskController extends Controller
     public function index(Request $request): View
     {
         $userId = $request->attributes->get('currentUser')->id;
+        $activeView = $request->query('view') === 'todos' ? 'todos' : 'tasks';
         $today = today();
         $dailyTodos = DB::table('daily_todos')
             ->where('user_id', $userId)
@@ -98,6 +99,7 @@ class TaskController extends Controller
             'tasks' => $tasks,
             'subtasks' => $subtasks,
             'dailyTodos' => $dailyTodos,
+            'activeView' => $activeView,
             'search' => $search,
             'category' => $category,
             'categoryOptions' => $categoryOptions,

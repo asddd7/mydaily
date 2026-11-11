@@ -20,6 +20,81 @@
     padding: 22px;
 }
 
+.content .tasks-page .tasks-view-tabs {
+    --daily-todo-ease: 180ms ease;
+
+    display: flex;
+    width: fit-content;
+    max-width: 100%;
+    gap: 5px;
+    padding: 5px;
+    border: 1px solid #e8edf4;
+    border-radius: 16px;
+    background: #f7f9fc;
+}
+
+.content .tasks-page a.tasks-view-tab {
+    display: inline-flex;
+    min-height: 42px;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    padding: 0 16px;
+    border: 1px solid transparent;
+    border-radius: 12px;
+    background: transparent;
+    color: #78879b;
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: none;
+    transition:
+        color var(--daily-todo-ease),
+        background var(--daily-todo-ease),
+        border-color var(--daily-todo-ease),
+        box-shadow var(--daily-todo-ease);
+}
+
+.content .tasks-page a.tasks-view-tab[aria-selected="true"] {
+    border-color: #e7edf5;
+    background: #fff;
+    color: #285f9f;
+    box-shadow: 0 3px 9px rgb(31 55 86 / 6%);
+}
+
+.content .tasks-page a.tasks-view-tab:not([aria-selected="true"]):hover {
+    background: #eef3f8;
+    color: #425168;
+}
+
+.content .tasks-page a.tasks-view-tab > span {
+    display: grid;
+    min-width: 22px;
+    height: 22px;
+    place-items: center;
+    padding: 0 6px;
+    border-radius: 999px;
+    background: #eef2f7;
+    color: #64748b;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.content .tasks-page a.tasks-view-tab[aria-selected="true"] > span {
+    background: #eaf2ff;
+    color: #426fa9;
+}
+
+.content .tasks-page .tasks-view-panel[hidden] {
+    display: none !important;
+}
+
+.content .tasks-page .tasks-view-panel:not([hidden]) {
+    display: grid;
+    min-width: 0;
+    gap: 24px;
+    touch-action: pan-y;
+}
+
 .daily-todos-integrated-heading {
     display: flex;
     align-items: center;
@@ -480,30 +555,15 @@
     }
 }
 
-@media (min-width: 1200px) {
-    .content .tasks-page {
-        grid-template-columns: minmax(0, .85fr) minmax(0, 1.15fr);
-        align-items: start;
+@media (max-width: 600px) {
+    .content .tasks-page .tasks-view-tabs {
+        width: 100%;
     }
 
-    .content .tasks-page > .tasks-heading,
-    .content .tasks-page > .tasks-tools {
-        grid-column: 1 / -1;
-    }
-
-    .content .tasks-page > .daily-todos-integrated {
-        grid-column: 1;
-        grid-row: 3;
-        max-height: min(72vh, 760px);
-        overflow-y: auto;
-        overscroll-behavior: contain;
-    }
-
-    .content .tasks-page > .task-list-section {
-        grid-column: 2;
-        grid-row: 3;
-        max-height: min(72vh, 760px);
-        overflow-y: auto;
-        overscroll-behavior: contain;
+    .content .tasks-page a.tasks-view-tab {
+        flex: 1;
+        gap: 7px;
+        padding: 0 10px;
+        font-size: 12px;
     }
 }

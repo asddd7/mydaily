@@ -10,7 +10,7 @@ class DailyTodoController extends Controller
 {
     public function index(): RedirectResponse
     {
-        return redirect()->route('tasks.index');
+        return redirect()->route('tasks.index', ['view' => 'todos']);
     }
 
     public function store(Request $request): RedirectResponse
@@ -29,7 +29,7 @@ class DailyTodoController extends Controller
             'updated_at' => now(),
         ]);
 
-        return redirect()->route('tasks.index')
+        return redirect()->route('tasks.index', ['view' => 'todos'])
             ->with('status', 'To-do berhasil ditambahkan.');
     }
 
@@ -53,7 +53,7 @@ class DailyTodoController extends Controller
                 'updated_at' => now(),
             ]);
 
-        return redirect()->route('tasks.index');
+        return redirect()->route('tasks.index', ['view' => 'todos']);
     }
 
     public function destroy(Request $request, int $item): RedirectResponse
@@ -67,7 +67,7 @@ class DailyTodoController extends Controller
             ->delete();
         abort_unless($deleted, 404);
 
-        return redirect()->route('tasks.index')
+        return redirect()->route('tasks.index', ['view' => 'todos'])
             ->with('status', 'To-do berhasil dihapus.');
     }
 }

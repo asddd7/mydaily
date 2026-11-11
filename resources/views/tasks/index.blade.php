@@ -20,7 +20,43 @@
         </div>
     </div>
 
-    <section class="daily-todos-page daily-todos-integrated" aria-labelledby="dailyPlanTitle">
+    <nav class="tasks-view-tabs" role="tablist" aria-label="Pilih daftar">
+        <a
+            id="daily-todos-tab"
+            class="tasks-view-tab"
+            href="{{ route('tasks.index', ['view' => 'todos']) }}"
+            role="tab"
+            aria-controls="daily-todos-panel"
+            aria-selected="{{ $activeView === 'todos' ? 'true' : 'false' }}"
+            @if ($activeView === 'todos') aria-current="page" @endif
+        >
+            <i class="fa-regular fa-circle-check" aria-hidden="true"></i>
+            Daily To-do
+            <span>{{ $dailyTodos->count() }}</span>
+        </a>
+        <a
+            id="tasks-tab"
+            class="tasks-view-tab"
+            href="{{ route('tasks.index', ['view' => 'tasks']) }}"
+            role="tab"
+            aria-controls="tasks-panel"
+            aria-selected="{{ $activeView === 'tasks' ? 'true' : 'false' }}"
+            @if ($activeView === 'tasks') aria-current="page" @endif
+        >
+            <i class="fa-solid fa-list-check" aria-hidden="true"></i>
+            Tugas
+            <span>{{ $tasks->count() }}</span>
+        </a>
+    </nav>
+
+    <section
+        id="daily-todos-panel"
+        class="daily-todos-page daily-todos-integrated tasks-view-panel"
+        role="tabpanel"
+        aria-labelledby="daily-todos-tab"
+        tabindex="0"
+        @if ($activeView !== 'todos') hidden @endif
+    >
         <div class="daily-todos-integrated-heading">
             <div>
                 <p class="daily-todos-eyebrow">DAFTAR HARIAN</p>
@@ -110,6 +146,14 @@
         </dialog>
     </section>
 
+    <section
+        id="tasks-panel"
+        class="tasks-view-panel"
+        role="tabpanel"
+        aria-labelledby="tasks-tab"
+        tabindex="0"
+        @if ($activeView !== 'tasks') hidden @endif
+    >
     <div class="tasks-tools">
         <section class="card task-tool-card task-import-card">
             <div class="task-section-heading">
@@ -585,12 +629,50 @@
             </div>
         @endforelse
     </section>
+    </section>
 </div>
 @endsection
 
 @push('scripts')
 <script>
 (() => {
+    const tabs = [...document.querySelectorAll('.tasks-view-tab')];
+    const panels = [...document.querySelectorAll('.tasks-view-panel')];
+
+    tabs.forEach((tab, index) => {
+        tab.addEventListener('keydown', event => {
+            if (!['ArrowLeft', 'ArrowRight'].includes(event.key)) return;
+            event.preventDefault();
+            const direction = event.key === 'ArrowRight' ? 1 : -1;
+            const nextTab = tabs[(index + direction + tabs.length) % tabs.length];
+            window.location.assign(nextTab.href);
+        });
+    });
+
+    panels.forEach(panel => {
+        let touchStart = null;
+
+        panel.addEventListener('pointerdown', event => {
+            if (event.pointerType !== 'touch') return;
+            if (event.target instanceof Element && event.target.closest('a, button, input, textarea, select, form, details, summary')) {
+                touchStart = null;
+                return;
+            }
+            touchStart = { x: event.clientX, y: event.clientY };
+        });
+        panel.addEventListener('pointerup', event => {
+            if (!touchStart) return;
+            const deltaX = event.clientX - touchStart.x;
+            const deltaY = event.clientY - touchStart.y;
+            touchStart = null;
+            if (Math.abs(deltaX) < 70 || Math.abs(deltaX) < Math.abs(deltaY) * 1.3) return;
+
+            const targetTab = document.querySelector(deltaX < 0 ? '#tasks-tab' : '#daily-todos-tab');
+            if (targetTab instanceof HTMLAnchorElement) window.location.assign(targetTab.href);
+        });
+        panel.addEventListener('pointercancel', () => { touchStart = null; });
+    });
+
     const dailyTodoDialog = document.querySelector('[data-daily-todo-dialog]');
     if (dailyTodoDialog instanceof HTMLDialogElement) {
         const openDailyTodoDialog = () => {
