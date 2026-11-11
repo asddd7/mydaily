@@ -94,46 +94,45 @@
                 @endforeach
             </ul>
         @endif
-    </section>
-
-    <dialog
-        class="daily-todos-dialog"
-        data-daily-todo-dialog
-        aria-labelledby="dailyTodoDialogTitle"
-        @if ($errors->any() && old('_form') === 'daily_todo_create') data-reopen @endif
-    >
-        <form method="post" action="{{ route('daily-todos.store') }}" class="daily-todos-dialog-form">
-            @csrf
-            <input type="hidden" name="date" value="{{ today()->toDateString() }}">
-            <input type="hidden" name="_form" value="daily_todo_create">
-            <div class="daily-todos-dialog-heading">
-                <div>
-                    <p class="daily-todos-eyebrow">SATU LANGKAH KECIL</p>
-                    <h2 id="dailyTodoDialogTitle">Tambah to-do</h2>
+        <dialog
+            class="daily-todos-dialog"
+            data-daily-todo-dialog
+            aria-labelledby="dailyTodoDialogTitle"
+            @if ($errors->any() && old('_form') === 'daily_todo_create') data-reopen @endif
+        >
+            <form method="post" action="{{ route('daily-todos.store') }}" class="daily-todos-dialog-form">
+                @csrf
+                <input type="hidden" name="date" value="{{ today()->toDateString() }}">
+                <input type="hidden" name="_form" value="daily_todo_create">
+                <div class="daily-todos-dialog-heading">
+                    <div>
+                        <p class="daily-todos-eyebrow">SATU LANGKAH KECIL</p>
+                        <h2 id="dailyTodoDialogTitle">Tambah to-do</h2>
+                    </div>
+                    <button class="daily-todos-dialog-close" type="button" data-close-daily-todo-dialog aria-label="Tutup dialog">
+                        <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+                    </button>
                 </div>
-                <button class="daily-todos-dialog-close" type="button" data-close-daily-todo-dialog aria-label="Tutup dialog">
-                    <i class="fa-solid fa-xmark" aria-hidden="true"></i>
-                </button>
-            </div>
-            <label for="dailyTodoTitle">Apa yang ingin kamu selesaikan?</label>
-            <input
-                id="dailyTodoTitle"
-                type="text"
-                name="title"
-                maxlength="255"
-                placeholder="Contoh: Membaca 10 halaman"
-                value="{{ old('_form') === 'daily_todo_create' ? old('title') : '' }}"
-                required
-            >
-            <div class="daily-todos-dialog-actions">
-                <button class="daily-todos-cancel" type="button" data-close-daily-todo-dialog>Batal</button>
-                <button class="daily-todos-submit" type="submit">
-                    <i class="fa-solid fa-plus" aria-hidden="true"></i>
-                    Tambahkan
-                </button>
-            </div>
-        </form>
-    </dialog>
+                <label for="dailyTodoTitle">Apa yang ingin kamu selesaikan?</label>
+                <input
+                    id="dailyTodoTitle"
+                    type="text"
+                    name="title"
+                    maxlength="255"
+                    placeholder="Contoh: Membaca 10 halaman"
+                    value="{{ old('_form') === 'daily_todo_create' ? old('title') : '' }}"
+                    required
+                >
+                <div class="daily-todos-dialog-actions">
+                    <button class="daily-todos-cancel" type="button" data-close-daily-todo-dialog>Batal</button>
+                    <button class="daily-todos-submit" type="submit">
+                        <i class="fa-solid fa-plus" aria-hidden="true"></i>
+                        Tambahkan
+                    </button>
+                </div>
+            </form>
+        </dialog>
+    </section>
 
     <div class="tasks-tools">
         <section class="card task-tool-card task-import-card">
