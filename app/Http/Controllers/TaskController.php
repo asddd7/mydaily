@@ -26,6 +26,23 @@ class TaskController extends Controller
     public function index(Request $request): View
     {
         $userId = $request->attributes->get('currentUser')->id;
+        $today = today();
+        $dailyTodos = DB::table('daily_todos')
+            ->where('user_id', $userId)
+            ->where('todo_date', $today->toDateString())
+            ->orderBy('id')
+            ->get();
+        $upcomingTasks = DB::table('tugas')
+            ->where('user_id', $userId)
+            ->whereNull('parent_id')
+            ->where('selesai', 0)
+            ->whereBetween('deadline', [
+                $today->toDateString(),
+                $today->copy()->addDays(3)->toDateString(),
+            ])
+            ->orderBy('deadline')
+            ->orderBy('urutan')
+            ->get(['id', 'nama_tugas', 'deadline']);
         $knownCategories = DB::table('tugas')
             ->where('user_id', $userId)
             ->whereNull('parent_id')
@@ -91,6 +108,8 @@ class TaskController extends Controller
         return view('tasks.index', [
             'tasks' => $tasks,
             'subtasks' => $subtasks,
+            'dailyTodos' => $dailyTodos,
+            'upcomingTasks' => $upcomingTasks,
             'search' => $search,
             'category' => $category,
             'categoryOptions' => $categoryOptions,

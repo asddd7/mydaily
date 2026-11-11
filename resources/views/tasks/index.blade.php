@@ -3,7 +3,7 @@
 @section('title', 'Tugas - MyDaily')
 
 @push('styles')
-    @vite('resources/css/tasks.css')
+    @vite(['resources/css/tasks.css', 'resources/css/daily-todos.css'])
 @endpush
 
 @section('content')
@@ -11,7 +11,7 @@
     <div class="tasks-heading">
         <div>
             <p class="tasks-eyebrow">Perencanaan harian</p>
-            <h1>Tugas</h1>
+            <h1>Tugas &amp; To-do</h1>
             <p class="tasks-intro">Atur prioritas, tenggat, dan subtugasmu di satu tempat.</p>
         </div>
         <div class="tasks-total" aria-label="{{ $tasks->count() }} tugas">
@@ -19,6 +19,121 @@
             <span>tugas</span>
         </div>
     </div>
+
+    <section class="daily-todos-page daily-todos-integrated" aria-labelledby="dailyPlanTitle">
+        <div class="daily-todos-integrated-heading">
+            <div>
+                <p class="daily-todos-eyebrow">RENCANA HARIAN</p>
+                <h2 id="dailyPlanTitle">Hari ini dan 3 hari ke depan</h2>
+                <p>Daily To-do dan tugas yang segera jatuh tempo.</p>
+            </div>
+            <button class="daily-todos-add-trigger" type="button" data-open-daily-todo-dialog>
+                <i class="fa-solid fa-plus" aria-hidden="true"></i>
+                Tambah to-do
+            </button>
+        </div>
+
+        @if ($dailyTodos->isEmpty() && $upcomingTasks->isEmpty())
+            <div class="daily-todos-empty">
+                <span aria-hidden="true"><i class="fa-regular fa-circle-check"></i></span>
+                <h2>Belum ada rencana dekat</h2>
+                <p>Tambahkan to-do harian atau buat tugas dengan tenggat dalam beberapa hari ini.</p>
+            </div>
+        @else
+            <ul class="daily-todos-list">
+                @foreach ($dailyTodos as $todo)
+                    <li @class(['daily-todos-item', 'is-completed' => $todo->is_completed])>
+                        <form method="post" action="{{ route('daily-todos.toggle', $todo->id) }}">
+                            @csrf
+                            @method('patch')
+                            <input type="hidden" name="date" value="{{ today()->toDateString() }}">
+                            <button
+                                class="daily-todos-check"
+                                type="submit"
+                                aria-label="{{ $todo->is_completed ? 'Tandai belum selesai' : 'Tandai selesai' }}: {{ $todo->title }}"
+                            >
+                                <i class="fa-solid fa-check" aria-hidden="true"></i>
+                            </button>
+                        </form>
+                        <span class="daily-todos-item-type">To-do</span>
+                        <span class="daily-todos-item-title">{{ $todo->title }}</span>
+                        <form method="post" action="{{ route('daily-todos.destroy', $todo->id) }}">
+                            @csrf
+                            @method('delete')
+                            <input type="hidden" name="date" value="{{ today()->toDateString() }}">
+                            <button class="daily-todos-delete" type="submit" aria-label="Hapus to-do: {{ $todo->title }}">
+                                <i class="fa-regular fa-trash-can" aria-hidden="true"></i>
+                            </button>
+                        </form>
+                    </li>
+                @endforeach
+
+                @foreach ($upcomingTasks as $upcomingTask)
+                    <li class="daily-todos-item">
+                        <form method="post" action="{{ route('tasks.toggle', $upcomingTask->id) }}">
+                            @csrf
+                            <input type="hidden" name="selesai" value="0">
+                            <input
+                                class="daily-todos-check"
+                                type="checkbox"
+                                name="selesai"
+                                value="1"
+                                onchange="this.form.requestSubmit()"
+                                aria-label="Tandai {{ $upcomingTask->nama_tugas }} sebagai selesai"
+                            >
+                        </form>
+                        <span class="daily-todos-item-type daily-todos-item-type-task">Tugas</span>
+                        <span class="daily-todos-item-title">{{ $upcomingTask->nama_tugas }}</span>
+                        <time class="daily-todos-item-deadline" datetime="{{ $upcomingTask->deadline }}">
+                            {{ \Illuminate\Support\Carbon::parse($upcomingTask->deadline)->translatedFormat('d M') }}
+                        </time>
+                        <a class="daily-todos-item-open" href="{{ route('tasks.show', $upcomingTask->id) }}" aria-label="Buka tugas {{ $upcomingTask->nama_tugas }}">
+                            <i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i>
+                        </a>
+                    </li>
+                @endforeach
+            </ul>
+        @endif
+    </section>
+
+    <dialog
+        class="daily-todos-dialog"
+        data-daily-todo-dialog
+        aria-labelledby="dailyTodoDialogTitle"
+        @if ($errors->any() && old('_form') === 'daily_todo_create') data-reopen @endif
+    >
+        <form method="post" action="{{ route('daily-todos.store') }}" class="daily-todos-dialog-form">
+            @csrf
+            <input type="hidden" name="date" value="{{ today()->toDateString() }}">
+            <input type="hidden" name="_form" value="daily_todo_create">
+            <div class="daily-todos-dialog-heading">
+                <div>
+                    <p class="daily-todos-eyebrow">SATU LANGKAH KECIL</p>
+                    <h2 id="dailyTodoDialogTitle">Tambah to-do</h2>
+                </div>
+                <button class="daily-todos-dialog-close" type="button" data-close-daily-todo-dialog aria-label="Tutup dialog">
+                    <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+                </button>
+            </div>
+            <label for="dailyTodoTitle">Apa yang ingin kamu selesaikan?</label>
+            <input
+                id="dailyTodoTitle"
+                type="text"
+                name="title"
+                maxlength="255"
+                placeholder="Contoh: Membaca 10 halaman"
+                value="{{ old('_form') === 'daily_todo_create' ? old('title') : '' }}"
+                required
+            >
+            <div class="daily-todos-dialog-actions">
+                <button class="daily-todos-cancel" type="button" data-close-daily-todo-dialog>Batal</button>
+                <button class="daily-todos-submit" type="submit">
+                    <i class="fa-solid fa-plus" aria-hidden="true"></i>
+                    Tambahkan
+                </button>
+            </div>
+        </form>
+    </dialog>
 
     <div class="tasks-tools">
         <section class="card task-tool-card task-import-card">
@@ -501,6 +616,23 @@
 @push('scripts')
 <script>
 (() => {
+    const dailyTodoDialog = document.querySelector('[data-daily-todo-dialog]');
+    if (dailyTodoDialog instanceof HTMLDialogElement) {
+        const openDailyTodoDialog = () => {
+            if (!dailyTodoDialog.open) dailyTodoDialog.showModal();
+            dailyTodoDialog.querySelector('[name="title"]')?.focus();
+        };
+
+        document.querySelector('[data-open-daily-todo-dialog]')?.addEventListener('click', openDailyTodoDialog);
+        dailyTodoDialog.querySelectorAll('[data-close-daily-todo-dialog]').forEach(button => {
+            button.addEventListener('click', () => dailyTodoDialog.close());
+        });
+        dailyTodoDialog.addEventListener('click', event => {
+            if (event.target === dailyTodoDialog) dailyTodoDialog.close();
+        });
+        if (dailyTodoDialog.hasAttribute('data-reopen')) openDailyTodoDialog();
+    }
+
     document.querySelectorAll('.task-form').forEach(form => {
         const reminderToggle = form.querySelector('[data-reminder-toggle]');
         const reminderTime = form.querySelector('[data-reminder-time]');

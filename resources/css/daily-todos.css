@@ -14,6 +14,35 @@
     color: var(--daily-todo-ink);
 }
 
+.content .tasks-page .daily-todos-integrated {
+    max-width: none;
+    margin: 0;
+    padding: 22px;
+}
+
+.daily-todos-integrated-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    margin-bottom: 20px;
+}
+
+.daily-todos-integrated-heading h2 {
+    margin: 0;
+    color: var(--daily-todo-ink);
+    font-size: clamp(18px, 2.5vw, 22px);
+    font-weight: 800;
+    letter-spacing: -.03em;
+}
+
+.content .daily-todos-page .daily-todos-integrated-heading p:last-child {
+    margin: 6px 0 0;
+    color: var(--daily-todo-muted);
+    font-size: 13px;
+    line-height: 1.5;
+}
+
 .daily-todos-page *,
 .daily-todos-page *::before,
 .daily-todos-page *::after {
@@ -165,6 +194,93 @@
     transform: scale(1.05);
     border-color: var(--daily-todo-accent);
     box-shadow: none;
+}
+
+.content .daily-todos-page input.daily-todos-check {
+    display: grid;
+    width: 27px;
+    height: 27px;
+    flex: 0 0 auto;
+    appearance: none;
+    place-content: center;
+    margin: 0;
+    border: 1.5px solid #cbd6e3 !important;
+    border-radius: 10px;
+    background: #fff;
+    cursor: pointer;
+    transition:
+        border-color var(--daily-todo-ease),
+        background var(--daily-todo-ease),
+        transform var(--daily-todo-ease);
+}
+
+.content .daily-todos-page input.daily-todos-check::before {
+    width: 10px;
+    height: 6px;
+    content: "";
+    transform: rotate(-45deg) scale(0);
+    border: solid #fff;
+    border-width: 0 0 2px 2px;
+    transition: transform var(--daily-todo-ease);
+}
+
+.content .daily-todos-page input.daily-todos-check:checked {
+    border-color: #48a88e !important;
+    background: #48a88e;
+}
+
+.content .daily-todos-page input.daily-todos-check:checked::before {
+    transform: rotate(-45deg) scale(1);
+}
+
+.content .daily-todos-page input.daily-todos-check:hover {
+    transform: scale(1.05);
+    border-color: var(--daily-todo-accent) !important;
+}
+
+.content .daily-todos-page input.daily-todos-check:focus-visible {
+    outline: 3px solid rgb(73 135 205 / 32%);
+    outline-offset: 3px;
+}
+
+.daily-todos-item-type {
+    flex: 0 0 auto;
+    padding: 5px 8px;
+    border-radius: 999px;
+    background: #eaf2ff;
+    color: #426fa9;
+    font-size: 10px;
+    font-weight: 750;
+    letter-spacing: .02em;
+}
+
+.daily-todos-item-type-task {
+    background: #f0edff;
+    color: #6b5aa8;
+}
+
+.daily-todos-item-deadline {
+    flex: 0 0 auto;
+    color: var(--daily-todo-muted);
+    font-size: 12px;
+    font-weight: 650;
+}
+
+.content .daily-todos-page a.daily-todos-item-open {
+    display: grid;
+    width: 34px;
+    height: 34px;
+    flex: 0 0 auto;
+    place-items: center;
+    border-radius: 11px;
+    color: #8a98aa;
+    text-decoration: none;
+    transition: background var(--daily-todo-ease), color var(--daily-todo-ease);
+}
+
+.content .daily-todos-page a.daily-todos-item-open:hover {
+    background: #f0f5fb;
+    color: var(--daily-todo-accent-dark);
 }
 
 .daily-todos-item-title {
@@ -412,9 +528,27 @@
         margin-bottom: 22px;
     }
 
+    .daily-todos-integrated-heading {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
     .daily-todos-card {
         min-height: 165px;
         padding: 18px 14px;
+    }
+
+    .content .tasks-page .daily-todos-integrated {
+        padding: 18px 14px;
+    }
+
+    .daily-todos-item {
+        gap: 8px;
+        padding: 8px;
+    }
+
+    .daily-todos-item-type {
+        font-size: 9px;
     }
 
     .daily-todos-dialog-form {

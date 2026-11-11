@@ -5,27 +5,12 @@ namespace App\Http\Controllers;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\View\View;
 
 class DailyTodoController extends Controller
 {
-    public function index(Request $request): View
+    public function index(): RedirectResponse
     {
-        $validated = $request->validate([
-            'date' => ['sometimes', 'date_format:Y-m-d'],
-        ]);
-        $date = $validated['date'] ?? now()->toDateString();
-        $userId = $request->attributes->get('currentUser')->id;
-        $items = DB::table('daily_todos')
-            ->where('user_id', $userId)
-            ->where('todo_date', $date)
-            ->orderBy('id')
-            ->get();
-
-        return view('daily-todos.index', [
-            'items' => $items,
-            'date' => $date,
-        ]);
+        return redirect()->route('tasks.index');
     }
 
     public function store(Request $request): RedirectResponse
@@ -44,13 +29,13 @@ class DailyTodoController extends Controller
             'updated_at' => now(),
         ]);
 
-        return redirect()->route('daily-todos.index', ['date' => $data['date']])
+        return redirect()->route('tasks.index')
             ->with('status', 'To-do berhasil ditambahkan.');
     }
 
     public function toggle(Request $request, int $item): RedirectResponse
     {
-        $data = $request->validate([
+        $request->validate([
             'date' => ['required', 'date_format:Y-m-d'],
         ]);
         $userId = $request->attributes->get('currentUser')->id;
@@ -68,12 +53,12 @@ class DailyTodoController extends Controller
                 'updated_at' => now(),
             ]);
 
-        return redirect()->route('daily-todos.index', ['date' => $data['date']]);
+        return redirect()->route('tasks.index');
     }
 
     public function destroy(Request $request, int $item): RedirectResponse
     {
-        $data = $request->validate([
+        $request->validate([
             'date' => ['required', 'date_format:Y-m-d'],
         ]);
         $deleted = DB::table('daily_todos')
@@ -82,7 +67,7 @@ class DailyTodoController extends Controller
             ->delete();
         abort_unless($deleted, 404);
 
-        return redirect()->route('daily-todos.index', ['date' => $data['date']])
+        return redirect()->route('tasks.index')
             ->with('status', 'To-do berhasil dihapus.');
     }
 }

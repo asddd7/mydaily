@@ -8,10 +8,7 @@
         <i class="fa-solid fa-house"></i><span>Dashboard</span>
     </a>
     <a href="{{ route('tasks.index') }}" @class(['active' => request()->routeIs('tasks.*')])>
-        <i class="fa-solid fa-list-check"></i><span>Tugas</span>
-    </a>
-    <a href="{{ route('daily-todos.index') }}" @class(['active' => request()->routeIs('daily-todos.*')])>
-        <i class="fa-solid fa-calendar-day"></i><span>Daily To-do</span>
+        <i class="fa-solid fa-list-check"></i><span>Tugas &amp; To-do</span>
     </a>
     <a href="{{ route('money.index') }}" @class(['active' => request()->routeIs('money.*')])>
         <i class="fa-solid fa-wallet"></i><span>Pengatur Keuangan</span>
