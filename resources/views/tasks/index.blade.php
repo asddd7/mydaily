@@ -23,9 +23,9 @@
     <section class="daily-todos-page daily-todos-integrated" aria-labelledby="dailyPlanTitle">
         <div class="daily-todos-integrated-heading">
             <div>
-                <p class="daily-todos-eyebrow">RENCANA HARIAN</p>
-                <h2 id="dailyPlanTitle">Hari ini dan 3 hari ke depan</h2>
-                <p>Daily To-do dan tugas yang segera jatuh tempo.</p>
+                <p class="daily-todos-eyebrow">DAFTAR HARIAN</p>
+                <h2 id="dailyPlanTitle">Daily To-do</h2>
+                <p>Catatan singkat untuk hal yang ingin diselesaikan hari ini.</p>
             </div>
             <button class="daily-todos-add-trigger" type="button" data-open-daily-todo-dialog>
                 <i class="fa-solid fa-plus" aria-hidden="true"></i>
@@ -33,11 +33,11 @@
             </button>
         </div>
 
-        @if ($dailyTodos->isEmpty() && $upcomingTasks->isEmpty())
+        @if ($dailyTodos->isEmpty())
             <div class="daily-todos-empty">
                 <span aria-hidden="true"><i class="fa-regular fa-circle-check"></i></span>
-                <h2>Belum ada rencana dekat</h2>
-                <p>Tambahkan to-do harian atau buat tugas dengan tenggat dalam beberapa hari ini.</p>
+                <h2>Belum ada to-do</h2>
+                <p>Tambahkan satu hal kecil untuk memulai harimu.</p>
             </div>
         @else
             <ul class="daily-todos-list">
@@ -68,30 +68,6 @@
                     </li>
                 @endforeach
 
-                @foreach ($upcomingTasks as $upcomingTask)
-                    <li class="daily-todos-item">
-                        <form method="post" action="{{ route('tasks.toggle', $upcomingTask->id) }}">
-                            @csrf
-                            <input type="hidden" name="selesai" value="0">
-                            <input
-                                class="daily-todos-check"
-                                type="checkbox"
-                                name="selesai"
-                                value="1"
-                                onchange="this.form.requestSubmit()"
-                                aria-label="Tandai {{ $upcomingTask->nama_tugas }} sebagai selesai"
-                            >
-                        </form>
-                        <span class="daily-todos-item-type daily-todos-item-type-task">Tugas</span>
-                        <span class="daily-todos-item-title">{{ $upcomingTask->nama_tugas }}</span>
-                        <time class="daily-todos-item-deadline" datetime="{{ $upcomingTask->deadline }}">
-                            {{ \Illuminate\Support\Carbon::parse($upcomingTask->deadline)->translatedFormat('d M') }}
-                        </time>
-                        <a class="daily-todos-item-open" href="{{ route('tasks.show', $upcomingTask->id) }}" aria-label="Buka tugas {{ $upcomingTask->nama_tugas }}">
-                            <i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i>
-                        </a>
-                    </li>
-                @endforeach
             </ul>
         @endif
         <dialog
