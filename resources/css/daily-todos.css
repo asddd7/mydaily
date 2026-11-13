@@ -134,6 +134,64 @@
     line-height: 1.5;
 }
 
+.daily-todos-week {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 8px;
+    margin-bottom: 20px;
+}
+
+.content .daily-todos-page a.daily-todos-week-day {
+    display: grid;
+    min-width: 0;
+    min-height: 68px;
+    align-content: center;
+    justify-items: center;
+    gap: 5px;
+    border: 1px solid #e8edf4;
+    border-radius: 15px;
+    background: #fff;
+    color: #78879b;
+    text-decoration: none;
+    transition:
+        color var(--daily-todo-ease),
+        background var(--daily-todo-ease),
+        border-color var(--daily-todo-ease),
+        box-shadow var(--daily-todo-ease),
+        transform var(--daily-todo-ease);
+}
+
+.content .daily-todos-page a.daily-todos-week-day > span {
+    color: inherit;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.content .daily-todos-page a.daily-todos-week-day > strong {
+    color: var(--daily-todo-ink);
+    font-size: 16px;
+    line-height: 1;
+}
+
+.content .daily-todos-page a.daily-todos-week-day[aria-current="date"] {
+    transform: translateY(-1px);
+    border-color: #b7d1f1;
+    background: #f0f6ff;
+    color: var(--daily-todo-accent-dark);
+    box-shadow: 0 4px 12px rgb(50 118 210 / 9%);
+}
+
+.content .daily-todos-page a.daily-todos-week-day[aria-current="date"] > strong {
+    color: var(--daily-todo-accent-dark);
+}
+
+.content .daily-todos-page a.daily-todos-week-day:hover:not([aria-current="date"]) {
+    transform: translateY(-1px);
+    border-color: #d3e3f8;
+    background: #f8fbff;
+}
+
 .daily-todos-page *,
 .daily-todos-page *::before,
 .daily-todos-page *::after {
@@ -559,6 +617,19 @@
 
     .content .tasks-page .daily-todos-integrated {
         padding: 18px 14px;
+    }
+
+    .daily-todos-week {
+        gap: 5px;
+    }
+
+    .content .daily-todos-page a.daily-todos-week-day {
+        min-height: 58px;
+        border-radius: 12px;
+    }
+
+    .content .daily-todos-page a.daily-todos-week-day > span {
+        font-size: 9px;
     }
 
     .daily-todos-item {

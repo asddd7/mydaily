@@ -25,7 +25,7 @@
             id="daily-todos-tab"
             class="tasks-view-tab"
             data-view="todos"
-            href="{{ route('tasks.index', ['view' => 'todos']) }}"
+            href="{{ route('tasks.index', ['view' => 'todos', 'todo_date' => $todoDate]) }}"
             role="tab"
             aria-controls="daily-todos-panel"
             aria-selected="{{ $activeView === 'todos' ? 'true' : 'false' }}"
@@ -62,14 +62,28 @@
         <div class="daily-todos-integrated-heading">
             <div>
                 <p class="daily-todos-eyebrow">DAFTAR HARIAN</p>
-                <h2 id="dailyPlanTitle">Daily To-do</h2>
-                <p>Catatan singkat untuk hal yang ingin diselesaikan hari ini.</p>
+                <h2 id="dailyPlanTitle">{{ \Illuminate\Support\Carbon::parse($todoDate)->translatedFormat('l, d F Y') }}</h2>
+                <p>Pilih hari dalam minggu ini untuk melihat daftar to-do.</p>
             </div>
             <button class="daily-todos-add-trigger" type="button" data-open-daily-todo-dialog>
                 <i class="fa-solid fa-plus" aria-hidden="true"></i>
                 Tambah to-do
             </button>
         </div>
+
+        <nav class="daily-todos-week" aria-label="Pilih hari pada minggu ini">
+            @foreach ($weekDates as $weekDate)
+                @php($weekDateString = $weekDate->toDateString())
+                <a
+                    class="daily-todos-week-day"
+                    href="{{ route('tasks.index', ['view' => 'todos', 'todo_date' => $weekDateString]) }}"
+                    @if ($todoDate === $weekDateString) aria-current="date" @endif
+                >
+                    <span>{{ $weekDate->translatedFormat('D') }}</span>
+                    <strong>{{ $weekDate->format('d') }}</strong>
+                </a>
+            @endforeach
+        </nav>
 
         @if ($dailyTodos->isEmpty())
             <div class="daily-todos-empty">
@@ -84,7 +98,7 @@
                         <form method="post" action="{{ route('daily-todos.toggle', $todo->id) }}">
                             @csrf
                             @method('patch')
-                            <input type="hidden" name="date" value="{{ today()->toDateString() }}">
+                            <input type="hidden" name="date" value="{{ $todoDate }}">
                             <button
                                 class="daily-todos-check"
                                 type="submit"
@@ -98,7 +112,7 @@
                         <form method="post" action="{{ route('daily-todos.destroy', $todo->id) }}">
                             @csrf
                             @method('delete')
-                            <input type="hidden" name="date" value="{{ today()->toDateString() }}">
+                            <input type="hidden" name="date" value="{{ $todoDate }}">
                             <button class="daily-todos-delete" type="submit" aria-label="Hapus to-do: {{ $todo->title }}">
                                 <i class="fa-regular fa-trash-can" aria-hidden="true"></i>
                             </button>
@@ -116,7 +130,7 @@
         >
             <form method="post" action="{{ route('daily-todos.store') }}" class="daily-todos-dialog-form">
                 @csrf
-                <input type="hidden" name="date" value="{{ today()->toDateString() }}">
+                <input type="hidden" name="date" value="{{ $todoDate }}">
                 <input type="hidden" name="_form" value="daily_todo_create">
                 <div class="daily-todos-dialog-heading">
                     <div>

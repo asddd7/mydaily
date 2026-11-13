@@ -38,8 +38,9 @@ queries. Tasks and daily to-dos share the Tugas page while remaining in their
 existing database tables; combining their interface does not migrate or alter
 stored records.
 
-Daily to-do checklists are stored separately for each user and date. To add
-the table on an existing deployment, back up the database and run:
+Daily to-do checklists are stored separately for each user and date. The
+Daily To-do tab lets users select dates in the current Monday-to-Sunday week.
+To add the table on an existing deployment, back up the database and run:
 
 ```sh
 php artisan migrate --path=database/migrations/2026_11_10_000001_create_daily_todos_table.php

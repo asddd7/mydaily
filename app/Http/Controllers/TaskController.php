@@ -28,9 +28,20 @@ class TaskController extends Controller
         $userId = $request->attributes->get('currentUser')->id;
         $activeView = $request->query('view') === 'todos' ? 'todos' : 'tasks';
         $today = today();
+        $weekStart = $today->copy()->startOfWeek(Carbon::MONDAY);
+        $weekDates = collect(range(0, 6))
+            ->map(fn (int $offset): Carbon => $weekStart->copy()->addDays($offset));
+        $weekDateStrings = $weekDates->map(fn (Carbon $date): string => $date->toDateString());
+        $todoDateInput = $request->validate([
+            'todo_date' => ['sometimes', 'date_format:Y-m-d'],
+        ])['todo_date'] ?? $today->toDateString();
+        $todoDate = $weekDateStrings->contains($todoDateInput)
+            ? $todoDateInput
+            : $today->toDateString();
+
         $dailyTodos = DB::table('daily_todos')
             ->where('user_id', $userId)
-            ->where('todo_date', $today->toDateString())
+            ->where('todo_date', $todoDate)
             ->orderBy('id')
             ->get();
         $knownCategories = DB::table('tugas')
@@ -99,6 +110,8 @@ class TaskController extends Controller
             'tasks' => $tasks,
             'subtasks' => $subtasks,
             'dailyTodos' => $dailyTodos,
+            'todoDate' => $todoDate,
+            'weekDates' => $weekDates,
             'activeView' => $activeView,
             'search' => $search,
             'category' => $category,
