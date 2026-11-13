@@ -379,14 +379,8 @@
                     </form>
                     <div class="task-card-info">
                         <h3 class="task-name {{ $task->selesai ? 'is-complete' : '' }}">{{ $task->nama_tugas }}</h3>
-                        @php
-                            $taskImages = is_array($task->images ?? null)
-                                ? $task->images
-                                : json_decode((string) ($task->images ?? ''), true);
-                            if (!is_array($taskImages) || $taskImages === []) {
-                                $taskImages = !empty($task->image) ? [$task->image] : [];
-                            }
-                        @endphp
+                        @php($taskImages = is_array($task->images ?? null) ? $task->images : json_decode((string) ($task->images ?? ''), true))
+                        @php($taskImages = is_array($taskImages) && $taskImages !== [] ? $taskImages : (!empty($task->image) ? [$task->image] : []))
                         @if ($taskImages !== [])
                             <div class="task-image-gallery" role="group" aria-label="Gambar untuk tugas {{ $task->nama_tugas }}" style="display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.65rem;">
                                 @foreach ($taskImages as $imageIndex => $imageName)
