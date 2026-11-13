@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
+use App\Services\TaskCompletionService;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Shared\Date as ExcelDate;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
@@ -377,73 +378,7 @@ class TaskController extends Controller
         $data = $request->validate(['selesai' => ['required', 'boolean']]);
         $userId = $request->attributes->get('currentUser')->id;
         $done = (bool) $data['selesai'];
-
-        DB::transaction(function () use ($task, $userId, $done): void {
-            $item = DB::table('tugas')
-                ->where('id', $task)
-                ->where('user_id', $userId)
-                ->whereNull('parent_id')
-                ->lockForUpdate()
-                ->first();
-            abort_unless($item, 404);
-
-            DB::table('tugas')->where('id', $task)->update([
-                'selesai' => $done,
-                'selesai_at' => $done ? now() : null,
-            ]);
-            DB::table('tugas')->where('parent_id', $task)->where('user_id', $userId)->update([
-                'selesai' => $done,
-                'selesai_at' => $done ? now() : null,
-            ]);
-
-            if (!$done) {
-                DB::table('tugas')->where('id', $task)->update(['recurring_generated' => 0]);
-
-                return;
-            }
-
-            if ($item->recurring_type === 'none' || $item->recurring_generated) {
-                return;
-            }
-
-            $baseDeadline = Carbon::parse(
-                $item->deadline ?? today()->toDateString()
-            );
-
-            $nextDeadline = match ($item->recurring_type) {
-                'daily' => $baseDeadline->copy()->addDay(),
-                'weekly' => $baseDeadline->copy()->addWeek(),
-                'monthly' => $baseDeadline->copy()->addMonth(),
-                'yearly' => $baseDeadline->copy()->addYear(),
-                default => null,
-            };
-
-            if (!$nextDeadline) {
-                return;
-            }
-
-            $nextId = DB::table('tugas')->insertGetId([
-                'nama_tugas' => $item->nama_tugas,
-                'deadline' => $nextDeadline->toDateString(),
-                'user_id' => $userId,
-                'recurring_type' => $item->recurring_type,
-                'kategori' => $item->kategori,
-                'image' => $item->image,
-            ]);
-
-            $children = DB::table('tugas')->where('parent_id', $task)->where('user_id', $userId)->get();
-            foreach ($children as $child) {
-                DB::table('tugas')->insert([
-                    'nama_tugas' => $child->nama_tugas,
-                    'deadline' => $nextDeadline->toDateString(),
-                    'user_id' => $userId,
-                    'parent_id' => $nextId,
-                    'kategori' => $item->kategori,
-                ]);
-            }
-
-            DB::table('tugas')->where('id', $task)->update(['recurring_generated' => 1]);
-        });
+        app(TaskCompletionService::class)->setCompleted($userId, $task, $done);
 
         if ($request->expectsJson()) {
             return response()->json(['status' => 'updated', 'selesai' => $done]);

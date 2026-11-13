@@ -19,6 +19,8 @@ use App\Http\Controllers\PushNotificationCronController;
 use App\Http\Controllers\PushSubscriptionController;
 use App\Http\Controllers\PushTestNotificationController;
 use App\Http\Controllers\CloudflarePushSyncController;
+use App\Http\Controllers\WhatsAppSettingsController;
+use App\Http\Controllers\WhatsAppWebhookController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -33,6 +35,17 @@ Route::post('/forgot-password', [AuthController::class, 'sendResetLink'])->name(
 Route::get('/reset-password/{token}', [AuthController::class, 'resetPassword'])->name('password.reset');
 Route::post('/reset-password/{token}', [AuthController::class, 'updatePassword'])->name('password.update');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+Route::get('/webhooks/whatsapp', [WhatsAppWebhookController::class, 'verify'])
+    ->name('whatsapp.webhook.verify');
+Route::post('/webhooks/whatsapp', [WhatsAppWebhookController::class, 'receive'])
+    ->middleware('throttle:120,1')
+    ->name('whatsapp.webhook.receive');
+Route::get('/settings/whatsapp', [WhatsAppSettingsController::class, 'index'])
+    ->name('whatsapp.settings');
+Route::post('/settings/whatsapp/link-code', [WhatsAppSettingsController::class, 'issueLinkCode'])
+    ->name('whatsapp.link-code');
+Route::delete('/settings/whatsapp/link', [WhatsAppSettingsController::class, 'unlink'])
+    ->name('whatsapp.unlink');
 Route::get('/firebase-messaging-sw.js', FirebaseMessagingServiceWorkerController::class)
     ->name('firebase.messaging-sw');
 Route::get('/firebase-messaging-worker.js', FirebaseMessagingServiceWorkerController::class)

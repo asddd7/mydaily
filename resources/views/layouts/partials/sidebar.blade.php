@@ -26,6 +26,9 @@
     <a href="{{ route('clock.edit') }}" @class(['active' => request()->routeIs('clock.*')])>
         <i class="fa-solid fa-clock"></i><span>Pengaturan Jam</span>
     </a>
+    <a href="{{ route('whatsapp.settings') }}" @class(['active' => request()->routeIs('whatsapp.*')])>
+        <i class="fa-brands fa-whatsapp"></i><span>WhatsApp Bot</span>
+    </a>
     @if (request()->attributes->get('currentUser')->role === 'admin')
         <a href="{{ route('admin.database-structure') }}" @class(['active' => request()->routeIs('admin.*')])>
             <i class="fa-solid fa-table"></i><span>Struktur DB</span>

@@ -27,6 +27,8 @@ class RequireUser
             'pwa.manifest',
             'pwa.manifest-json',
             'notifications.push.cron',
+            'whatsapp.webhook.verify',
+            'whatsapp.webhook.receive',
         ], true) || in_array($request->path(), [
             'koneksi/login.php',
             'register.php',

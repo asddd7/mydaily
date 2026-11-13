@@ -15,6 +15,7 @@ export default defineConfig({
                 'resources/css/auth.css',
                 'resources/css/clock.css',
                 'resources/css/daily-todos.css',
+                'resources/css/whatsapp.css',
                 'resources/js/page-loader.js',
                 'resources/js/push-notifications.js',
                 'resources/js/pwa-install.js',

@@ -164,3 +164,47 @@ php artisan migrate --path=database/migrations/2026_10_17_000001_add_last_used_a
 The old daily-quest toggle endpoint has no corresponding tables in the active
 database (`daily_quest` and `achievements` are absent), so it is not exposed as
 a working Laravel feature without its intended schema.
+
+## WhatsApp bot
+
+The WhatsApp Cloud API integration supports text commands for listing,
+creating, editing, completing, and deleting the signed-in user's tasks and
+daily to-dos. Account linking uses a one-time code that expires after 10
+minutes. Deletion commands require the explicit `KONFIRMASI` suffix. The bot
+does not migrate or replace task or to-do records; it adds separate tables for
+linked phone numbers and webhook message deduplication.
+
+On an existing database, back up the database and apply the additive
+migrations. The daily-to-do migration is needed if it has not already been
+applied:
+
+```sh
+php artisan migrate --path=database/migrations/2026_11_10_000001_create_daily_todos_table.php
+php artisan migrate --path=database/migrations/2026_11_13_000001_create_whatsapp_bot_tables.php
+```
+
+In the Meta developer dashboard, configure a WhatsApp Cloud API phone number
+and a webhook callback to `https://your-domain.example/webhooks/whatsapp`.
+Subscribe the webhook to the `messages` field. Set these server-side environment
+variables; never commit or share the access token or app secret:
+
+```dotenv
+WHATSAPP_ACCESS_TOKEN=
+WHATSAPP_PHONE_NUMBER_ID=
+WHATSAPP_APP_SECRET=
+WHATSAPP_VERIFY_TOKEN=
+WHATSAPP_GRAPH_API_VERSION=
+```
+
+Use the Graph API version currently supported by the Meta app. Configure the
+same random `WHATSAPP_VERIFY_TOKEN` in Meta and the Laravel environment. The
+webhook verification challenge is checked against that token, and each POST
+request is authenticated with Meta's `X-Hub-Signature-256` HMAC before it is
+processed. The callback must be reachable over HTTPS. The hosting environment
+must also allow outbound HTTPS to `graph.facebook.com` for bot replies; verify
+this capability with the host because outbound connectivity can vary.
+
+After deployment, sign in to MyDaily, open **WhatsApp Bot**, generate a code,
+and send `TAUTKAN <kode>` to the bot number. Then use `BANTUAN` for available
+commands. The bot only accepts text messages, and task completion reuses
+MyDaily's recurring-task behavior.

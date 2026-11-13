@@ -17,6 +17,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->append(TrustLocalNgrokProxies::class);
         $middleware->validateCsrfTokens(except: [
             'notifications/cron/due-tasks',
+            'webhooks/whatsapp',
         ]);
         $middleware->web(append: [
             SecurityHeaders::class,
