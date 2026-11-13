@@ -24,6 +24,7 @@
         <a
             id="daily-todos-tab"
             class="tasks-view-tab"
+            data-view="todos"
             href="{{ route('tasks.index', ['view' => 'todos']) }}"
             role="tab"
             aria-controls="daily-todos-panel"
@@ -37,6 +38,7 @@
         <a
             id="tasks-tab"
             class="tasks-view-tab"
+            data-view="tasks"
             href="{{ route('tasks.index', ['view' => 'tasks']) }}"
             role="tab"
             aria-controls="tasks-panel"
@@ -639,14 +641,57 @@
     const tabs = [...document.querySelectorAll('.tasks-view-tab')];
     const panels = [...document.querySelectorAll('.tasks-view-panel')];
 
+    const showView = (view, updateHistory = true) => {
+        const selectedTab = tabs.find(tab => tab.dataset.view === view);
+        if (!selectedTab) return;
+
+        tabs.forEach(tab => {
+            const selected = tab === selectedTab;
+            tab.setAttribute('aria-selected', String(selected));
+            if (selected) {
+                tab.setAttribute('aria-current', 'page');
+            } else {
+                tab.removeAttribute('aria-current');
+            }
+        });
+
+        panels.forEach(panel => {
+            const selected = panel.id === selectedTab.getAttribute('aria-controls');
+            panel.hidden = !selected;
+            if (selected) {
+                panel.classList.remove('is-entering');
+                void panel.offsetWidth;
+                panel.classList.add('is-entering');
+            } else {
+                panel.classList.remove('is-entering');
+            }
+        });
+
+        if (updateHistory) {
+            const url = new URL(window.location.href);
+            url.searchParams.set('view', view);
+            window.history.pushState({ view }, '', url);
+        }
+    };
+
     tabs.forEach((tab, index) => {
+        tab.addEventListener('click', event => {
+            event.preventDefault();
+            showView(tab.dataset.view);
+        });
         tab.addEventListener('keydown', event => {
             if (!['ArrowLeft', 'ArrowRight'].includes(event.key)) return;
             event.preventDefault();
             const direction = event.key === 'ArrowRight' ? 1 : -1;
             const nextTab = tabs[(index + direction + tabs.length) % tabs.length];
-            window.location.assign(nextTab.href);
+            nextTab.focus();
+            showView(nextTab.dataset.view);
         });
+    });
+
+    window.addEventListener('popstate', () => {
+        const view = new URL(window.location.href).searchParams.get('view');
+        showView(view === 'todos' ? 'todos' : 'tasks', false);
     });
 
     panels.forEach(panel => {
@@ -668,7 +713,7 @@
             if (Math.abs(deltaX) < 70 || Math.abs(deltaX) < Math.abs(deltaY) * 1.3) return;
 
             const targetTab = document.querySelector(deltaX < 0 ? '#tasks-tab' : '#daily-todos-tab');
-            if (targetTab instanceof HTMLAnchorElement) window.location.assign(targetTab.href);
+            if (targetTab instanceof HTMLAnchorElement) showView(targetTab.dataset.view);
         });
         panel.addEventListener('pointercancel', () => { touchStart = null; });
     });

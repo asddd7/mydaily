@@ -95,6 +95,22 @@
     touch-action: pan-y;
 }
 
+.content .tasks-page .tasks-view-panel.is-entering {
+    animation: tasks-view-enter 220ms cubic-bezier(.2, .7, .25, 1) both;
+}
+
+@keyframes tasks-view-enter {
+    from {
+        opacity: 0;
+        transform: translateY(7px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
 .daily-todos-integrated-heading {
     display: flex;
     align-items: center;
@@ -512,6 +528,10 @@
         transition-duration: .01ms !important;
         animation-duration: .01ms !important;
         animation-iteration-count: 1 !important;
+    }
+
+    .content .tasks-page .tasks-view-panel.is-entering {
+        animation: none;
     }
 }
 
