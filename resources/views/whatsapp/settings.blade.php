@@ -8,14 +8,14 @@
 
 @section('content')
 <section class="whatsapp-settings-page">
-    <header class="whatsapp-heading">
+    <div class="whatsapp-heading">
         <span class="whatsapp-heading-icon" aria-hidden="true"><i class="fa-brands fa-whatsapp"></i></span>
         <div>
             <p class="whatsapp-eyebrow">Integrasi pesan</p>
             <h1>WhatsApp Bot</h1>
             <p>Tautkan nomor WhatsApp untuk mengelola task dan to-do melalui chat pribadi.</p>
         </div>
-    </header>
+    </div>
 
     @unless ($botConfigured)
         <div class="whatsapp-setup-notice" role="status">
