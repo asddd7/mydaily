@@ -77,10 +77,10 @@
                 <a
                     class="daily-todos-week-day"
                     href="{{ route('tasks.index', ['view' => 'todos', 'todo_date' => $weekDateString]) }}"
+                    aria-label="{{ $weekDate->translatedFormat('l, d F Y') }}"
                     @if ($todoDate === $weekDateString) aria-current="date" @endif
                 >
                     <span>{{ $weekDate->translatedFormat('D') }}</span>
-                    <strong>{{ $weekDate->format('d') }}</strong>
                 </a>
             @endforeach
         </nav>
