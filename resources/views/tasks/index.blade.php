@@ -135,7 +135,6 @@
         >
             <form method="post" action="{{ route('daily-todos.store') }}" class="daily-todos-dialog-form">
                 @csrf
-                <input type="hidden" name="date" value="{{ $todoDate }}">
                 <input type="hidden" name="_form" value="daily_todo_create">
                 <div class="daily-todos-dialog-heading">
                     <div>
@@ -146,6 +145,15 @@
                         <i class="fa-solid fa-xmark" aria-hidden="true"></i>
                     </button>
                 </div>
+                <label for="dailyTodoDate">Tanggal to-do</label>
+                <select id="dailyTodoDate" name="date" required>
+                    @foreach ($weekDates as $weekDate)
+                        @php($weekDateString = $weekDate->toDateString())
+                        <option value="{{ $weekDateString }}" @selected(old('date', $todoDate) === $weekDateString)>
+                            {{ $weekDate->translatedFormat('l, d F') }}
+                        </option>
+                    @endforeach
+                </select>
                 <label for="dailyTodoTitle">Apa yang ingin kamu selesaikan?</label>
                 <input
                     id="dailyTodoTitle"
@@ -685,6 +693,8 @@
             url.searchParams.set('view', view);
             window.history.pushState({ view }, '', url);
         }
+
+        document.dispatchEvent(new CustomEvent('tasks:view-change', { detail: { view } }));
     };
 
     tabs.forEach((tab, index) => {
@@ -739,6 +749,7 @@
         };
 
         document.querySelector('[data-open-daily-todo-dialog]')?.addEventListener('click', openDailyTodoDialog);
+        document.addEventListener('todo:open-create', openDailyTodoDialog);
         dailyTodoDialog.querySelectorAll('[data-close-daily-todo-dialog]').forEach(button => {
             button.addEventListener('click', () => dailyTodoDialog.close());
         });

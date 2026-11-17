@@ -1,6 +1,8 @@
 @php
     $fabContext = match (request()->route()?->getName()) {
-        'tasks.index' => ['label' => 'Tambah tugas', 'icon' => 'fa-list-check', 'action' => 'task'],
+        'tasks.index' => request()->query('view') === 'todos'
+            ? ['label' => 'Quick add to-do', 'icon' => 'fa-circle-plus', 'action' => 'todo']
+            : ['label' => 'Tambah tugas', 'icon' => 'fa-list-check', 'action' => 'task'],
         'tasks.show' => ['label' => 'Tambah subtugas', 'icon' => 'fa-list-check', 'action' => 'subtask'],
         'money.index' => ['label' => 'Tambah transaksi', 'icon' => 'fa-wallet', 'action' => 'money'],
         'notes.index' => ['label' => 'Tambah catatan', 'icon' => 'fa-note-sticky', 'action' => 'note'],
@@ -45,6 +47,8 @@
         toggle.addEventListener('click', () => {
             if (toggle.dataset.fabAction === 'task') {
                 document.dispatchEvent(new CustomEvent('task:open-create'));
+            } else if (toggle.dataset.fabAction === 'todo') {
+                document.dispatchEvent(new CustomEvent('todo:open-create'));
             } else if (toggle.dataset.fabAction === 'subtask') {
                 document.dispatchEvent(new CustomEvent('task:open-subtask'));
             } else if (toggle.dataset.fabAction === 'money') {
@@ -72,6 +76,27 @@
         });
         document.addEventListener('click', () => menu.classList.remove('show'));
     }
+
+    const updateTaskFab = view => {
+        if (toggle.dataset.fabAction !== 'task' && toggle.dataset.fabAction !== 'todo') return;
+
+        const isTodoView = view === 'todos';
+        const action = isTodoView ? 'todo' : 'task';
+        const label = isTodoView ? 'Quick add to-do' : 'Tambah tugas';
+        const icon = isTodoView ? 'fa-circle-plus' : 'fa-list-check';
+        toggle.dataset.fabAction = action;
+        toggle.setAttribute('aria-label', label);
+        toggle.querySelector('i')?.classList.replace(
+            isTodoView ? 'fa-list-check' : 'fa-circle-plus',
+            icon,
+        );
+        const labelElement = toggle.querySelector('span');
+        if (labelElement) labelElement.textContent = label;
+    };
+
+    document.addEventListener('tasks:view-change', event => {
+        updateTaskFab(event.detail?.view);
+    });
 
     const clock = document.getElementById('floatingClock');
     const mode = @json(request()->attributes->get('currentUser')->clock_mode ?: 'clock');

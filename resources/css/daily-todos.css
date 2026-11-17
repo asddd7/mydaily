@@ -587,6 +587,26 @@
     transition: border-color var(--daily-todo-ease), box-shadow var(--daily-todo-ease);
 }
 
+.content .daily-todos-page .daily-todos-dialog-form > select[name="date"] {
+    width: 100%;
+    min-height: 46px;
+    padding: 0 13px;
+    border: 1px solid var(--daily-todo-line) !important;
+    border-radius: 13px;
+    background: #fff;
+    color: var(--daily-todo-ink) !important;
+    font-family: inherit;
+    font-size: 14px;
+    box-shadow: none;
+    transition: border-color var(--daily-todo-ease), box-shadow var(--daily-todo-ease);
+}
+
+.content .daily-todos-page .daily-todos-dialog-form > select[name="date"]:focus {
+    border-color: #a9c8ef !important;
+    box-shadow: 0 0 0 4px rgb(73 135 205 / 10%);
+    outline: none;
+}
+
 .content .daily-todos-page .daily-todos-dialog-form > input[name="title"]:focus {
     border-color: #a9c8ef !important;
     box-shadow: 0 0 0 4px rgb(73 135 205 / 10%);
