@@ -587,7 +587,8 @@
     transition: border-color var(--daily-todo-ease), box-shadow var(--daily-todo-ease);
 }
 
-.content .daily-todos-page .daily-todos-dialog-form > select[name="date"] {
+.content .daily-todos-page .daily-todos-dialog-form > select[name="weekday_date"],
+.content .daily-todos-page .daily-todos-dialog-form > input[type="date"][name="date"] {
     width: 100%;
     min-height: 46px;
     padding: 0 13px;
@@ -601,10 +602,23 @@
     transition: border-color var(--daily-todo-ease), box-shadow var(--daily-todo-ease);
 }
 
-.content .daily-todos-page .daily-todos-dialog-form > select[name="date"]:focus {
+.content .daily-todos-page .daily-todos-dialog-form > select[name="weekday_date"]:focus,
+.content .daily-todos-page .daily-todos-dialog-form > input[type="date"][name="date"]:focus {
     border-color: #a9c8ef !important;
     box-shadow: 0 0 0 4px rgb(73 135 205 / 10%);
     outline: none;
+}
+
+.daily-todos-dialog-form > label span,
+.daily-todos-date-hint {
+    color: #8996a8;
+    font-size: 11px;
+    font-weight: 400;
+}
+
+.daily-todos-date-hint {
+    margin-top: -12px;
+    line-height: 1.5;
 }
 
 .content .daily-todos-page .daily-todos-dialog-form > input[name="title"]:focus {

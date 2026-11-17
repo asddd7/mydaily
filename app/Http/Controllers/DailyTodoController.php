@@ -26,13 +26,15 @@ class DailyTodoController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $data = $request->validate([
-            'date' => ['required', 'date_format:Y-m-d', Rule::in($this->currentWeekDateStrings())],
+            'weekday_date' => ['required', 'date_format:Y-m-d', Rule::in($this->currentWeekDateStrings())],
+            'date' => ['nullable', 'date_format:Y-m-d', Rule::in($this->currentWeekDateStrings())],
             'title' => ['required', 'string', 'max:255'],
         ]);
+        $todoDate = $data['date'] ?? $data['weekday_date'];
 
         DB::table('daily_todos')->insert([
             'user_id' => $request->attributes->get('currentUser')->id,
-            'todo_date' => $data['date'],
+            'todo_date' => $todoDate,
             'title' => $data['title'],
             'is_completed' => false,
             'created_at' => now(),
@@ -41,7 +43,7 @@ class DailyTodoController extends Controller
 
         return redirect()->route('tasks.index', [
             'view' => 'todos',
-            'todo_date' => $data['date'],
+            'todo_date' => $todoDate,
         ])
             ->with('status', 'To-do berhasil ditambahkan.');
     }

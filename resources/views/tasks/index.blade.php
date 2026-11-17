@@ -65,10 +65,6 @@
                 <h2 id="dailyPlanTitle">{{ \Illuminate\Support\Carbon::parse($todoDate)->translatedFormat('l, d F Y') }}</h2>
                 <p>Pilih hari dalam minggu ini untuk melihat daftar to-do.</p>
             </div>
-            <button class="daily-todos-add-trigger" type="button" data-open-daily-todo-dialog>
-                <i class="fa-solid fa-plus" aria-hidden="true"></i>
-                Tambah to-do
-            </button>
         </div>
 
         <nav class="daily-todos-week" aria-label="Pilih hari pada minggu ini">
@@ -145,15 +141,28 @@
                         <i class="fa-solid fa-xmark" aria-hidden="true"></i>
                     </button>
                 </div>
-                <label for="dailyTodoDate">Tanggal to-do</label>
-                <select id="dailyTodoDate" name="date" required>
+                <label for="dailyTodoWeekday">Hari to-do</label>
+                <select id="dailyTodoWeekday" name="weekday_date" required>
                     @foreach ($weekDates as $weekDate)
                         @php($weekDateString = $weekDate->toDateString())
-                        <option value="{{ $weekDateString }}" @selected(old('date', $todoDate) === $weekDateString)>
+                        <option value="{{ $weekDateString }}" @selected(old('weekday_date', $todoDate) === $weekDateString)>
                             {{ $weekDate->translatedFormat('l, d F') }}
                         </option>
                     @endforeach
                 </select>
+                <label for="dailyTodoDate">Pilih tanggal lain <span>(opsional)</span></label>
+                <input
+                    id="dailyTodoDate"
+                    type="date"
+                    name="date"
+                    min="{{ $weekDates->first()->toDateString() }}"
+                    max="{{ $weekDates->last()->toDateString() }}"
+                    value="{{ old('_form') === 'daily_todo_create' ? old('date') : '' }}"
+                    aria-describedby="dailyTodoDateHint"
+                >
+                <small class="daily-todos-date-hint" id="dailyTodoDateHint">
+                    Jika diisi, tanggal ini digunakan sebagai pengganti hari yang dipilih.
+                </small>
                 <label for="dailyTodoTitle">Apa yang ingin kamu selesaikan?</label>
                 <input
                     id="dailyTodoTitle"
@@ -748,7 +757,6 @@
             dailyTodoDialog.querySelector('[name="title"]')?.focus();
         };
 
-        document.querySelector('[data-open-daily-todo-dialog]')?.addEventListener('click', openDailyTodoDialog);
         document.addEventListener('todo:open-create', openDailyTodoDialog);
         dailyTodoDialog.querySelectorAll('[data-close-daily-todo-dialog]').forEach(button => {
             button.addEventListener('click', () => dailyTodoDialog.close());
