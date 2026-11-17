@@ -192,6 +192,72 @@
     background: #f8fbff;
 }
 
+.daily-todos-page .daily-todos-date-loading[hidden] {
+    display: none !important;
+}
+
+.daily-todos-page .daily-todos-date-loading {
+    display: flex;
+    min-height: 42px;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    margin: -8px 0 16px;
+    border: 1px solid #e8edf4;
+    border-radius: 12px;
+    background: rgb(255 255 255 / 84%);
+    color: #64748b;
+    font-size: 12px;
+    font-weight: 600;
+    animation: daily-todo-loading-enter 180ms ease both;
+}
+
+.daily-todos-date-loading-spinner {
+    width: 15px;
+    height: 15px;
+    flex: 0 0 15px;
+    border: 2px solid #d6e5f7;
+    border-top-color: var(--daily-todo-accent);
+    border-radius: 50%;
+    animation: daily-todo-loading-spin 700ms linear infinite;
+}
+
+.daily-todos-page.is-date-loading .daily-todos-list,
+.daily-todos-page.is-date-loading .daily-todos-empty {
+    opacity: .48;
+    transform: translateY(3px);
+    filter: blur(.35px);
+    pointer-events: none;
+}
+
+.daily-todos-page .daily-todos-list,
+.daily-todos-page .daily-todos-empty {
+    transition: opacity 180ms ease, transform 180ms ease, filter 180ms ease;
+}
+
+.content .daily-todos-page a.daily-todos-week-day[aria-disabled="true"] {
+    cursor: wait;
+    pointer-events: none;
+}
+
+@keyframes daily-todo-loading-enter {
+    from {
+        opacity: 0;
+        transform: translateY(-4px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes daily-todo-loading-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
 .daily-todos-page *,
 .daily-todos-page *::before,
 .daily-todos-page *::after {
@@ -589,6 +655,10 @@
     }
 
     .content .tasks-page .tasks-view-panel.is-entering {
+        animation: none;
+    }
+
+    .daily-todos-page .daily-todos-date-loading {
         animation: none;
     }
 }

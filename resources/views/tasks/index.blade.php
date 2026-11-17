@@ -85,6 +85,11 @@
             @endforeach
         </nav>
 
+        <div class="daily-todos-date-loading" data-daily-todo-date-loading role="status" aria-live="polite" hidden>
+            <span class="daily-todos-date-loading-spinner" aria-hidden="true"></span>
+            <span>Memuat to-do...</span>
+        </div>
+
         @if ($dailyTodos->isEmpty())
             <div class="daily-todos-empty">
                 <span aria-hidden="true"><i class="fa-regular fa-circle-check"></i></span>

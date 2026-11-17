@@ -64,6 +64,28 @@
             return;
         }
 
+        const dailyTodoPanel = link.closest('#daily-todos-panel');
+        if (
+            link.matches('.daily-todos-week-day')
+            && dailyTodoPanel instanceof HTMLElement
+            && destination.href !== currentPage.href
+        ) {
+            event.preventDefault();
+            dailyTodoPanel.classList.add('is-date-loading');
+            dailyTodoPanel.setAttribute('aria-busy', 'true');
+
+            const loadingIndicator = dailyTodoPanel.querySelector('[data-daily-todo-date-loading]');
+            if (loadingIndicator instanceof HTMLElement) loadingIndicator.hidden = false;
+
+            dailyTodoPanel.querySelectorAll('.daily-todos-week-day').forEach(dayLink => {
+                dayLink.setAttribute('aria-disabled', 'true');
+            });
+            link.setAttribute('aria-busy', 'true');
+
+            navigateAfterPaint(() => window.location.assign(destination.href));
+            return;
+        }
+
         event.preventDefault();
         showLoader();
         navigateAfterPaint(() => window.location.assign(destination.href));
