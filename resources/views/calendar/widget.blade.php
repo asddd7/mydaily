@@ -11,11 +11,25 @@
             <span class="calendar-holiday-heading-icon" aria-hidden="true"><i class="fa-regular fa-calendar-check"></i></span>
             <div>
                 <h3 id="calendarHolidayTitle">Kelola hari libur</h3>
-                <p>Tambahkan hari libur langsung ke kalender.</p>
+                <p>Hari libur yang ditambahkan akan ditampilkan di kalender.</p>
             </div>
         </div>
+        <button type="button" class="calendar-holiday-button" data-holiday-open aria-haspopup="dialog">
+            <i class="fa-solid fa-plus" aria-hidden="true"></i>
+            Tambah hari libur
+        </button>
+        <p class="calendar-holiday-feedback" data-holiday-list-feedback role="status" aria-live="polite"></p>
+        <div class="calendar-holiday-list-section">
+            <h4>Hari libur <span data-calendar-holiday-year></span></h4>
+            <ul class="calendar-holiday-list" data-calendar-holiday-list>
+                <li>Memuat hari libur…</li>
+            </ul>
+        </div>
+    </section>
 
+    <dialog data-calendar-holiday-dialog class="calendar-dialog" aria-labelledby="calendarHolidayDialogTitle">
         <form class="calendar-holiday-form" data-calendar-holiday-form>
+            <h3 id="calendarHolidayDialogTitle" data-holiday-dialog-title>Tambah hari libur</h3>
             <input type="hidden" name="original_tanggal">
             <label>
                 <span>Tanggal</span>
@@ -25,24 +39,18 @@
                 <span>Keterangan</span>
                 <input type="text" name="keterangan" maxlength="255" placeholder="Contoh: Hari Kemerdekaan" required>
             </label>
-            <div class="calendar-holiday-form-actions">
+            <p class="calendar-holiday-feedback" data-holiday-feedback role="status" aria-live="polite"></p>
+            <div class="calendar-dialog-actions calendar-holiday-form-actions">
                 <button type="submit" class="calendar-holiday-button calendar-holiday-submit" data-holiday-submit>
                     <i class="fa-solid fa-plus" aria-hidden="true"></i>
                     <span data-holiday-submit-label>Tambah hari libur</span>
                 </button>
-                <button type="button" class="calendar-holiday-button" data-holiday-cancel hidden>
+                <button type="button" class="calendar-holiday-button close" data-holiday-close>
                     Batal
                 </button>
             </div>
         </form>
-        <p class="calendar-holiday-feedback" data-holiday-feedback role="status" aria-live="polite"></p>
-        <div class="calendar-holiday-list-section">
-            <h4>Hari libur <span data-calendar-holiday-year></span></h4>
-            <ul class="calendar-holiday-list" data-calendar-holiday-list>
-                <li>Memuat hari libur…</li>
-            </ul>
-        </div>
-    </section>
+    </dialog>
 
 
     <div data-calendar-status class="calendar-status" role="status" aria-live="polite"></div>
@@ -184,18 +192,36 @@
     };
 
     const holidayForm = widget.querySelector('[data-calendar-holiday-form]');
+    const holidayDialog = widget.querySelector('[data-calendar-holiday-dialog]');
+    const holidayDialogTitle = widget.querySelector('[data-holiday-dialog-title]');
+    const holidayOpen = widget.querySelector('[data-holiday-open]');
     const holidayList = widget.querySelector('[data-calendar-holiday-list]');
     const holidayYear = widget.querySelector('[data-calendar-holiday-year]');
     const holidayFeedback = widget.querySelector('[data-holiday-feedback]');
+    const holidayListFeedback = widget.querySelector('[data-holiday-list-feedback]');
     const holidaySubmitLabel = widget.querySelector('[data-holiday-submit-label]');
-    const holidayCancel = widget.querySelector('[data-holiday-cancel]');
+    const holidayClose = widget.querySelector('[data-holiday-close]');
 
     const resetHolidayForm = () => {
         holidayForm.reset();
         holidayForm.elements.original_tanggal.value = '';
+        holidayDialogTitle.textContent = 'Tambah hari libur';
         holidaySubmitLabel.textContent = 'Tambah hari libur';
-        holidayCancel.hidden = true;
+        holidayFeedback.textContent = '';
     };
+
+    holidayOpen.addEventListener('click', () => {
+        resetHolidayForm();
+        holidayListFeedback.textContent = '';
+        holidayDialog.showModal();
+        holidayForm.elements.tanggal.focus();
+    });
+
+    holidayClose.addEventListener('click', () => holidayDialog.close());
+    holidayDialog.addEventListener('close', resetHolidayForm);
+    holidayDialog.addEventListener('click', event => {
+        if (event.target === holidayDialog) holidayDialog.close();
+    });
 
     const renderHolidayList = (holidays, year) => {
         holidayYear.textContent = String(year);
@@ -229,11 +255,14 @@
                 edit.type = 'button';
                 edit.setAttribute('aria-label', `Ubah ${holiday.keterangan}`);
                 edit.addEventListener('click', () => {
+                    resetHolidayForm();
                     holidayForm.elements.tanggal.value = holiday.tanggal;
                     holidayForm.elements.keterangan.value = holiday.keterangan;
                     holidayForm.elements.original_tanggal.value = holiday.tanggal;
+                    holidayDialogTitle.textContent = 'Ubah hari libur';
                     holidaySubmitLabel.textContent = 'Simpan perubahan';
-                    holidayCancel.hidden = false;
+                    holidayListFeedback.textContent = '';
+                    holidayDialog.showModal();
                     holidayForm.elements.keterangan.focus();
                 });
 
@@ -244,17 +273,17 @@
                 remove.addEventListener('click', async () => {
                     if (!window.confirm(`Hapus hari libur ${holiday.keterangan}?`)) return;
                     remove.disabled = true;
-                    holidayFeedback.textContent = '';
+                    holidayListFeedback.textContent = '';
                     try {
                         await requestJson(endpoints.holidayRemove.replace('__date__', encodeURIComponent(holiday.tanggal)), {
                             method: 'DELETE',
                             headers: { 'X-CSRF-TOKEN': csrf }
                         });
                         cache.holidays.delete(year);
-                        holidayFeedback.textContent = 'Hari libur berhasil dihapus.';
+                        holidayListFeedback.textContent = 'Hari libur berhasil dihapus.';
                         await render();
                     } catch (error) {
-                        holidayFeedback.textContent = error.message;
+                        holidayListFeedback.textContent = error.message;
                         remove.disabled = false;
                     }
                 });
@@ -264,12 +293,12 @@
             });
     };
 
-    holidayCancel.addEventListener('click', resetHolidayForm);
     holidayForm.addEventListener('submit', async event => {
         event.preventDefault();
         const submit = holidayForm.querySelector('[data-holiday-submit]');
         submit.disabled = true;
         holidayFeedback.textContent = '';
+        holidayListFeedback.textContent = '';
         const data = Object.fromEntries(new FormData(holidayForm).entries());
         const newDate = data.tanggal;
         const oldDate = data.original_tanggal;
@@ -285,10 +314,10 @@
             });
             if (oldDate) cache.holidays.delete(Number(oldDate.slice(0, 4)));
             cache.holidays.delete(Number(newDate.slice(0, 4)));
-            resetHolidayForm();
             current = new Date(Number(newDate.slice(0, 4)), Number(newDate.slice(5, 7)) - 1, 1);
+            if (holidayDialog.open) holidayDialog.close();
+            holidayListFeedback.textContent = result.message;
             await render();
-            holidayFeedback.textContent = result.message;
         } catch (error) {
             holidayFeedback.textContent = error.message;
         } finally {

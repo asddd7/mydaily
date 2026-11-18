@@ -316,6 +316,11 @@
         margin: 0;
     }
 
+    .calendar-widget .calendar-holiday-form h3,
+    .calendar-widget .calendar-holiday-form .calendar-holiday-feedback {
+        grid-column: 1 / -1;
+    }
+
     .calendar-widget .calendar-holiday-form > label {
         display: grid;
         gap: 6px;
@@ -364,6 +369,10 @@
     .calendar-widget .calendar-holiday-feedback {
         min-height: 0;
         margin: 0;
+    }
+
+    .calendar-widget .calendar-holiday-feedback:empty {
+        display: none;
     }
 
     .calendar-widget .calendar-holiday-list-section {
