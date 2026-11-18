@@ -243,25 +243,7 @@
     line-height: 1.5;
 }
 
-.calendar-holiday-tools {
-    display: flex;
-    flex: 0 0 auto;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: flex-end;
-    gap: 9px;
-}
-
-.calendar-holiday-import {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 8px;
-    margin: 0;
-}
-
-.calendar-holiday-button,
-.calendar-holiday-file-label {
+.calendar-holiday-button {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -282,15 +264,10 @@
     transition: background-color .18s ease, border-color .18s ease, transform .18s ease;
 }
 
-.calendar-holiday-button:hover,
-.calendar-holiday-file-label:hover {
+.calendar-holiday-button:hover {
     background: #f8fafc;
     border-color: #93b4f8;
     transform: translateY(-1px);
-}
-
-.calendar-holiday-download {
-    color: #1d4ed8;
 }
 
 .calendar-holiday-submit,
@@ -302,20 +279,6 @@
 
 .calendar-holiday-submit:hover {
     background: #1d4ed8;
-}
-
-.calendar-holiday-file-label input[type="file"] {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip-path: inset(50%);
-    white-space: nowrap;
-}
-
-.calendar-holiday-file-label:focus-within {
-    outline: 2px solid #93c5fd;
-    outline-offset: 2px;
 }
 
 .calendar-holiday-feedback {
@@ -333,44 +296,186 @@
     margin: 4px 0;
 }
 
-@media (max-width: 480px) {
-    .calendar-holiday-panel {
-        align-items: stretch;
-        flex-direction: column;
-        gap: 14px;
-        padding: 14px;
-    }
-
-    .calendar-holiday-tools,
-    .calendar-holiday-import {
-        width: 100%;
-    }
-
-    .calendar-holiday-tools {
+.calendar-widget .calendar-holiday-panel {
         display: grid;
-        grid-template-columns: 1fr;
+        grid-template-columns: minmax(0, 1fr);
+        align-items: start;
+        justify-content: stretch;
+        gap: 14px;
+        padding: 18px;
     }
 
-    .calendar-holiday-import > *,
-    .calendar-holiday-download,
-    .calendar-holiday-file-label {
-        width: 100%;
+    .calendar-widget .calendar-holiday-heading {
+        align-items: flex-start;
     }
 
-    .calendar-holiday-file-label {
+    .calendar-widget .calendar-holiday-form {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+        margin: 0;
+    }
+
+    .calendar-widget .calendar-holiday-form > label {
+        display: grid;
+        gap: 6px;
         min-width: 0;
-        overflow: hidden;
+        color: #475569;
+        font-size: 12px;
+        font-weight: 700;
     }
 
-    .calendar-holiday-file-label span {
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
+    .calendar-widget .calendar-holiday-form input {
+        width: 100%;
+        min-width: 0;
+        min-height: 42px;
+        margin: 0;
+        padding: 8px 11px;
+        border: 1px solid #d5deec;
+        border-radius: 10px;
+        background: #fff;
+        color: #172033;
+        font: inherit;
+        font-size: 13px;
+        box-shadow: none;
     }
-}
+
+    .calendar-widget .calendar-holiday-form input:focus {
+        border-color: #93b4f8;
+        outline: 3px solid rgb(37 99 235 / 12%);
+    }
+
+    .calendar-widget .calendar-holiday-form-actions {
+        display: flex;
+        grid-column: 1 / -1;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .calendar-widget .calendar-holiday-button {
+        min-width: 0;
+        min-height: 40px;
+    }
+
+    .calendar-widget .calendar-holiday-button[hidden] {
+        display: none;
+    }
+
+    .calendar-widget .calendar-holiday-feedback {
+        min-height: 0;
+        margin: 0;
+    }
+
+    .calendar-widget .calendar-holiday-list-section {
+        min-width: 0;
+        padding-top: 12px;
+        border-top: 1px solid #e2e8f0;
+    }
+
+    .calendar-widget .calendar-holiday-list-section h4 {
+        margin: 0 0 9px;
+        color: #334155;
+        font-size: 12px;
+        font-weight: 750;
+    }
+
+    .calendar-widget .calendar-holiday-list {
+        display: grid;
+        gap: 7px;
+        max-height: 230px;
+        margin: 0;
+        padding: 0;
+        overflow: auto;
+        list-style: none;
+    }
+
+    .calendar-widget .calendar-holiday-entry {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        min-width: 0;
+        padding: 9px 11px;
+        border: 1px solid #e2e8f0;
+        border-radius: 11px;
+        background: #fff;
+    }
+
+    .calendar-widget .calendar-holiday-entry > div:first-child {
+        display: grid;
+        gap: 2px;
+        min-width: 0;
+    }
+
+    .calendar-widget .calendar-holiday-entry time {
+        color: #334155;
+        font-size: 12px;
+        font-weight: 750;
+    }
+
+    .calendar-widget .calendar-holiday-entry time + span {
+        color: #64748b;
+        font-size: 12px;
+        overflow-wrap: anywhere;
+    }
+
+    .calendar-widget .calendar-holiday-entry-actions {
+        display: flex;
+        flex: 0 0 auto;
+        gap: 5px;
+    }
+
+    .calendar-widget .calendar-holiday-entry-actions button {
+        min-height: 32px;
+        padding: 5px 9px;
+        border: 1px solid #dbe3ef;
+        border-radius: 8px;
+        background: #fff;
+        color: #334155;
+        cursor: pointer;
+        font-size: 11px;
+        font-weight: 700;
+    }
+
+    .calendar-widget .calendar-holiday-entry-actions button.is-delete {
+        border-color: #fecaca;
+        color: #b91c1c;
+    }
+
+    .calendar-widget .calendar-holiday-entry-actions button:disabled {
+        cursor: wait;
+        opacity: .6;
+    }
+
+    .calendar-widget .calendar-holiday-empty {
+        padding: 10px;
+        border-radius: 10px;
+        background: #fff;
+        color: #64748b;
+        font-size: 12px;
+    }
+
+    @media (max-width: 480px) {
+        .calendar-widget .calendar-holiday-form {
+            grid-template-columns: minmax(0, 1fr);
+        }
+
+        .calendar-widget .calendar-holiday-form-actions {
+            grid-column: auto;
+        }
+
+        .calendar-widget .calendar-holiday-form-actions button {
+            flex: 1 1 100%;
+        }
+
+        .calendar-widget .calendar-holiday-entry {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+    }
 
 
-.tasks-page {
+    .tasks-page {
     display: grid;
     gap: 24px;
     max-width: 1160px;

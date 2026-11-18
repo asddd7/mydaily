@@ -6,70 +6,43 @@
     </div>
 
 
-    <div class="calendar-holiday-panel" aria-label="Impor dan ekspor kalender">
+    <section class="calendar-holiday-panel" aria-labelledby="calendarHolidayTitle">
         <div class="calendar-holiday-heading">
-            <span class="calendar-holiday-heading-icon" aria-hidden="true"><i class="fa-solid fa-arrows-rotate"></i></span>
+            <span class="calendar-holiday-heading-icon" aria-hidden="true"><i class="fa-regular fa-calendar-check"></i></span>
             <div>
-                <h3>Cadangkan hari libur</h3>
-                <p>Simpan atau pulihkan daftar hari libur menggunakan file JSON.</p>
+                <h3 id="calendarHolidayTitle">Kelola hari libur</h3>
+                <p>Tambahkan hari libur langsung ke kalender.</p>
             </div>
         </div>
 
-        <div class="calendar-holiday-tools">
-            <a
-                href="{{ route('calendar.holidays.download') }}"
-                class="calendar-holiday-button calendar-holiday-download"
-            >
-                <i class="fa-solid fa-download" aria-hidden="true"></i>
-                <span>Unduh JSON</span>
-            </a>
-
-            <form
-                action="{{ route('calendar.holidays.import') }}"
-                method="POST"
-                enctype="multipart/form-data"
-                class="calendar-holiday-import"
-                data-holiday-import-form
-            >
-                @csrf
-
-                <label class="calendar-holiday-file-label">
-                    <i class="fa-regular fa-file-lines" aria-hidden="true"></i>
-                    <span data-holiday-file-label>Pilih file JSON</span>
-
-                    <input
-                        type="file"
-                        name="holiday_json"
-                        accept=".json,application/json"
-                        required
-                        data-holiday-file-input
-                    >
-                </label>
-
-                <button
-                    type="submit"
-                    class="calendar-holiday-button calendar-holiday-submit"
-                >
-                    <i class="fa-solid fa-arrow-up-from-bracket" aria-hidden="true"></i>
-                    <span>Impor kalender</span>
+        <form class="calendar-holiday-form" data-calendar-holiday-form>
+            <input type="hidden" name="original_tanggal">
+            <label>
+                <span>Tanggal</span>
+                <input type="date" name="tanggal" min="2000-01-01" max="2100-12-31" required>
+            </label>
+            <label>
+                <span>Keterangan</span>
+                <input type="text" name="keterangan" maxlength="255" placeholder="Contoh: Hari Kemerdekaan" required>
+            </label>
+            <div class="calendar-holiday-form-actions">
+                <button type="submit" class="calendar-holiday-button calendar-holiday-submit" data-holiday-submit>
+                    <i class="fa-solid fa-plus" aria-hidden="true"></i>
+                    <span data-holiday-submit-label>Tambah hari libur</span>
                 </button>
-            </form>
+                <button type="button" class="calendar-holiday-button" data-holiday-cancel hidden>
+                    Batal
+                </button>
+            </div>
+        </form>
+        <p class="calendar-holiday-feedback" data-holiday-feedback role="status" aria-live="polite"></p>
+        <div class="calendar-holiday-list-section">
+            <h4>Hari libur <span data-calendar-holiday-year></span></h4>
+            <ul class="calendar-holiday-list" data-calendar-holiday-list>
+                <li>Memuat hari libur…</li>
+            </ul>
         </div>
-    </div>
-
-    @if (session('status'))
-        <p class="calendar-holiday-feedback" role="status">
-            {{ session('status') }}
-        </p>
-    @endif
-
-    @if ($errors->has('holiday_json'))
-        <div class="calendar-holiday-feedback is-error" role="alert">
-            @foreach ($errors->get('holiday_json') as $error)
-                <p>{{ $error }}</p>
-            @endforeach
-        </div>
-    @endif
+    </section>
 
 
     <div data-calendar-status class="calendar-status" role="status" aria-live="polite"></div>
@@ -133,7 +106,9 @@
         taskToggle: @json(route('tasks.toggle', ['task' => '__id__'], absolute: false)),
         store: @json(route('calendar.store', absolute: false)),
         toggle: @json(route('calendar.toggle', ['mark' => '__id__'], absolute: false)),
-        remove: @json(route('calendar.destroy', ['mark' => '__id__'], absolute: false))
+        remove: @json(route('calendar.destroy', ['mark' => '__id__'], absolute: false)),
+        holidayStore: @json(route('calendar.holidays.store', absolute: false)),
+        holidayRemove: @json(route('calendar.holidays.destroy', ['date' => '__date__'], absolute: false))
     };
 
     let current = new Date();
@@ -207,6 +182,119 @@
         parent.appendChild(element);
         return element;
     };
+
+    const holidayForm = widget.querySelector('[data-calendar-holiday-form]');
+    const holidayList = widget.querySelector('[data-calendar-holiday-list]');
+    const holidayYear = widget.querySelector('[data-calendar-holiday-year]');
+    const holidayFeedback = widget.querySelector('[data-holiday-feedback]');
+    const holidaySubmitLabel = widget.querySelector('[data-holiday-submit-label]');
+    const holidayCancel = widget.querySelector('[data-holiday-cancel]');
+
+    const resetHolidayForm = () => {
+        holidayForm.reset();
+        holidayForm.elements.original_tanggal.value = '';
+        holidaySubmitLabel.textContent = 'Tambah hari libur';
+        holidayCancel.hidden = true;
+    };
+
+    const renderHolidayList = (holidays, year) => {
+        holidayYear.textContent = String(year);
+        holidayList.replaceChildren();
+
+        if (!holidays.length) {
+            addText(holidayList, 'li', 'Belum ada hari libur untuk tahun ini.', 'calendar-holiday-empty');
+            return;
+        }
+
+        holidays
+            .filter(holiday => holiday?.tanggal && holiday?.keterangan)
+            .sort((a, b) => a.tanggal.localeCompare(b.tanggal))
+            .forEach(holiday => {
+                const item = document.createElement('li');
+                item.className = 'calendar-holiday-entry';
+
+                const details = document.createElement('div');
+                const date = document.createElement('time');
+                date.dateTime = holiday.tanggal;
+                date.textContent = new Date(`${holiday.tanggal}T00:00:00`).toLocaleDateString('id-ID', {
+                    day: 'numeric',
+                    month: 'long'
+                });
+                details.append(date);
+                addText(details, 'span', holiday.keterangan);
+
+                const actions = document.createElement('div');
+                actions.className = 'calendar-holiday-entry-actions';
+                const edit = addText(actions, 'button', 'Ubah');
+                edit.type = 'button';
+                edit.setAttribute('aria-label', `Ubah ${holiday.keterangan}`);
+                edit.addEventListener('click', () => {
+                    holidayForm.elements.tanggal.value = holiday.tanggal;
+                    holidayForm.elements.keterangan.value = holiday.keterangan;
+                    holidayForm.elements.original_tanggal.value = holiday.tanggal;
+                    holidaySubmitLabel.textContent = 'Simpan perubahan';
+                    holidayCancel.hidden = false;
+                    holidayForm.elements.keterangan.focus();
+                });
+
+                const remove = addText(actions, 'button', 'Hapus');
+                remove.type = 'button';
+                remove.className = 'is-delete';
+                remove.setAttribute('aria-label', `Hapus ${holiday.keterangan}`);
+                remove.addEventListener('click', async () => {
+                    if (!window.confirm(`Hapus hari libur ${holiday.keterangan}?`)) return;
+                    remove.disabled = true;
+                    holidayFeedback.textContent = '';
+                    try {
+                        await requestJson(endpoints.holidayRemove.replace('__date__', encodeURIComponent(holiday.tanggal)), {
+                            method: 'DELETE',
+                            headers: { 'X-CSRF-TOKEN': csrf }
+                        });
+                        cache.holidays.delete(year);
+                        holidayFeedback.textContent = 'Hari libur berhasil dihapus.';
+                        await render();
+                    } catch (error) {
+                        holidayFeedback.textContent = error.message;
+                        remove.disabled = false;
+                    }
+                });
+
+                item.append(details, actions);
+                holidayList.appendChild(item);
+            });
+    };
+
+    holidayCancel.addEventListener('click', resetHolidayForm);
+    holidayForm.addEventListener('submit', async event => {
+        event.preventDefault();
+        const submit = holidayForm.querySelector('[data-holiday-submit]');
+        submit.disabled = true;
+        holidayFeedback.textContent = '';
+        const data = Object.fromEntries(new FormData(holidayForm).entries());
+        const newDate = data.tanggal;
+        const oldDate = data.original_tanggal;
+
+        try {
+            const result = await requestJson(endpoints.holidayStore, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': csrf
+                },
+                body: JSON.stringify(data)
+            });
+            if (oldDate) cache.holidays.delete(Number(oldDate.slice(0, 4)));
+            cache.holidays.delete(Number(newDate.slice(0, 4)));
+            resetHolidayForm();
+            current = new Date(Number(newDate.slice(0, 4)), Number(newDate.slice(5, 7)) - 1, 1);
+            await render();
+            holidayFeedback.textContent = result.message;
+        } catch (error) {
+            holidayFeedback.textContent = error.message;
+        } finally {
+            submit.disabled = false;
+        }
+    });
 
     const isDone = value => value === true || Number(value) === 1;
 
@@ -404,6 +492,7 @@
     document.addEventListener('calendar:open-create', () => openForDate(toDateString(new Date())));
 
     const applyCalendarData = (year, month, marks = [], holidays = [], tasks = []) => {
+        renderHolidayList(holidays, year);
         const marksByDate = groupByDate(marks);
         const holidaysByDate = new Map(
             holidays

@@ -129,6 +129,10 @@ Route::post('/calendar/marks', [CalendarController::class, 'store'])->name('cale
 Route::patch('/calendar/marks/{mark}', [CalendarController::class, 'toggle'])->name('calendar.toggle');
 Route::delete('/calendar/marks/{mark}', [CalendarController::class, 'destroy'])->name('calendar.destroy');
 Route::get('/calendar/holidays', [CalendarController::class, 'holidays'])->name('calendar.holidays');
+Route::post('/calendar/holidays', [CalendarHolidayFileController::class, 'store'])->name('calendar.holidays.store');
+Route::delete('/calendar/holidays/{date}', [CalendarHolidayFileController::class, 'destroyHoliday'])
+    ->where('date', '\d{4}-\d{2}-\d{2}')
+    ->name('calendar.holidays.destroy');
 Route::get('/calendar/holidays/json/download', [CalendarHolidayFileController::class, 'download'])->name('calendar.holidays.download');
 Route::post('/calendar/holidays/json/import', [CalendarHolidayFileController::class, 'import'])->name('calendar.holidays.import');
 Route::get('/calendar', [CalendarController::class, 'index'])->name('calendar.index');
