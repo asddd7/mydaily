@@ -81,6 +81,18 @@ class DatabaseStructureController extends Controller
                 ],
             ],
             [
+                'title' => 'To-do Harian',
+                'description' => 'Daftar to-do yang terpisah untuk setiap pengguna dan tanggal.',
+                'routes' => ['/daily-todos', '/daily-todos/{item}', '/daily-todos/{item}/toggle'],
+                'tables' => ['daily_todos', 'users'],
+                'files' => [
+                    'Controller' => ['app/Http/Controllers/DailyTodoController.php'],
+                    'View' => ['resources/views/tasks/index.blade.php'],
+                    'Schema' => ['database/migrations/2026_11_10_000001_create_daily_todos_table.php'],
+                    'Routes' => ['routes/web.php'],
+                ],
+            ],
+            [
                 'title' => 'Dashboard',
                 'description' => 'Ringkasan aktivitas, transaksi, catatan, dan tugas.',
                 'routes' => ['/dashboard', '/notifications/count'],
@@ -205,6 +217,30 @@ class DatabaseStructureController extends Controller
                     'Service' => ['app/Services/FirebaseMessagingService.php', 'app/Services/CloudflarePushSyncService.php'],
                     'Worker' => ['public/firebase-messaging-sw.js', 'cloudflare/push-worker/src/index.js', 'cloudflare/push-worker/schema.sql'],
                     'Frontend' => ['resources/js/push-notifications.js', 'resources/views/layouts/partials/topbar.blade.php'],
+                    'Routes' => ['routes/web.php'],
+                ],
+            ],
+            [
+                'title' => 'WhatsApp Bot',
+                'description' => 'Tautan akun WhatsApp, deduplikasi webhook, dan perintah tugas serta to-do harian.',
+                'routes' => [
+                    '/settings/whatsapp',
+                    '/settings/whatsapp/link-code',
+                    '/settings/whatsapp/link',
+                    '/webhooks/whatsapp',
+                ],
+                'tables' => ['whatsapp_accounts', 'whatsapp_inbound_messages', 'daily_todos', 'tugas', 'users'],
+                'files' => [
+                    'Controller' => [
+                        'app/Http/Controllers/WhatsAppSettingsController.php',
+                        'app/Http/Controllers/WhatsAppWebhookController.php',
+                    ],
+                    'Service' => [
+                        'app/Services/WhatsAppCommandService.php',
+                        'app/Services/WhatsAppCloudApiService.php',
+                    ],
+                    'View' => ['resources/views/whatsapp/settings.blade.php'],
+                    'Schema' => ['database/migrations/2026_11_13_000001_create_whatsapp_bot_tables.php'],
                     'Routes' => ['routes/web.php'],
                 ],
             ],
